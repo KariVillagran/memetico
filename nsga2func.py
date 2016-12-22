@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import funciones
 import random
 import numpy as np
@@ -18,6 +20,7 @@ class Solucion:
 		self.numSolDominantes = 0
 		self.setSolDominadas = []
 		self.crowdedDistance = 0.0
+		self.visitado = 0
 		self.tabuList = []
 
 	def costoAsignacion(self):
@@ -27,8 +30,8 @@ class Solucion:
 			for j in range(self.numFacilities):
 				self.costoFlujo[0] = self.costoFlujo[0] + funciones.matrixFlujoUno[i*(self.numFacilities)+j]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[j]]
 				self.costoFlujo[1] = self.costoFlujo[1] + funciones.matrixFlujoDos[i*(self.numFacilities)+j]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[j]]
-		print "Costo F1: ", self.costoFlujo[0]
-		print "Costo F2: ", self.costoFlujo[1]
+		#print "Costo F1: ", self.costoFlujo[0]
+		#print "Costo F2: ", self.costoFlujo[1]
 
 	def costoAsignacionMovida(self, r, s ):
 		self.costoFlujo[0] = 0.0
@@ -37,8 +40,8 @@ class Solucion:
 			if k != r and k != s:
 				self.costoFlujo[0] += (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])										
 				self.costoFlujo[1] += (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])						  
-		print "Costo Movida F1: ", self.costoFlujo[0]
-		print "Costo Movida F2: ", self.costoFlujo[1]			
+		#print "Costo Movida F1: ", self.costoFlujo[0]
+		#print "Costo Movida F2: ", self.costoFlujo[1]			
 
 
 class NSGA2:
@@ -48,7 +51,8 @@ class NSGA2:
 		self.mutationRate = mutationRate
 		self.crossoverRate = crossoverRate
 
-	def runAlgorithm(self, poblacion, tamPob, generaciones):
+	def runAlgorithm(self, poblacion, tamPob, generaciones, cantIteraciones):
+		print "tamPob INICIAL: ",tamPob
 		for sol in poblacion:
 			sol.costoAsignacion()
 		lastIteration = generaciones-1	
@@ -96,14 +100,105 @@ class NSGA2:
 				break
 				#funciones.graficarPob(poblacion)
 			else:
-				nextPobla = self.makeNewPob(poblacion)
 				print "Comenzando Local Search. . ."
-				solucionesconLS = tamPob/2
-				for i in range(solucionesconLS):
-					solucion = random.choice(nextPobla)
-					solucion = localSearch(solucion)
+				nextP = self.paretoLS(poblacion, tamPob, cantIteraciones)
+				nextPobla = self.makeNewPob(nextP)
+
 		return poblacion
-		 		
+
+	def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
+		
+		archive = []
+		contador = 0
+		numFac = poblacion[0].numFacilities
+		for solucion in poblacion:
+			if solucion.rank == 1:
+				archive.append(solucion)
+				solucion.visitado = 0
+				#print solucion.solution
+		solSeleccionada = self.seleccionar(archive)
+		#print "solucion seleccionada: ", solSeleccionada.solution
+		#print "costo de la solucion seleccionada en obj 1: ", solSeleccionada.costoFlujo[0],
+		#print "costo de la solucion seleccionada en obj 2: ",  solSeleccionada.costoFlujo[1]
+		while contador != cantidadIteraciones:
+			#print "Generando Vecinos"
+			vecindad = self.generoVecinos(solSeleccionada, numFac)
+			for vecino in vecindad:
+				#print "solucion vecina: ", vecino.solution
+				#print "costo de la solucion vecina en obj 1: ", vecino.costoFlujo[0],
+				#print "costo de la solucion vecina en obj 2: ",  vecino.costoFlujo[1]
+				if funciones.dominance(vecino, solSeleccionada):
+					#print "el vecino domina a la solucion seleccionada"
+					
+					archive = self.addAndUpdate(vecino, archive)
+					
+					#print "se agrega al archive y  se actualiza "
+				elif funciones.dominance(solSeleccionada, vecino):
+					#print "la solucion seleccionada domina al vecino"
+					
+					continue
+				else:
+
+					#print "ninguna se domina!"
+					archive = self.addAndUpdate(vecino, archive)
+					#print "se agrega al archive y  se actualiza "
+
+			archive = np.array(archive)
+			archive = np.unique(archive)
+			archive = archive.tolist()
+			solSeleccionada.visitado = 1
+			contador += 1
+			print contador
+			if len(archive) >= tamPob:
+				self.crowdingDistanceAssignment(archive)
+				self.sortCrowding(archive)
+				del archive[tamPob:]
+			solSeleccionada = self.seleccionar(archive)
+			#print "nueva solucion seleccionada. ", solSeleccionada.solution
+		#Deberia ordenarlas por crowding ?
+		newArchive = []
+		newArchive.extend(archive)
+		newArchive.extend(poblacion)
+		
+		print "poblacion:"
+		for elem in poblacion:
+			print elem.solution
+		print "archive: "
+		for elem in archive:
+			print elem.solution
+		print "new Archive:"
+		for elem in newArchive:
+			print elem.solution
+
+		print "tamPob", tamPob
+		print "len pobla:",len(poblacion)
+		print "len archive",len(archive)
+		#newArchive = self.fastNonDominatedSort(newArchive)
+		#newArchive = np.array(newArchive)
+		#newArchive = np.unique(newArchive)
+		#newArchive = newArchive.tolist()
+		#nuevoArchive = []
+		print "FND SORTING ARCHIVE"
+		print "len newArchive antes del del: ", len(newArchive)
+		del newArchive[tamPob:]
+		print "len newArchive",len(newArchive)
+		return newArchive
+		#Tengo que tomar la poblacion resultante del nsga2, tomarla y sacar solo las soluciones de la primera frontera y agregarlas
+		#Al archivo que debe ser del mismo tamao que la poblacion resultante.
+		#Selecciono una solucion del archivo 'solSeleccionada' 
+		#mientras no se hayan visitado todas las soluciones del archivo se debe continuar. 
+			#para cada solucion vecina del solSeleccionada
+				#exploro su vecindario
+				#si solucuionVecinadelaSeleccionada no es dominada por ninguna solucion del archivo:
+					#debo chequear tambien si esta solucion domina a alguna.
+					#Debo chequear el largo del archivo... ¿que pasa si esta lleno? o supera el tamao de m poblacion? 
+					#la agrego al archivo (OJo: AGREGAR AL ARCHIVO DEBE CHEQUEAR SI ESA SOLUCION NUEVA DOMINA A ALGUNA QUE YA ESTA EN EL ARCHIVIO)
+					#seteo su bit de visita en falso	
+			#seteo el bit de visita en True de solSeleccionada
+			#t = t  + 1 ... esto puede ser un contador, puede servir para algo... 
+			#sol Seleccionada elegirDelArchivo(): Funcion que elige una solucion con el bit de visita en Falso del archivo.
+					#Debo considerar las soluciones generadas en la iteracion pasada. 		 		
+
 
 
 	def sortRanking(self, poblacion):
@@ -248,7 +343,7 @@ class NSGA2:
 			else:
 				objPendiente.insert(x, elem)
 		cont = 0
-		for x in posLibres:
+		for x in posLibres:	
 			child.solution.insert(x,objPendiente[cont])
 			cont +=1
 		#print "child: ", 
@@ -283,51 +378,84 @@ class NSGA2:
 		return best
 
 
-def localSearch(solucion):
-	contadorVecinosDominantes = 0
-	listaVecinosDominantes = []
-	archive = []
-	archive.append(solucion)
-	vecinos = generoVecinos(solucion)
-	for vecino in vecinos:
-		vecino.costoAsignacion()
-		#if funciones.dominance(vecino, solucion):
 
-		if funciones.dominance(vecino, solucion):
-			listaVecinosDominantes.append(vecino)
-			contadorVecinosDominantes +=1
-		else:
-			continue
-	if contadorVecinosDominantes == 1:
-		mejorSolucion = listaVecinosDominantes[0]
-	elif contadorVecinosDominantes == 0:
-		mejorSolucion = solucion
-	elif contadorVecinosDominantes > 1:
-		mejorSolucion = random.choice(listaVecinosDominantes)
-	return mejorSolucion
+	def seleccionar(self, archive):
+		sol = random.choice(archive)
+		while sol.visitado == 1:
+			sol = random.choice(archive)
+		return sol
 
-def generoVecinos(solucion):
-	vecindad, soluciones = [], []
-	for i in range(solucion.numFacilities):
-		for j in range(solucion.numFacilities):
-			if i != j:
-				vecino = swap(solucion, i, j)
-				if vecino.solution not in soluciones:
-					soluciones.append(vecino.solution)
-					vecino.costoAsignacion()
-					vecindad.append(vecino)
-	del soluciones[:]
-	print len(vecindad)
-	return vecindad
 
-def swap(solucion, posicionUno, posicionDos):
-	numFac = solucion.numFacilities
-	elementoPosUno = solucion.solution[posicionUno]
-	elementoPosDos = solucion.solution[posicionDos]
-	solSwapeada = copy.deepcopy(solucion)
-	a, b = solSwapeada.solution.index(elementoPosUno), solSwapeada.solution.index(elementoPosDos)
-	solSwapeada.solution[b], solSwapeada.solution[a] = solSwapeada.solution[a], solSwapeada.solution[b]
-	return solSwapeada
+	def addAndUpdate(self, solucion, archive):
+		#print "comienzo addAndUpdate"
+		archiveActualizado = []
+		archiveActualizado.append(solucion)
+		#print "solucion a analizar: ", solucion.solution
+		#print "costo de la solucion obj 1: ", solucion.costoFlujo[0],
+		#print "costo solucion obj 2: ",  solucion.costoFlujo[1]
+		for elemento in archive:
+			#print "solucion a comparar: ", elemento.solution
+			#print "costo sol obj 1: ", elemento.costoFlujo[0],
+			#print "costo sol obj 2: ",  elemento.costoFlujo[1] 
+			#Si encuentro una solucion vecina dominada por mi solucion inicial, continuo
+			if funciones.dominance(solucion, elemento):
+				#print "la solucion a analizar domina a la solucion a comparar"
+				continue
+			elif funciones.dominance(elemento, solucion):
+				#print "la solucion a comparar domina a la solucion a analizar"
+				continue
+			#Si encuentro una solucion que es no-dominada por esta nueva solucion ND agregada:
+			else:
+				#print "ninguna se domina!" 
+				archiveActualizado.append(elemento)
+				#print "se agrega al archive"
+		archiveActualizado = np.array(archiveActualizado)
+		archiveActualizado = np.unique(archiveActualizado)
+		archiveActualizado = archiveActualizado.tolist()		
+		#print "termino addAndUpdate"
+		return archiveActualizado
+
+	def contadorVisitados(self, archive, tamPob):
+		contador = 0
+		for solucion in archive:
+			if solucion.visitado == 1:
+				contador += 1
+				if contador == tamPob:
+					return False
+				print "contador del contadorVisitados", 
+				print contador
+			else:
+				return True
+
+	def generoVecinos(self, sol, numFac):
+		vecindad, soluciones = [], []
+
+		#numFac = solucion.numFacilities
+		for i in range(numFac):
+			for j in range(numFac):
+				if i != j:
+					vecino = Solucion(numFac)
+					vecino = self.swap(sol, i, j, numFac)
+					if vecino.solution not in soluciones:
+						soluciones.append(vecino.solution)
+						vecino.costoAsignacion()
+						vecindad.append(vecino)
+						#print "vecino:", 
+						#print vecino.solution
+		del soluciones[:]
+		#print len(vecindad)
+		return vecindad
+
+
+	def swap(self, sol, posicionUno, posicionDos, numFac):
+		elementoPosUno = sol.solution[posicionUno]
+		elementoPosDos = sol.solution[posicionDos]
+		solSwapeada = copy.deepcopy(sol)
+		a, b = solSwapeada.solution.index(elementoPosUno), solSwapeada.solution.index(elementoPosDos)
+		solSwapeada.solution[b], solSwapeada.solution[a] = solSwapeada.solution[a], solSwapeada.solution[b]
+		return solSwapeada			
+
+
 
 
 def crowdedComparisonOperator(sol, otherSol):
@@ -336,6 +464,14 @@ def crowdedComparisonOperator(sol, otherSol):
 		return 1
 	else: 
 		return -1
+
+
+
+
+
+
+
+
 
 
 

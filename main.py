@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import funciones
 from nsga2func import Solucion
 from nsga2func import NSGA2
@@ -21,31 +22,17 @@ def main():
 	start = time.time()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	pob = funciones.crearPoblacion(P,5, numFac)
+	funciones.crearPoblacion(P,50, numFac)
 	front = nsga2.fastNonDominatedSort(P)
-	for elem in pob:
-		print "Solucion s: ", 
-		print elem.solution
-		elem.costoAsignacion()
-		sol1 = nsga2func.swap(elem, 2, 3)
-		sol2 = nsga2func.swap(sol1, 3, 2)
-		print "hola"
-		print sol2.solution
-		sol2.costoAsignacionMovida(2,3)
-		sol2.costoAsignacion()
-
-		break
-		
-
 	#for fron in front:
 	#	nsga2.crowdingDistanceAssignment(fron)
 
 	#nsga2.sortCrowding(P)
 
-	#pob = nsga2.runAlgorithm(P,200,300)
+	pob = nsga2.runAlgorithm(P,50,50, 10)
 	end = time.time()
 	print "T =", end-start
-	#funciones.graficarPob(pob)
+	funciones.graficarPob(pob)
 	
 
 

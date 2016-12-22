@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from nsga2func import Solucion
 from nsga2func import NSGA2
 import random
@@ -10,6 +11,22 @@ global numFac
 matrixDistancia = []
 matrixFlujoUno = []
 matrixFlujoDos = []
+
+
+
+class DMLS:
+
+	def __init__(self, x):
+		self.x = 9
+
+
+#IMPLEMENTO BUSQUEDA LOCAL:
+# PARAMETROS A CONSIDERAR:
+# 1.- DECIDIR RELACION DOMINANCIA
+# 2.- DECIDIR UNA ESTRATEGIA DE SELECCION DE ELEMENTOS DEL ARCHIVO
+# 3.- DECIDIR UNA ESTRATEGIA DE EXPLORACION DE VECINOS
+# 4.- DECIDIR UNA ESTRATEGIA DE MANEJO DEL ARCHIVO
+# 5.- DECIRIDE UN CRITERIO TERMINO
 
 
 
@@ -103,20 +120,23 @@ def dominance(sol, otherSol):
 		#print False
 		return False
 #ALGORITMO
-def strongDominance(sol, otherSol):
+def noDominance(sol, archive):
 	sF1 = sol.costoFlujo[0]
 	sF2 = sol.costoFlujo[1]
-	oF1 = otherSol.costoFlujo[0]
-	oF2 = otherSol.costoFlujo[1]
-	a,b = sF1 < oF1, sF2 < oF2
-	if(a and b):
-		return True
-	else:
-		return False
+	contadorDominancia = 0
+	tamArchive = len(archive)
+	for elemento in archive:
+		oF1 = elemento.costoFlujo[0]
+		oF2 = elemento.costoFlujo[1]
+		a,b = sF1 <= oF1, sF2 <= oF2
+		c,d = oF1 <= sF1, oF2 <= sF2
+		if (a and d) or (c and b):
+			contadorDominancia += 1
+			if contadorDominancia == tamArchive:
+				return True
+		elif dominance(sol, elemento) or dominance(elemento, sol):
+			return False
 
-
-def generarTodoVecindario(sol):
-	raise "Not implemented yet"
 
 def generarVecino(sol):
 	numFac = sol.numFacilities
@@ -135,8 +155,6 @@ def generarVecino(sol):
 	#print sol.solution
 	return sol
 
-
-
 def graficarPob(poblacion):
 	listaSolC1, listaSolC2 = [], []
 	for elem in poblacion:
@@ -149,4 +167,8 @@ def graficarPob(poblacion):
 	plt.xlabel('Costo Flujo 1')
 	plt.show()
 	return 1
+
+
+
+
 
