@@ -136,25 +136,6 @@ def noDominance(sol, archive):
 				return True
 		elif dominance(sol, elemento) or dominance(elemento, sol):
 			return False
-
-
-def generarVecino(sol):
-	numFac = sol.numFacilities
-	posicionUno = random.randint(0,numFac-1)
-	posicionDos = random.randint(0,numFac-1)
-	while posicionUno == posicionDos:
-		posicionDos = random.randint(0,numFac-1)
-	#print "posiciones: ", 
-	#print posicionUno, 
-	#print posicionDos
-	elementoPosUno = sol.solution[posicionUno]
-	elementoPosDos = sol.solution[posicionDos]
-	a, b = sol.solution.index(elementoPosUno), sol.solution.index(elementoPosDos)
-	sol.solution[b], sol.solution[a] = sol.solution[a], sol.solution[b]
-	#print "Solucion con cambio: ", 
-	#print sol.solution
-	return sol
-
 def graficarPob(poblacion):
 	listaSolC1, listaSolC2 = [], []
 	for elem in poblacion:

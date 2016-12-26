@@ -34,12 +34,14 @@ class Solucion:
 		#print "Costo F2: ", self.costoFlujo[1]
 
 	def costoAsignacionMovida(self, r, s ):
-		self.costoFlujo[0] = 0.0
-		self.costoFlujo[1] = 0.0
+		#self.costoFlujo[0] = 0.0
+		#self.costoFlujo[1] = 0.0
+		costos = [0.0,0.0]
 		for k in range(self.numFacilities):
 			if k != r and k != s:
-				self.costoFlujo[0] += (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])										
-				self.costoFlujo[1] += (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])						  
+				costos[0] += (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoUno[s*self.numFacilities+k] - funciones.matrixFlujoUno[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])										
+				costos[1] += (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])						  
+		return costos
 		#print "Costo Movida F1: ", self.costoFlujo[0]
 		#print "Costo Movida F2: ", self.costoFlujo[1]			
 
@@ -106,6 +108,7 @@ class NSGA2:
 
 		return poblacion
 
+
 	def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
 		
 		archive = []
@@ -120,6 +123,7 @@ class NSGA2:
 		#print "solucion seleccionada: ", solSeleccionada.solution
 		#print "costo de la solucion seleccionada en obj 1: ", solSeleccionada.costoFlujo[0],
 		#print "costo de la solucion seleccionada en obj 2: ",  solSeleccionada.costoFlujo[1]
+		contadorItera = 0
 		while contador != cantidadIteraciones:
 			#print "Generando Vecinos"
 			vecindad = self.generoVecinos(solSeleccionada, numFac)
@@ -129,18 +133,20 @@ class NSGA2:
 				#print "costo de la solucion vecina en obj 2: ",  vecino.costoFlujo[1]
 				if funciones.dominance(vecino, solSeleccionada):
 					#print "el vecino domina a la solucion seleccionada"
-					
 					archive = self.addAndUpdate(vecino, archive)
-					
-					#print "se agrega al archive y  se actualiza "
+					#contadorItera = 0
+				#print "se agrega al archive y  se actualiza "
 				elif funciones.dominance(solSeleccionada, vecino):
 					#print "la solucion seleccionada domina al vecino"
-					
+					#contador += 1
+					#contadorItera += 1
+					#print contadorItera
 					continue
 				else:
-
+					
 					#print "ninguna se domina!"
 					archive = self.addAndUpdate(vecino, archive)
+					#contadorItera = 0
 					#print "se agrega al archive y  se actualiza "
 
 			archive = np.array(archive)
@@ -160,25 +166,20 @@ class NSGA2:
 		newArchive.extend(archive)
 		newArchive.extend(poblacion)
 		
-		print "poblacion:"
-		for elem in poblacion:
-			print elem.solution
-		print "archive: "
-		for elem in archive:
-			print elem.solution
-		print "new Archive:"
-		for elem in newArchive:
-			print elem.solution
+		#print "poblacion:"
+		#for elem in poblacion:
+		#	print elem.solution
+		#print "archive: "
+		#for elem in archive:
+		#	print elem.solution
+		#print "new Archive:"
+		#for elem in newArchive:
+		#	print elem.solution
 
-		print "tamPob", tamPob
-		print "len pobla:",len(poblacion)
-		print "len archive",len(archive)
-		#newArchive = self.fastNonDominatedSort(newArchive)
-		#newArchive = np.array(newArchive)
-		#newArchive = np.unique(newArchive)
-		#newArchive = newArchive.tolist()
-		#nuevoArchive = []
-		print "FND SORTING ARCHIVE"
+		#print "tamPob", tamPob
+		#print "len pobla:",len(poblacion)
+		#print "len archive",len(archive)
+		
 		print "len newArchive antes del del: ", len(newArchive)
 		del newArchive[tamPob:]
 		print "len newArchive",len(newArchive)
@@ -429,8 +430,6 @@ class NSGA2:
 
 	def generoVecinos(self, sol, numFac):
 		vecindad, soluciones = [], []
-
-		#numFac = solucion.numFacilities
 		for i in range(numFac):
 			for j in range(numFac):
 				if i != j:
@@ -438,14 +437,13 @@ class NSGA2:
 					vecino = self.swap(sol, i, j, numFac)
 					if vecino.solution not in soluciones:
 						soluciones.append(vecino.solution)
-						vecino.costoAsignacion()
+						costos = sol.costoAsignacionMovida(i,j)
+						vecino.costoFlujo[0] = sol.costoFlujo[0] - costos[0]
+						vecino.costoFlujo[1] = sol.costoFlujo[1] - costos[1]
 						vecindad.append(vecino)
-						#print "vecino:", 
-						#print vecino.solution
 		del soluciones[:]
 		#print len(vecindad)
 		return vecindad
-
 
 	def swap(self, sol, posicionUno, posicionDos, numFac):
 		elementoPosUno = sol.solution[posicionUno]
