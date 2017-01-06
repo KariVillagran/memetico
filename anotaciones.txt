@@ -1,0 +1,4 @@
+drezler 
+long runs -- alggo nuevo para computar nuevas soluciones
+comparacion literatura --- me comparo con el resto de los algoritmos para el problema. 
+

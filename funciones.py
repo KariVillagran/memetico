@@ -13,13 +13,6 @@ matrixFlujoUno = []
 matrixFlujoDos = []
 
 
-
-class DMLS:
-
-	def __init__(self, x):
-		self.x = 9
-
-
 #IMPLEMENTO BUSQUEDA LOCAL:
 # PARAMETROS A CONSIDERAR:
 # 1.- DECIDIR RELACION DOMINANCIA
@@ -31,7 +24,6 @@ class DMLS:
 
 
 def lectura():
-	#archivo = raw_input("Ingrese nombre archivo: ")
 	archivo = sys.argv[1]
 	instancias = open(archivo, 'r')
 	arreglo = []
