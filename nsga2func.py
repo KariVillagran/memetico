@@ -5,7 +5,7 @@ import random
 import numpy as np
 import copy
 import itertools
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class Solucion:
 
@@ -93,7 +93,7 @@ class NSGA2:
 				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 				print "Comenzando Local Search. . ."	
 				nextPobla = self.paretoLocalSearch(poblacion, tamPob)
-				print "largo resultado LS: ", len(nextPobla)
+				#print "largo resultado LS: ", len(nextPobla)
 				#nextPobla = self.paretoLoc(poblacion, tamPob, cantIteraciones)
 		return poblacion
 
@@ -112,102 +112,6 @@ class NSGA2:
 		if len(poblacion) >= tamPob:
 			del poblacion[tamPob:]
 		return poblacion
-
-	def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
-		
-		archive = []
-		contador = 0
-		numFac = poblacion[0].numFacilities
-		print "largo pob: ", len(poblacion)
-		for solucion in poblacion:
-			print solucion.solution
-			if solucion.rank == 1:
-				archive.append(solucion)
-				solucion.visitado = 0
-				#print solucion.solution
-		solSeleccionada = self.seleccionar(archive)
-		print "solucion seleccionada: ", solSeleccionada.solution
-		print "costo de la solucion seleccionada en obj 1: ", solSeleccionada.costoFlujo[0],
-		print "costo de la solucion seleccionada en obj 2: ",  solSeleccionada.costoFlujo[1]
-		contadorItera = 0
-		while contador != cantidadIteraciones:
-			print "Generando Vecinos"
-			vecindad = self.generoVecinos(solSeleccionada, numFac)
-			for vecino in vecindad:
-				print "solucion vecina: ", vecino.solution
-				print "costo de la solucion vecina en obj 1: ", vecino.costoFlujo[0],
-				print "costo de la solucion vecina en obj 2: ",  vecino.costoFlujo[1]
-				if funciones.dominance(vecino, solSeleccionada):
-					print "el vecino domina a la solucion seleccionada"
-					archive = self.addAndUpdate(vecino, archive)
-					#contadorItera = 0
-					print "se agrega al archive y  se actualiza "
-				elif funciones.dominance(solSeleccionada, vecino):
-					print "la solucion seleccionada domina al vecino"
-					#contador += 1
-					#contadorItera += 1
-					#print contadorItera
-					continue
-				else:
-					
-					print "ninguna se domina!"
-					archive = self.addAndUpdate(vecino, archive)
-					#contadorItera = 0
-					#print "se agrega al archive y  se actualiza "
-
-			archive = np.array(archive)
-			archive = np.unique(archive)
-			archive = archive.tolist()
-			solSeleccionada.visitado = 1
-			contador += 1
-			print contador
-			if len(archive) >= tamPob:
-				self.crowdingDistanceAssignment(archive)
-				self.sortCrowding(archive)
-				del archive[tamPob:]
-			solSeleccionada = self.seleccionar(archive)
-			#print "nueva solucion seleccionada. ", solSeleccionada.solution
-		#Deberia ordenarlas por crowding ?
-		print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		print "elementos del archive: "
-		for elem in archive:
-			print elem.solution
-		newArchive = []
-		newArchive.extend(archive)
-		print "Len con solo el archive: ", len(newArchive)
-		newArchive.extend(poblacion)
-		print "len con archive y poblacion", len(newArchive)
-		#print "poblacion:"
-		#for elem in poblacion:
-		#	print elem.solution
-		#print "archive: "
-
-		#print "new Archive:"
-		#for elem in newArchive:
-		#	print elem.solution
-
-		#print "tamPob", tamPob
-		#print "len pobla:",len(poblacion)
-		#print "len archive",len(archive)
-		
-		del newArchive[tamPob:]
-		print "len newArchive",len(newArchive)
-		return newArchive
-		#Tengo que tomar la poblacion resultante del nsga2, tomarla y sacar solo las soluciones de la primera frontera y agregarlas
-		#Al archivo que debe ser del mismo tamao que la poblacion resultante.
-		#Selecciono una solucion del archivo 'solSeleccionada' 
-		#mientras no se hayan visitado todas las soluciones del archivo se debe continuar. 
-			#para cada solucion vecina del solSeleccionada
-				#exploro su vecindario
-				#si solucuionVecinadelaSeleccionada no es dominada por ninguna solucion del archivo:
-					#debo chequear tambien si esta solucion domina a alguna.
-					#Debo chequear el largo del archivo... ¿que pasa si esta lleno? o supera el tamao de m poblacion? 
-					#la agrego al archivo (OJo: AGREGAR AL ARCHIVO DEBE CHEQUEAR SI ESA SOLUCION NUEVA DOMINA A ALGUNA QUE YA ESTA EN EL ARCHIVIO)
-					#seteo su bit de visita en falso	
-			#seteo el bit de visita en True de solSeleccionada
-			#t = t  + 1 ... esto puede ser un contador, puede servir para algo... 
-			#sol Seleccionada elegirDelArchivo(): Funcion que elige una solucion con el bit de visita en Falso del archivo.
-					#Debo considerar las soluciones generadas en la iteracion pasada. 		 		
 
 
 	def paretoLocalSearch(self, poblacion, tamPob):
@@ -230,6 +134,7 @@ class NSGA2:
 			for elemento in archive:
 				solutionArchive.append(elemento.solution)
 			#Selecciono una solucion cuyo bit de visita sea 0.	
+			#print "seleccionando y  obteniendo vecinos"
 			solSeleccionada = self.seleccionar(archive)
 			#Genero la vecindad TOTAL de la solucion seleccionada
 			vecindad = self.generoVecinos(solSeleccionada, numFac)
@@ -250,6 +155,8 @@ class NSGA2:
 					#print "vecino a agregar: "
 					#print vecino.solution
 			#Si la solSeleccionada esta en las mejores soluciones, la agrego y su bit de visita en 1.
+			#print "Se agregaran ", len(listaVecinos), "elementos"
+			#print "agregando nuevas soluciones"
 			if solSeleccionada.solution in soluciones:
 				#print "esta!!!!!"
 				solSeleccionada.visitado = 1
@@ -279,14 +186,23 @@ class NSGA2:
 					else:
 						archive.append(elementoVecino)
 				del listaVecinos[:]
-			if len(archive)	>= tamPob:
+			tamanoPonderar = tamPob*0.1
+			if len(archive)	>= tamanoPonderar*tamPob:
+				print "Se supera el tamaño de poblacion, reduciendo tamaño", len(archive)
 				fronteras = self.fastNonDominatedSort(archive)
 				archive = self.ordenPostBusqueda(archive, fronteras, tamPob)
 				del archive[tamPob:]
-			#print "len Archive: ", len(archive)
-			#for elem in archive:
-				#print elem.solution, elem.visitado
+				for elem in archive:
+					print elem.visitado,
 
+
+			#print "elementos del archive: "
+			#contador = 0
+			#for elemento in archive:
+			#	print elemento.solution, contador, elemento.visitado
+			#	contador +=1
+			#print "len Archive: ", len(archive)
+				
 			del solutionArchive[:]			
 		#Debo chequear si el archive resultante es menor al tamanio de la poblacion,
 		#. si esto se cumple es necesario generar mutaciones dentro de los mejores elementos 
@@ -463,6 +379,13 @@ class NSGA2:
 		#print "One Point Crossover Finished"
 		return child
 
+	def sequentialConstructiveCrossover(self, sol, other):
+		raise "Not implemented yet"
+
+	def adaptiveMutation(self, sol):
+		raise "Not implemented yet"
+
+		
 
 	def twOptSearch(self,sol):
 		numFac = sol.numFacilities
@@ -497,39 +420,6 @@ class NSGA2:
 			sol = random.choice(archive)
 		return sol
 
-
-	def addAndUpdate(self, solucion, archive):
-		print "comienzo addAndUpdate"
-		archiveActualizado = []
-		archiveActualizado.append(solucion)
-		print "solucion a analizar: ", solucion.solution
-		print "costo de la solucion obj 1: ", solucion.costoFlujo[0],
-		print "costo solucion obj 2: ",  solucion.costoFlujo[1]
-		for elemento in archive:
-			print "solucion a comparar: ", elemento.solution
-			print "costo sol obj 1: ", elemento.costoFlujo[0],
-			print "costo sol obj 2: ",  elemento.costoFlujo[1] 
-			#Si encuentro una solucion vecina dominada por mi solucion inicial, continuo
-			if funciones.dominance(solucion, elemento):
-				print "la solucion a analizar domina a la solucion a comparar"
-				continue
-			elif funciones.dominance(elemento, solucion):
-				print "la solucion a comparar domina a la solucion a analizar"
-				continue
-			#Si encuentro una solucion que es no-dominada por esta nueva solucion ND agregada:
-			else:
-				print "ninguna se domina!" 
-				archiveActualizado.append(elemento)
-				print "se agrega al archive"
-		archiveActualizado = np.array(archiveActualizado)
-		archiveActualizado = np.unique(archiveActualizado)
-		archiveActualizado = archiveActualizado.tolist()		
-		print "el archive esta compuesto por: "
-		for elem in archiveActualizado:
-			print elem.solution,
-		print "termino addAndUpdate"
-		return archiveActualizado
-
 	def generoVecinos(self, sol, numFac):
 		vecindad, soluciones = [], []
 		for i in range(numFac):
@@ -558,6 +448,7 @@ class NSGA2:
 		a, b = solSwapeada.solution.index(elementoPosUno), solSwapeada.solution.index(elementoPosDos)
 		solSwapeada.solution[b], solSwapeada.solution[a] = solSwapeada.solution[a], solSwapeada.solution[b]
 		return solSwapeada			
+
 
 
 

@@ -3,7 +3,7 @@ from nsga2func import Solucion
 from nsga2func import NSGA2
 import random
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import sys
 
 global matrixDistancia, matrixFlujoUno, matrixFlujoDos
