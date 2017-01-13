@@ -89,10 +89,12 @@ def crearPoblacion(poblacion, tamPoblacion, numFac):
 		if(x==0):
 			solux = Solucion(numFac)
 			generarSolucionRandom(solux, numFac)
+			solux.costoAsignacion()
 			poblacion.append(solux)
 		else:
 			solux = Solucion(numFac)
 			generarSolucionRandom(solux, numFac)
+			solux.costoAsignacion()
 			while (solux in poblacion):
 				generarSolucionRandom(solux, numFac)
 			poblacion.append(solux)

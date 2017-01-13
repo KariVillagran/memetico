@@ -55,12 +55,12 @@ class NSGA2:
 
 	def runAlgorithm(self, poblacion, tamPob, generaciones):
 		print "tamPob INICIAL: ",tamPob
-		for sol in poblacion:
-			sol.costoAsignacion()
+		#for sol in poblacion:
+		#	sol.costoAsignacion()
 		lastIteration = generaciones-1	
 		nextPobla = self.makeNewPob(poblacion)
-		for sol in nextPobla:
-			sol.costoAsignacion()
+		#for sol in nextPobla:
+		#	sol.costoAsignacion()
 		nombreArchivo = "generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )	
 		for i in range(1,generaciones+1):
@@ -72,29 +72,35 @@ class NSGA2:
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
 
+			#for elem in pobCombinada:
+			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank,elem.crowdedDistance
+
 			fronteras = self.fastNonDominatedSort(pobCombinada)
 			
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
-
 
 			nArchivo.write("Generacion: " + str(i) + "\n")
 			for i in range(len(poblacion)):
 				nArchivo.write(""+ str(poblacion[i].costoFlujo[0]) + ", " + str(poblacion[i].costoFlujo[1]) + ", " + str(poblacion[i].rank) + ", " +  str(poblacion[i].crowdedDistance) +"\n")
 				
-	
-			if i == generaciones:
-				break
-				#funciones.graficarPob(poblacion)
-			else:
-				
-				poblacion = self.makeNewPob(poblacion)
-				fronteras = self.fastNonDominatedSort(poblacion)
-				#print "la cantidad de fronteras es: ", len(fronteras)
-				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
-				print "Comenzando Local Search. . ."	
-				nextPobla = self.paretoLocalSearch(poblacion, tamPob)
-				#print "largo resultado LS: ", len(nextPobla)
-				#nextPobla = self.paretoLoc(poblacion, tamPob, cantIteraciones)
+
+			poblacion = self.makeNewPob(poblacion)
+			fronteras = self.fastNonDominatedSort(poblacion)
+			#print "la cantidad de fronteras es: ", len(fronteras)
+			poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+			print "Comenzando Local Search. . ."	
+			nextPobla = self.paretoLocalSearch(poblacion, tamPob)
+			
+			#print "NEXTPOBLA"
+			#for elem in nextPobla:
+			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank, elem.crowdedDistance
+
+
+			#print "largo resultado LS: ", len(nextPobla)
+			#nextPobla = self.paretoLoc(poblacion, tamPob, cantIteraciones)
+		
+
+
 		return poblacion
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
@@ -106,8 +112,6 @@ class NSGA2:
 			for elemento in frontera:
 				poblacion.append(elemento)
 
-			if len(poblacion) >= tamPob:
-				break	
 		self.sortCrowding(poblacion)
 		if len(poblacion) >= tamPob:
 			del poblacion[tamPob:]
@@ -117,7 +121,6 @@ class NSGA2:
 	def paretoLocalSearch(self, poblacion, tamPob):
 		archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], []
 		numFac = poblacion[0].numFacilities
-		
 		#print "largo pob: ", len(poblacion)
 		#Para cada solucion de la poblacion, si la solucion tiene rank 1 la agrego a mi archive
 		#Ademas seteo su bit de visita en 0.
@@ -128,7 +131,7 @@ class NSGA2:
 				solucion.visitado = 0
 				#print solucion.solution
 		#Mientras no esten todos los elementos del archive visitados
-		while self.contadorVisitados(archive):
+		while self.ready(archive):
 			#Para cada elemento en el archivo, agrego sus vectores solucion a un vector para 
 			#.verificar que si se agregan elementos repetidos sea con el bit de visitado en 1.
 			for elemento in archive:
@@ -148,12 +151,16 @@ class NSGA2:
 			vecindad = self.ordenPostBusqueda(vecindad, fronteras, tamPob)
 			#Para cada vecino en la vecindad, selecciono solo los con ranking 1, los agrego tanto
 			#. a la lista de listas con soluciones y a la lista de vecinos a agregar al archive.
+			
 			for vecino in vecindad:
+				#print vecino.solution, vecino.costoFlujo[0], vecino.costoFlujo[1], vecino.rank, vecino.crowdedDistance
+				
 				if vecino.rank == 1:
 					soluciones.append(vecino.solution)
 					listaVecinos.append(vecino)
 					#print "vecino a agregar: "
-					#print vecino.solution
+					#print vecino.solution, vecino.rank
+			#print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			#Si la solSeleccionada esta en las mejores soluciones, la agrego y su bit de visita en 1.
 			#print "Se agregaran ", len(listaVecinos), "elementos"
 			#print "agregando nuevas soluciones"
@@ -171,9 +178,19 @@ class NSGA2:
 						if elementoVecino.solution in solutionArchive:
 							elementoVecino.visitado = 1
 							archive.append(elementoVecino)
+							self.fastNonDominatedSort(archive)
+							for elemento in archive:
+								if elemento.rank != 1:
+									archive.remove(elemento)
+
 						#Si no esta, simplemente lo agrego
 						else:
 							archive.append(elementoVecino)
+							self.fastNonDominatedSort(archive)
+							for elemento in archive:
+								if elemento.rank != 1:
+									archive.remove(elemento)
+				
 				del listaVecinos[:]			
 			
 			elif solSeleccionada.solution not in soluciones:
@@ -183,17 +200,24 @@ class NSGA2:
 					if elementoVecino.solution in solutionArchive:
 						elementoVecino.visitado = 1
 						archive.append(elementoVecino)
+						self.fastNonDominatedSort(archive)
+						for elemento in archive:
+							if elemento.rank != 1:
+								archive.remove(elemento)
 					else:
 						archive.append(elementoVecino)
+						self.fastNonDominatedSort(archive)
+						for elemento in archive:
+							if elemento.rank != 1:
+								archive.remove(elemento)					
 				del listaVecinos[:]
 			tamanoPonderar = tamPob*0.1
 			if len(archive)	>= tamanoPonderar*tamPob:
 				print "Se supera el tamaño de poblacion, reduciendo tamaño", len(archive)
 				fronteras = self.fastNonDominatedSort(archive)
 				archive = self.ordenPostBusqueda(archive, fronteras, tamPob)
-				del archive[tamPob:]
 				for elem in archive:
-					print elem.visitado,
+					print elem.visitado, 
 
 
 			#print "elementos del archive: "
@@ -211,17 +235,53 @@ class NSGA2:
 		return archive			
 
 	def contadorVisitados(self, archive):
+			
+
 		contador = 0
 		for solucion in archive:
 			if solucion.visitado == 1:
 				contador += 1
 				#print "contador del contadorVisitados", 
 				#print contador
-				if contador == len(archive):
+				if contador == len(archive)-1:
 					return False
 				
 			else:
 				return True
+
+	def ready(self, archive):
+		contador = 0
+		contadorVisita = 0
+		listaSolVis = []
+		for elemento in archive:
+			listaAux = []
+			listaAux.append(elemento.solution)
+			listaAux.append(elemento.visitado)
+			listaSolVis.append(listaAux)
+		#print len(listaSolVis)
+		i = 0
+		largo = len(listaSolVis)	
+		while contador != largo:
+			#print len(listaSolVis)
+			if len(listaSolVis) == 0:
+				contador +=1
+				break
+			else:
+				elemSolVis = random.choice(listaSolVis)
+			#print "soy elemSolVis: ",
+			#print elemSolVis
+			if elemSolVis[1] == 1:
+				contadorVisita += 1
+				listaSolVis.remove(elemSolVis)
+				#print "soy listaSolVis: ", listaSolVis
+			elif elemSolVis[0] == 0:
+				listaSolVis.remove(elemSolVis)
+			contador += 1
+		if contadorVisita == len(archive):
+			#print "True"
+			return False
+		else:
+			return True	
 
 
 
@@ -294,6 +354,8 @@ class NSGA2:
 		#print "Iniciando  Fast Non-Dominated-Sort"
 		matrixFrontera = []
 		fronteras = []
+		for sol in poblacion:
+			sol.rank = 0
 		for solP in poblacion:
 			for solQ in poblacion:
 				if solP == solQ:
@@ -380,7 +442,17 @@ class NSGA2:
 		return child
 
 	def sequentialConstructiveCrossover(self, sol, other):
-		raise "Not implemented yet"
+		numFac = sol.numFacilities
+		child = Solucion(numFac)
+		soluciones = []
+		soluciones.append(sol), soluciones.append(other)
+		print soluciones[0].solution, soluciones[1].solution
+		aux = random.choice(soluciones)
+		locationP = aux.solution[0]
+		print aux.solution
+		print locationP
+		return aux
+
 
 	def adaptiveMutation(self, sol):
 		raise "Not implemented yet"
@@ -419,6 +491,9 @@ class NSGA2:
 		while sol.visitado == 1:
 			sol = random.choice(archive)
 		return sol
+
+
+
 
 	def generoVecinos(self, sol, numFac):
 		vecindad, soluciones = [], []

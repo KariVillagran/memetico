@@ -22,10 +22,19 @@ def main():
 	start = time.time()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,30, numFac)
+	funciones.crearPoblacion(P,50, numFac)
 	front = nsga2.fastNonDominatedSort(P)
+	P = nsga2.sortRanking(P)
+	#for elem in P:
+	#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank
+	#lisa = nsga2.ready(P)
+	#for elem in lisa:
+	#	print elem[1]
+	#	print "hola hola"
+	pob = nsga2.runAlgorithm(P,50,25)
 
-	pob = nsga2.runAlgorithm(P,30,5)
+	#sol = nsga2.sequentialConstructiveCrossover(P[0], P[1])
+
 
 	end = time.time()
 	print "T =", end-start
