@@ -23,12 +23,15 @@ def main():
 	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,20, numFac)
+	funciones.crearPoblacion(P,50, numFac)
 	front = nsga2.fastNonDominatedSort(P)
 	P = nsga2.sortRanking(P)
 
-	
-	nsga2.runAlgorithm(P,20,10, start)
+	#print "Solucion : ", P[0].solution, P[0].costoFlujo[0], P[0].costoFlujo[1]
+	#print "y su vecindario, con alpha = 0.3"
+	#nsga2.generarAlphaVecinos(P[0], 0.6)
+
+	nsga2.runAlgorithm(P,50,5, start)
 
 
 
