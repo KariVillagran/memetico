@@ -130,18 +130,19 @@ def noDominance(sol, archive):
 				return True
 		elif dominance(sol, elemento) or dominance(elemento, sol):
 			return False
-def graficarPob(poblacion):
-	listaSolC1, listaSolC2 = [], []
-	for elem in poblacion:
-		if elem.rank == 1:
-			#elem.costoAsignacion()
-			listaSolC1.append(elem.costoFlujo[0])
-			listaSolC2.append(elem.costoFlujo[1])
-	plt.plot(listaSolC1, listaSolC2, 'ro')
-	plt.ylabel('Costo Flujo 2')
-	plt.xlabel('Costo Flujo 1')
-	plt.show()
-	return 1
+
+def convertTime(time):
+    strTime = str(time).split()
+    strTime = strTime[0]+"_"+strTime[1]
+    strTime = strTime.split(".")[0]
+    strTime = strTime.split(":")
+    strTime = strTime[0].split("-") + strTime[1:]
+    newTime = ""
+    for i in strTime:
+        newTime += i
+    newTime = newTime.strip("-")
+    return newTime
+
 
 
 

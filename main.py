@@ -4,8 +4,9 @@ from nsga2func import Solucion
 from nsga2func import NSGA2
 import nsga2func
 import math
-import time, sys, random
+import time, sys, random, datetime
 from random import randint
+from itertools import cycle
 #import numpy as np
 #import matplotlib.pyplot as plt
 
@@ -19,26 +20,18 @@ matrixFlujoDos = []
 def main():
 
 	numFac = funciones.distribuirMatrices(funciones.lectura())
-	start = time.time()
+	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,50, numFac)
+	funciones.crearPoblacion(P,20, numFac)
 	front = nsga2.fastNonDominatedSort(P)
 	P = nsga2.sortRanking(P)
-	#for elem in P:
-	#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank
-	#lisa = nsga2.ready(P)
-	#for elem in lisa:
-	#	print elem[1]
-	#	print "hola hola"
-	pob = nsga2.runAlgorithm(P,50,25)
 
-	#sol = nsga2.sequentialConstructiveCrossover(P[0], P[1])
-
-
-	end = time.time()
-	print "T =", end-start
 	
+	nsga2.runAlgorithm(P,20,10, start)
+
+
+
 
 
 

@@ -5,6 +5,8 @@ import random
 import numpy as np
 import copy
 import itertools
+import datetime
+import os
 #import matplotlib.pyplot as plt
 
 class Solucion:
@@ -43,7 +45,23 @@ class Solucion:
 				costos[1] += (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]]) + (funciones.matrixFlujoDos[s*self.numFacilities+k] - funciones.matrixFlujoDos[r*self.numFacilities+k])*(funciones.matrixDistancia[self.solution[s]*self.numFacilities+self.solution[k]] - funciones.matrixDistancia[self.solution[r]*self.numFacilities+self.solution[k]])						  
 		return costos
 		#print "Costo Movida F1: ", self.costoFlujo[0]
-		#print "Costo Movida F2: ", self.costoFlujo[1]			
+		#print "Costo Movida F2: ", self.costoFlujo[1]
+	def costoAsignacionParcial(self, locationNew ):
+		largoK = len(self.solution)
+		self.costoFlujo[0] =  0.0
+		self.costoFlujo[1] =  0.0
+		
+		indexNew = self.solution.index(locationNew)
+		for i in range(largoK-1):
+			self.costoFlujo[0] += funciones.matrixFlujoUno[i*self.numFacilities+largoK]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[indexNew]] + funciones.matrixFlujoUno[i*self.numFacilities+largoK]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[indexNew]] 
+			self.costoFlujo[1] += funciones.matrixFlujoDos[i*self.numFacilities+largoK]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[indexNew]] + funciones.matrixFlujoDos[i*self.numFacilities+largoK]*funciones.matrixDistancia[self.solution[i]*(self.numFacilities)+self.solution[indexNew]] 
+		#print "costos: "
+		#print self.costoFlujo[0], 
+		#print self.costoFlujo[1]
+			
+
+
+
 
 
 class NSGA2:
@@ -52,16 +70,20 @@ class NSGA2:
 		self.numObjectives = numObjectives
 		self.mutationRate = mutationRate
 		self.crossoverRate = crossoverRate
+		self.directorio = None
 
-	def runAlgorithm(self, poblacion, tamPob, generaciones):
-		print "tamPob INICIAL: ",tamPob
-		#for sol in poblacion:
-		#	sol.costoAsignacion()
-		lastIteration = generaciones-1	
+		
+
+	def runAlgorithm(self, poblacion, tamPob, generaciones, start):
+		
+		startTime = start
+		tiempo = funciones.convertTime(startTime)
+		self.directorio = "results/Results_"+tiempo
+		os.makedirs(self.directorio)
+
 		nextPobla = self.makeNewPob(poblacion)
-		#for sol in nextPobla:
-		#	sol.costoAsignacion()
-		nombreArchivo = "generaciones.csv"
+
+		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )	
 		for i in range(1,generaciones+1):
 			print "+++++++++++++++++++"
@@ -91,6 +113,8 @@ class NSGA2:
 			print "Comenzando Local Search. . ."	
 			nextPobla = self.paretoLocalSearch(poblacion, tamPob)
 			
+			
+
 			#print "NEXTPOBLA"
 			#for elem in nextPobla:
 			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank, elem.crowdedDistance
@@ -98,10 +122,11 @@ class NSGA2:
 
 			#print "largo resultado LS: ", len(nextPobla)
 			#nextPobla = self.paretoLoc(poblacion, tamPob, cantIteraciones)
-		
+		stopTime = datetime.datetime.now()
+		final = stopTime - startTime
+		nArchivo.write("Tiempo final: " + str(final))
+		nArchivo.close()
 
-
-		return poblacion
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
 		del poblacion[:]
@@ -131,7 +156,7 @@ class NSGA2:
 				solucion.visitado = 0
 				#print solucion.solution
 		#Mientras no esten todos los elementos del archive visitados
-		while self.ready(archive):
+		while self.contadorVisitados(archive):
 			#Para cada elemento en el archivo, agrego sus vectores solucion a un vector para 
 			#.verificar que si se agregan elementos repetidos sea con el bit de visitado en 1.
 			for elemento in archive:
@@ -243,7 +268,7 @@ class NSGA2:
 				contador += 1
 				#print "contador del contadorVisitados", 
 				#print contador
-				if contador == len(archive)-1:
+				if contador == len(archive):
 					return False
 				
 			else:
@@ -415,6 +440,9 @@ class NSGA2:
 		#print "One Point Crossover beggining"
 		numFac = sol.numFacilities
 		child = Solucion(numFac)
+		#sol.costoAsignacion(), other.costoAsignacion()
+		#print "sol1: ",sol.solution, sol.costoFlujo[0], sol.costoFlujo[1]
+		#print "Sol2:", other.solution, other.costoFlujo[0], other.costoFlujo[1]
 		posRestringidas, posLibres, objPendiente  = [], [], []
 		rangoA,rangoB = random.randint(0, numFac-1), random.randint(2, numFac-2)
 		rangoC = rangoA+rangoB
@@ -437,7 +465,9 @@ class NSGA2:
 			child.solution.insert(x,objPendiente[cont])
 			cont +=1
 		#print "child: ", 
-		#print child
+		child.costoAsignacion()
+		#print child.solution, child.costoFlujo[0], child.costoFlujo[1]
+		
 		#print "One Point Crossover Finished"
 		return child
 
@@ -447,17 +477,109 @@ class NSGA2:
 		soluciones = []
 		soluciones.append(sol), soluciones.append(other)
 		print soluciones[0].solution, soluciones[1].solution
+		sol.costoAsignacion(), other.costoAsignacion()
+		#print "Costos iniciales de sol : ", sol.costoFlujo[0], sol.costoFlujo[1]
+		#print "Costos iniciales de other: ", other.costoFlujo[0], other.costoFlujo[1]
 		aux = random.choice(soluciones)
 		locationP = aux.solution[0]
 		print aux.solution
-		print locationP
-		return aux
+		
+		child.solution.insert(0, locationP)
+		childAux1 = Solucion(numFac)
+		childAux2 = Solucion(numFac)
+
+		while len(child.solution) != len(sol.solution):
+
+			nextElem = self.findNextLoc(soluciones[0], child, locationP, numFac)
+			nextElem2 = self.findNextLoc(soluciones[1], child, locationP, numFac)
+
+			childAux1.solution = child.solution[:]
+			childAux2.solution = child.solution[:]
 
 
-	def adaptiveMutation(self, sol):
-		raise "Not implemented yet"
+			childAux1.solution.append(nextElem)
+			childAux2.solution.append(nextElem2)
+
+			#print childAux1.solution, childAux2.solution
+			childAux1.costoAsignacionParcial(nextElem)
+			childAux2.costoAsignacionParcial(nextElem2)
+
+			if funciones.dominance(childAux1, childAux2):
+				
+				child.solution = childAux2.solution[:]
+				locationP = nextElem2
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+			elif funciones.dominance(childAux2, childAux1):
+				child.solution = childAux1.solution[:]
+				locationP = nextElem
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+			else:
+				child.solution = childAux1.solution[:]
+				locationP = nextElem
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+		child.costoAsignacion()		
+		#print "costos hijos: ", child.costoFlujo[0], child.costoFlujo[1]		
+
+		if funciones.dominance(soluciones[0], child):
+			#print "El primer padre domina al child, se desecha el hijo"
+			return soluciones[0]
+		elif funciones.dominance(child, soluciones[0]):
+			#print "el hijo domina al padre, por lo tanto se escoge"
+			return child		
+		else:
+			#print "ninguno se domina, se elige al azar"
+			del soluciones[:]
+			soluciones.append(child), soluciones.append(sol)
+			seleccionada = random.choice(soluciones)
+			return seleccionada
+
+
+	def findNextLoc(self, sol, child, locationP, numFac):
+		index = sol.solution.index(locationP)
+		#print "indice de location P: ", index
+		for x in range(index+1, index+len(sol.solution)):
+			elemento = sol.solution[x%numFac]
+			if elemento in child.solution:
+				continue
+			else:
+				return elemento
+		
 
 		
+	def adaptiveMutation(self, sol, poblacion):
+		raise "hola"
+
+	
+
+	def threExchangeMutation(self, sol):
+		numFac = sol.numFacilities	
+		posicionUno = random.randint(0,numFac-1)
+		posicionDos = random.randint(0,numFac-1)
+		while posicionUno == posicionDos:
+			posicionDos = random.randint(0,numFac-1)
+		posicionTres = random.randint(0,numFac-1)
+		while posicionTres == posicionDos or posicionTres == posicionUno:
+			posicionTres = random.randint(0,numFac-1)
+		
+		elementoPosUno = sol.solution[posicionUno]
+		elementoPosDos = sol.solution[posicionDos]
+		elementoPosTres = sol.solution[posicionTres]
+ 		
+		solSwapeada = Solucion(numFac)
+		solSwapeada.solution = sol.solution[:]
+		
+		a, b, c = solSwapeada.solution.index(elementoPosUno), solSwapeada.solution.index(elementoPosDos), solSwapeada.solution.index(elementoPosTres)
+		
+		solSwapeada.solution[b], solSwapeada.solution[a] = solSwapeada.solution[a], solSwapeada.solution[b]
+		solSwapeada.solution[b], solSwapeada.solution[c] = solSwapeada.solution[c], solSwapeada.solution[b]
+
+		return solSwapeada
 
 	def twOptSearch(self,sol):
 		numFac = sol.numFacilities
