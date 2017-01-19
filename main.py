@@ -30,8 +30,9 @@ def main():
 	#print "Solucion : ", P[0].solution, P[0].costoFlujo[0], P[0].costoFlujo[1]
 	#print "y su vecindario, con alpha = 0.3"
 	#nsga2.generarAlphaVecinos(P[0], 0.6)
-
-	nsga2.runAlgorithm(P,50,5, start)
+	#Cada parametro es: 
+	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
+	nsga2.runAlgorithm(P,50, 5, 0.3, 1, 2,start)
 
 
 

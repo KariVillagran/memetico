@@ -74,14 +74,14 @@ class NSGA2:
 
 		
 
-	def runAlgorithm(self, poblacion, tamPob, generaciones, start):
+	def runAlgorithm(self, poblacion, tamPob, generaciones, alpha, indCX, indMUT, start):
 		
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 		self.directorio = "results/Results_"+tiempo
 		os.makedirs(self.directorio)
 
-		nextPobla = self.makeNewPob(poblacion)
+		nextPobla = self.makeNewPob(poblacion, indCX, indMUT)
 
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )	
@@ -106,13 +106,13 @@ class NSGA2:
 				nArchivo.write(""+ str(poblacion[i].costoFlujo[0]) + ", " + str(poblacion[i].costoFlujo[1]) + ", " + str(poblacion[i].rank) + ", " +  str(poblacion[i].crowdedDistance) +"\n")
 				
 
-			poblacion = self.makeNewPob(poblacion)
+			poblacion = self.makeNewPob(poblacion, indCX, indMUT)
 			print "Fast Non-Dominated Sorting of new population. . .  "
 			fronteras = self.fastNonDominatedSort(poblacion)
 			#print "la cantidad de fronteras es: ", len(fronteras)
 			poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 			print "Local Search is beggining. . . "	
-			nextPobla = self.paretoLocalSearch(poblacion, tamPob, 0.35)
+			nextPobla = self.paretoLocalSearch(poblacion, tamPob, alpha)
 			print "Local Search has ended."
 			
 
@@ -418,7 +418,7 @@ class NSGA2:
 					poblacion[j] = sol1
 		return poblacion
 
-	def makeNewPob(self, poblacion):
+	def makeNewPob(self, poblacion, indiceCX, indiceMUT):
 		print "Creating a new Population. . ."
 		new_pob = []
 		while len(new_pob) != len(poblacion):
@@ -434,11 +434,18 @@ class NSGA2:
 						solSeleccionadas[i] = sol1
 					else:
 						solSeleccionadas[i] = sol2
-			if random.random() < self.crossoverRate:
-				child = self.sequentialConstructiveCrossover(solSeleccionadas[0], solSeleccionadas[1])
-
-			if random.random() < self.mutationRate:
-				child = self.threExchangeMutation(child)
+			if indiceCX == 1:
+				if random.random() < self.crossoverRate:
+					child = self.sequentialConstructiveCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			elif indiceCX == 2:
+				if random.random() < self.crossoverRate:
+					child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			if indiceMUT == 1:
+				if random.random() < self.mutationRate:
+					child = self.twOptSearch(child)
+			elif indiceMUT == 2:
+				if random.random() < self.mutationRate:
+					child = self.threExchangeMutation(child)
 
 			new_pob.append(child)
 
