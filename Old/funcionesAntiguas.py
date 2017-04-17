@@ -1,4 +1,5 @@
-	def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
+# -*- coding: utf-8 -*-
+def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
 		
 		archive = []
 		contador = 0
@@ -95,7 +96,7 @@
 					#Debo considerar las soluciones generadas en la iteracion pasada. 		 		
 
 
-	def addAndUpdate(self, solucion, archive):
+def addAndUpdate(self, solucion, archive):
 		#print "comienzo addAndUpdate"
 		archiveActualizado = []
 		archiveActualizado.append(solucion)
@@ -126,3 +127,7 @@
 		#	print elem.solution,
 		#print "termino addAndUpdate"
 		return archiveActualizado
+
+
+for i in range(1, 64+1):
+	print i,

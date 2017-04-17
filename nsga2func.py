@@ -7,6 +7,7 @@ import copy
 import itertools
 import datetime
 import os
+from hv import HyperVolume
 #import matplotlib.pyplot as plt
 
 class Solucion:
@@ -71,6 +72,7 @@ class NSGA2:
 		self.mutationRate = mutationRate
 		self.crossoverRate = crossoverRate
 		self.directorio = None
+		self.hyperVol = None
 
 		
 
@@ -81,10 +83,11 @@ class NSGA2:
 		self.directorio = "results/Results_"+tiempo
 		os.makedirs(self.directorio)
 
-		nextPobla = self.makeNewPob(poblacion, indCX, indMUT)
-
+		nextPobla = self.makeNewPob(poblacion, indCX, indMUT, tamPob)
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )	
+		counter = 1
+		archiveHyperVolume = []
 		for i in range(1,generaciones+1):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			print "Generation Number: ", i,
@@ -95,27 +98,65 @@ class NSGA2:
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
 
+			print "Largo poblacion:" ,len(poblacion)
+			print "largo bextPobla: ", len(nextPobla)
+			print "Largo Combinada:", len(pobCombinada)
 			#for elem in pobCombinada:
 			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank,elem.crowdedDistance
 			print "Fast Non-Dominated Sorting of Combined Population. . . " 
+			#np.asarray(pobCombinada)
 			fronteras = self.fastNonDominatedSort(pobCombinada)
+			del poblacion[:]
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
-
+			print "Tamaño poblacion: ", len(poblacion)
 			nArchivo.write("Generacion: " + str(i) + "\n")
-			for i in range(len(poblacion)):
-				nArchivo.write(""+ str(poblacion[i].costoFlujo[0]) + ", " + str(poblacion[i].costoFlujo[1]) + ", " + str(poblacion[i].rank) + ", " +  str(poblacion[i].crowdedDistance) +"\n")
+			for j in range(len(poblacion)):
+				nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
 				
 
-			poblacion = self.makeNewPob(poblacion, indCX, indMUT)
-			print "Fast Non-Dominated Sorting of new population. . .  "
-			fronteras = self.fastNonDominatedSort(poblacion)
-			#print "la cantidad de fronteras es: ", len(fronteras)
-			poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+			if counter != 1:
+				poblacion = self.makeNewPob(poblacion, indCX, indMUT, tamPob)
+				print len(poblacion)
+				print "Fast Non-Dominated Sorting of new population. . .  "
+				fronteras = self.fastNonDominatedSort(poblacion)
+				#print "la cantidad de fronteras es: ", len(fronteras)
+				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+			
 			print "Local Search is beggining. . . "	
 			nextPobla = self.paretoLocalSearch(poblacion, tamPob, alpha)
 			print "Local Search has ended."
 			
-
+			if counter == generaciones:
+				print "ULTIMA GENERACION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+				
+				
+				pobCombi = []
+				normalizedValues = []
+				pobCombi.extend(poblacion)
+				pobCombi.extend(nextPobla)
+				#print len(poblacion)
+				#print len(nextPobla)
+				front =	self.fastNonDominatedSort(pobCombi)
+				pobCombi = self.ordenPostBusqueda(pobCombi, front, tamPob)
+				#print len(pobCombi)
+				#print tamPob
+				for elem in pobCombi:
+					#pardeFlujos = []
+					#pardeFlujos.append(elem.costoFlujo[0])
+					#pardeFlujos.append(elem.costoFlujo[1])
+					#print elem.costoFlujo	
+					archiveHyperVolume.append(elem.costoFlujo)
+					#archiveHyperVolume.append(pardeFlujos)
+				normalizedValues = self.normalizarValores(poblacion, tamPob)	
+				ref = [1,1]
+				hv = HyperVolume(ref)
+				volume = hv.compute(normalizedValues)
+				#print archiveHyperVolume
+					
+					#print elem.costoFlujo[0], elem.costoFlujo[1]
+				#print archiveHyperVolume
+				#print len(archiveHyperVolume)
+			counter += 1
 			#print "NEXTPOBLA"
 			#for elem in nextPobla:
 			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank, elem.crowdedDistance
@@ -130,20 +171,84 @@ class NSGA2:
 		nArchivo.close()
 		print "Algorithm finished in: " , str(final)
 
+	def normalizarValores(self, poblacion, tamPob):
+		maxMin = []
+		for n_obj in range(0,self.numObjectives):
+			objValues = []
+			poblacion = self.sortCostoAssignacion(poblacion, n_obj)
+			for elem in poblacion:
+				print elem.solution, elem.costoFlujo
+			minValue = poblacion[0].costoFlujo[n_obj]
+			maxValue = poblacion[tamPob-1].costoFlujo[n_obj]
+			objValues.append(minValue)
+			objValues.append(maxValue)
+			maxMin.append(objValues)
+			print "obj2"
+		minObj1 = maxMin[0][0]
+		maxObj1 = maxMin[0][1]
+		minObj2 = maxMin[1][0]
+		maxObj2 = maxMin[1][1]
+		difObj1 = maxObj1 - minObj1
+		difObj2 = maxObj2 - minObj2
+		poblacion_SR = []
+		soluciones = []
+		for elemento in poblacion:
+			if elemento.solution not in soluciones:
+				poblacion_SR.append(elemento)
+				soluciones.append(elemento.solution)
+		del soluciones[:]
+		print "pob sin repetidos"
+		#for elem in poblacion_SR:
+		#	print elem.solution, elem.costoFlujo
+
+		#print minObj1, maxObj1, minObj2, maxObj2 
+		
+		normValues = []
+		for elemento in poblacion_SR:
+			values = []
+			cost1 = elemento.costoFlujo[0]
+			cost2 = elemento.costoFlujo[1]
+			valueObj1 = (cost1 - minObj1 )/difObj1
+			valueObj2 = (cost2 - minObj2)/difObj2
+			values.append(valueObj1)
+			values.append(valueObj2)
+			normValues.append(values)
+		print "valores normalizados"
+		#for value in normValues:
+		#	print value
+		return normValues
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
+		
 		del poblacion[:]
-		for frontera in fronteras:
-			if len(frontera)==0:
-				break
-			frontera = self.crowdingDistanceAssignment(frontera)
-			for elemento in frontera:
-				poblacion.append(elemento)
-
+		for front in fronteras:
+			self.crowdingDistanceAssignment(front)
+			for elem in front:
+				poblacion.append(elem)
 		self.sortCrowding(poblacion)
 		if len(poblacion) >= tamPob:
-			del poblacion[tamPob:]
+			poblacion = poblacion[:tamPob]
+		#for elemento in poblacion:
+			#print elemento.solution, elemento.rank
 		return poblacion
+		#Viejo
+#		del poblacion[:]
+#		for frontera in fronteras:
+#			frontera = self.crowdingDistanceAssignment(frontera)
+			#print "Largo de la frontera: ", len(fronteras)
+#			for elemento in frontera:
+				#print elemento.solution
+#				poblacion.append(elemento)
+#			if len(frontera)==0:
+#					break	
+
+#		self.sortCrowding(poblacion)
+		#if len(poblacion) >= tamPob:
+
+#		poblacion = poblacion[:tamPob]
+		#else: 
+			#print "SOMETHING IS WRONG!! "
+#		return poblacion
 
 	def modifiedPLS(self, poblacion, tamPob, alphaVec):
 		archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], []
@@ -210,6 +315,102 @@ class NSGA2:
 			del solutionArchive[:]			
 		return archive		
 
+	def memoryBasedPLS(self, poblacion, tamPob):
+		#Defino variables para almacenar soluciones
+		archive ,archive_aux ,LS_archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], [], [], []
+		numFac = poblacion[0].numFacilities	
+		#Para cada solucion de la poblacion cuyo rank sea 1, debo agregarla al archive_aux, que contiene todas las soluciones pero solo 
+		#usa las no repetidas para la LS
+		for solucion in poblacion:
+			if solucion.rank == 1:
+				archive_aux.append(solucion)
+		#Calculo su crowding de cada individuo y sort por dicho valor		
+		archive_aux = self.crowdingDistanceAssignment(archive_aux)
+		archive_aux = self.sortCrowding(archive_aux)
+		#aqui elimino los repetidos	
+		#for elemento in archive_aux:
+		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance 
+		for elemento in archive_aux:
+			if elemento.solution not in soluciones:
+				archive.append(elemento)
+				soluciones.append(elemento.solution)
+		del soluciones[:]
+		#crear funcion para eliminar repetidos
+		#print "Sin repetir"
+		#for elemento in archive:
+		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance 
+		#Setear tamanio archive... como justificar tamaño seleccionado. 
+		#SOlo para probar se utiliza que el tamano del archive sea como maximo el 10% del tamPob . Ej: Tam pob: 100 --> tam Archive = 10
+		tamArchive = int(round(tamPob*0.2))
+		print tamArchive
+		#En caso que sea mayor a un 20% del tamanio de la poblacion es necesario reducir!
+		#TRASPASAR A FUNCION! IGUAL QUE LA PARTE DE REPETIDAS!
+		if len(archive) > tamArchive:
+			print "MAYOR! A REDUCIR"
+			#Si es mayor, elijo los miembros random (CAMBIAR Y PREGUNTAR SI HACERLO POR crowding distance)
+			aux, aux_solution = [], []
+			for i in range(tamArchive):
+				elem = random.choice(archive)
+				while elem.solution in aux_solution:
+					elem = random.choice(archive)
+				aux.append(elem)
+				aux_solution.append(elem.solution)
+				elem.visitado = 0
+			del archive[:]
+			archive = aux[:]
+			del aux[:]
+		#for elemento in archive:
+		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance, elemento.visitado 
+		
+		while self.contadorVisitados(archive):
+			solSeleccionada = self.seleccionar(archive)
+			
+
+
+
+
+	def generate_One_Neighbor(self, solucion, posiciones ):
+		pos_Aux = []
+		posiciones = []
+		#Selecciono las posiciones, no pueden ser iguales
+		posRandom1 = random.randint(0, numFac-1)
+		posRandom2 = random.randint(0, numFac-1)
+		while posRandom1 == posRandom2:
+			posRandom2 = random.randint(0, numFac-1)
+		posAux.append(posRandom1), posAux.append(posRandom2)
+		while ((posAux in posiciones) or posAux.reverse() in posiciones):
+			posRandom1 = random.randint(0, numFac-1)
+			posRandom2 = random.randint(0, numFac-1)
+			while posRandom1 == posRandom2:
+				posRandom2 = random.randint(0, numFac-1)
+			del posAux[:]	
+			posAux.append(posRandom1), posAux.append(posRandom2)
+		#Aca si o si deberia tener un par [rand1,rand2] que no esten en la lista de soluciones,
+		# que contiene todos los movimientos hechos hasta ahora
+		vecino = Solucion(numFac)
+		vecino = self.swap(solucion, posAux[0], posAux[1], numFac)
+		#Entonces genero el primer vecino, ahora debo iterar este proceso hasta encontrar dominante
+
+	def buscarDominante(self, solucion):
+		numFac = solucion.numFacilities
+		posiciones = []
+		vecino = Solucion(numFac)
+		resultado = self.generate_One_Neighbor(solucion, posiciones)
+		
+		iterator = 0
+		#Mientras el vecino NO domine a la solucion: Hay 3 casos... 
+		#1.- si el vecino domina a la solucion no entra al while y pasa directo a ser agregada
+		#2.- si la solucion domina al vecino 
+		while not(funciones.dominance(vecino, solucion)):
+			
+			if funciones.dominance(solucion, vecino):
+				posiciones.append(posAux)
+			else:
+				pass
+
+
+
+
 
 	def paretoLocalSearch(self, poblacion, tamPob, alphaVec):
 		archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], []
@@ -266,19 +467,23 @@ class NSGA2:
 				#Ahora todos los elementos del vecindario deben ser agregados excepto la solucion 
 				for elementoVecino in listaVecinos:
 					#Si es la solSeleccionada, continuo
-					if elementoVecino in solucionAux:
+					if elementoVecino.solution in solucionAux:
 						continue
 					#Si no
 					else:
 						#Si el elementoVecino ya esta en el archive, lo agrego pero con bit de visitado en 1
 						if elementoVecino.solution in solutionArchive:
 							elementoVecino.visitado = 1
-							archive.append(elementoVecino)
-							self.fastNonDominatedSort(archive)
-							archive = self.actualizarArchive(archive)
+							#archive.append(elementoVecino)
+							#Aqui tengo una duda... siempre que la solucion ya esta en el archive, hare un ordenamiento no dominada?
+							#Deberia solo setear su bit de visita en 0, en otra parte debería ordenarlo, solo cuando se agregan...
+							#REVISAR!!!!
+							#self.fastNonDominatedSort(archive)
+							#archive = self.actualizarArchive(archive)
 
 						#Si no esta, simplemente lo agrego
 						else:
+							#Aca se justifica por que lo estoy agregando.... bien, 
 							archive.append(elementoVecino)
 							self.fastNonDominatedSort(archive)
 							archive = self.actualizarArchive(archive)
@@ -291,9 +496,9 @@ class NSGA2:
 				for elementoVecino in listaVecinos:
 					if elementoVecino.solution in solutionArchive:
 						elementoVecino.visitado = 1
-						archive.append(elementoVecino)
-						self.fastNonDominatedSort(archive)
-						archive = self.actualizarArchive(archive)
+						#archive.append(elementoVecino)
+						#self.fastNonDominatedSort(archive)
+						#archive = self.actualizarArchive(archive)
 					else:
 						archive.append(elementoVecino)
 						self.fastNonDominatedSort(archive)
@@ -306,7 +511,11 @@ class NSGA2:
 				fronteras = self.fastNonDominatedSort(archive)
 				archive = self.ordenPostBusqueda(archive, fronteras, tamPob)
 				for elem in archive:
-					print elem.visitado, 
+					print elem.visitado,
+			else:
+				self.fastNonDominatedSort(archive)
+				archive = self.actualizarArchive(archive)
+
 
 
 			#print "elementos del archive: "
@@ -418,22 +627,70 @@ class NSGA2:
 					poblacion[j] = sol1
 		return poblacion
 
-	def makeNewPob(self, poblacion, indiceCX, indiceMUT):
+	def createNewPob(self, poblacion, indiceCX, indiceMut):
+	
+		print "Creating a new Population. . . "
+		numFac = poblacion[0].numFacilities
+		new_pob, rankedPop, restPop = [], [], []
+		for elemento in poblacion:
+			if elemento.rank == 1:
+				rankedPop.append(elemento)
+				new_pob.append(elemento)
+			else:
+				restPop.append(elemento)
+		#AQUI SETEO EL % DE RANDOM
+		indiceRand = 0.2
+		indiceCruz = 1 - indiceRand
+		largoRestante = len(poblacion)-len(new_pob)
+		cantidadCX = int(round(largoRestante * indiceCruz))
+		cantidadRand = int(round(largoRestante*indiceRand))
+		for i in range(1, cantidadCX+1):
+			child = Solucion(numFac)
+			solSeleccionadas = [None, None]
+			for i in range(2):
+				sol1 = random.choice(rankedPop)
+				sol2 = random.choice(restPop)
+				if crowdedComparisonOperator(sol1, sol2) > 0:
+					solSeleccionadas[i] = sol1
+				else: 
+					solSeleccionadas[i] = sol2
+			if indiceCX == 1:
+				if random.random() < self.crossoverRate:
+					child = self.sequentialConstructiveCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			elif indiceCX == 2:
+				if random.random() < self.crossoverRate:
+					child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			if indiceMut == 1:
+				if random.random() < self.mutationRate:
+					child = self.twOptSearch(child)
+			elif indiceMut == 2:
+				if random.random() < self.mutationRate:
+					child = self.threExchangeMutation(child)
+			new_pob.append(child)
+		for i in range(1, cantidadRand+1):
+			randomChild = Solucion(numFac)
+			randomChild = funciones.generarSolucionRandom(randomChild, numFac)
+			randomChild.costoAsignacion()
+			new_pob.append(randomChild)
+		del rankedPop[:]
+		del restPop[:]
+
+		return new_pob
+
+
+	def makeNewPob(self, poblacion, indiceCX, indiceMUT, tamPob):
 		print "Creating a new Population. . ."
 		new_pob = []
-		while len(new_pob) != len(poblacion):
+		while len(new_pob) != tamPob:
 			child = Solucion(poblacion[0].numFacilities)
 			solSeleccionadas = [None, None]
-			while solSeleccionadas[0] == solSeleccionadas[1]:
-				for i in range(2):
-					sol1 = random.choice(poblacion)
-					sol2 = random.choice(poblacion)
-					while sol1 == sol2:
-						sol2 = random.choice(poblacion)
-					if crowdedComparisonOperator(sol1, sol2) > 0:
-						solSeleccionadas[i] = sol1
-					else:
-						solSeleccionadas[i] = sol2
+			for i in range(2):
+				sol1 = random.choice(poblacion)
+				sol2 = random.choice(poblacion)
+				if crowdedComparisonOperator(sol1, sol2) > 0:
+					solSeleccionadas[i] = sol1
+				else:
+					solSeleccionadas[i] = sol2
 			if indiceCX == 1:
 				if random.random() < self.crossoverRate:
 					child = self.sequentialConstructiveCrossover(solSeleccionadas[0], solSeleccionadas[1])
@@ -448,7 +705,8 @@ class NSGA2:
 					child = self.threExchangeMutation(child)
 
 			new_pob.append(child)
-
+			for elem in new_pob:
+				elem.costoAsignacion()
 		return new_pob				
 
 	def fastNonDominatedSort(self, poblacion):
@@ -479,11 +737,13 @@ class NSGA2:
 							solQ.rank = cont_front+1
 							nextFront.append(solQ)
 			cont_front +=1
-			fronteras = nextFront
-			if(fronteras == []):
+			#fronteras = nextFront[:]
+			if(len(fronteras) == 0):
 				continue
 			else:
 				matrixFrontera.append(fronteras)
+			fronteras = nextFront[:]
+
 		return matrixFrontera
 
 	def crowdingDistanceAssignment(self,frontera):
@@ -600,21 +860,7 @@ class NSGA2:
 				del childAux2.solution[:]
 
 		child.costoAsignacion()		
-		#print "costos hijos: ", child.costoFlujo[0], child.costoFlujo[1]		
-
-		if funciones.dominance(soluciones[0], child):
-			#print "El primer padre domina al child, se desecha el hijo"
-			return soluciones[0]
-		elif funciones.dominance(child, soluciones[0]):
-			#print "el hijo domina al padre, por lo tanto se escoge"
-			return child		
-		else:
-			#print "ninguno se domina, se elige al azar"
-			del soluciones[:]
-			soluciones.append(child), soluciones.append(sol)
-			seleccionada = random.choice(soluciones)
-			return seleccionada
-
+		return child
 
 	def findNextLoc(self, sol, child, locationP, numFac):
 		index = sol.solution.index(locationP)

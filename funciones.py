@@ -105,16 +105,82 @@ def dominance(sol, otherSol):
 	sF2 = sol.costoFlujo[1]
 	oF1 = otherSol.costoFlujo[0]
 	oF2 = otherSol.costoFlujo[1]
-	a,b = sF1 < oF1, sF2 < oF2
-	c,d = sF1 <= oF1, sF2 <= oF2
-	if (c and d) and (a or b):
+	#a,b = sF1 < oF1, sF2 < oF2
+	#c,d = sF1 <= oF1, sF2 <= oF2
+	#if (c and d) and (a or b):
 		#print True
+	wklyDom = weaklyDominance(sol, otherSol)
+	nonwkly = not(weaklyDominance(otherSol, sol))
+	#print "Dominancia: ", 
+	if wklyDom and nonwkly:
+		#print "True"
 		return True
 	else:
-		#print False
+		#print "False"
 		return False
+
+def weaklyDominance(sol, otherSol):
+	solF1 = sol.costoFlujo[0]
+	solF2 = sol.costoFlujo[1]
+	othF1 = otherSol.costoFlujo[0]
+	othF2 = otherSol.costoFlujo[1]
+	a = solF1 <= othF1
+	b = solF2 <= othF2
+	#print "Dominancia leve: ", 
+	if a and b:
+		#print "True"
+		return True
+	else:
+		#print "False"
+		return False
+
+def AweaklyDominance(sol, otherSol):
+	solF1 = sol.costoFlujo[0]
+	solF2 = sol.costoFlujo[1]
+	othF1 = otherSol.costoFlujo[0]
+	othF2 = otherSol.costoFlujo[1]
+	a = solF1 <= othF1
+	b = solF2 <= othF2
+	#print "Dominancia leve: ", 
+	if a and b:
+		#print "True"
+		return True
+	else:
+		#print "False"
+		return False
+
+def nonDominance(sol, otherSol):
+	solF1 = sol.costoFlujo[0]
+	solF2 = sol.costoFlujo[1]
+	othF1 = otherSol.costoFlujo[0]
+	othF2 = otherSol.costoFlujo[1]
+	a = weaklyDominance(sol, otherSol)
+	b = weaklyDominance(otherSol, sol)
+	#print "No Dominantes entre si: ", 
+	if not(a) and not(b):
+		return True
+		#print "true"
+	else:
+		return False 
+		#print "False"
+def strictDominance(sol, otherSol):
+	solF1 = sol.costoFlujo[0]
+	solF2 = sol.costoFlujo[1]
+	othF1 = otherSol.costoFlujo[0]
+	othF2 = otherSol.costoFlujo[1]
+	a = solF1 < othF1
+	b = solF2 < othF2
+	#print "Dominancia estrica: ",
+	if a and b:
+		return True
+		#print "True"
+	else:
+		return False 
+		#print "False"
+
+
 #ALGORITMO
-def noDominance(sol, archive):
+def noDominanceArchive(sol, archive):
 	sF1 = sol.costoFlujo[0]
 	sF2 = sol.costoFlujo[1]
 	contadorDominancia = 0
