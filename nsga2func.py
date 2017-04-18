@@ -366,7 +366,6 @@ class NSGA2:
 
 
 
-
 	def generate_One_Neighbor(self, solucion, posiciones ):
 		numFac = solucion.numFacilities
 		posAux = []
@@ -408,6 +407,8 @@ class NSGA2:
 		vecino = self.generate_One_Neighbor(solucion, posiciones)
 		
 		iterator = 1
+		tamVecindario = (numFac*(numFac-1))/2
+		searchLimit = int(round(tamVecindario*0.95))
 		#Mientras el vecino NO domine a la solucion: Hay 3 casos... 
 		#1.- si el vecino domina a la solucion no entra al while y pasa directo a ser agregada
 		#2.- si la solucion domina al vecino entonces agrego la posicion generada
@@ -418,14 +419,23 @@ class NSGA2:
 				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				iterator += 1
+				if iterator >= searchLimit:
+					break
 			else:
 				print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
 				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				iterator += 1
-		print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
-		print "y se encontro en la iteracion: ", iterator
-		return vecino		
+				if iterator >= searchLimit:
+					break
+		if iterator >= searchLimit:
+			print "no se encontraron resultados e iterator es: ", iterator
+			return solucion
+
+		else:
+			print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
+			print "y se encontro en la iteracion: ", iterator
+			return vecino		
 
 
 
