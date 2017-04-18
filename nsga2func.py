@@ -24,7 +24,7 @@ class Solucion:
 		self.setSolDominadas = []
 		self.crowdedDistance = 0.0
 		self.visitado = 0
-		self.tabuList = []
+		self.movimientos = []
 
 	def costoAsignacion(self):
 		self.costoFlujo[0] = 0.0
@@ -151,6 +151,7 @@ class NSGA2:
 				ref = [1,1]
 				hv = HyperVolume(ref)
 				volume = hv.compute(normalizedValues)
+				nArchivo.write(str(volume))
 				#print archiveHyperVolume
 					
 					#print elem.costoFlujo[0], elem.costoFlujo[1]
@@ -332,6 +333,7 @@ class NSGA2:
 		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance 
 		for elemento in archive_aux:
 			if elemento.solution not in soluciones:
+				elemento.visitado = 0
 				archive.append(elemento)
 				soluciones.append(elemento.solution)
 		del soluciones[:]
@@ -339,75 +341,91 @@ class NSGA2:
 		#print "Sin repetir"
 		#for elemento in archive:
 		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance 
+		
 		#Setear tamanio archive... como justificar tamaño seleccionado. 
 		#SOlo para probar se utiliza que el tamano del archive sea como maximo el 10% del tamPob . Ej: Tam pob: 100 --> tam Archive = 10
-		tamArchive = int(round(tamPob*0.2))
-		print tamArchive
-		#En caso que sea mayor a un 20% del tamanio de la poblacion es necesario reducir!
-		#TRASPASAR A FUNCION! IGUAL QUE LA PARTE DE REPETIDAS!
-		if len(archive) > tamArchive:
-			print "MAYOR! A REDUCIR"
-			#Si es mayor, elijo los miembros random (CAMBIAR Y PREGUNTAR SI HACERLO POR crowding distance)
-			aux, aux_solution = [], []
-			for i in range(tamArchive):
-				elem = random.choice(archive)
-				while elem.solution in aux_solution:
-					elem = random.choice(archive)
-				aux.append(elem)
-				aux_solution.append(elem.solution)
-				elem.visitado = 0
-			del archive[:]
-			archive = aux[:]
-			del aux[:]
-		#for elemento in archive:
-		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance, elemento.visitado 
-		
+		# ACA DEFINO TAMANIO DEL ARCHIVE, PERO POR AHORA NO LO USO. SE VA A CODIGO VIEJO
+
+		#Tengo el archive listo, falta un t.
+		t = 0
+		#Mientras no haya visitado todas las soluciones del archive...
 		while self.contadorVisitados(archive):
+			#Selecciono una solucion no visitada
 			solSeleccionada = self.seleccionar(archive)
+			#Obtengo un vecino dominante
+			vecino = self.buscarDominante(solSeleccionada)
+			#Ahora debo comparar al vecino dominante con las soluciones en el archive, si el vecino es no-weakly-dominante con todas
+			#las soluciones del archivo... entonces ahi agrego al vecino y elimino a la solucion de donde la obtuve. 
 			
+
+			solSeleccionada.visitado = 1
+
+
+	
+
 
 
 
 
 	def generate_One_Neighbor(self, solucion, posiciones ):
-		pos_Aux = []
-		posiciones = []
+		numFac = solucion.numFacilities
+		posAux = []
 		#Selecciono las posiciones, no pueden ser iguales
 		posRandom1 = random.randint(0, numFac-1)
 		posRandom2 = random.randint(0, numFac-1)
 		while posRandom1 == posRandom2:
 			posRandom2 = random.randint(0, numFac-1)
 		posAux.append(posRandom1), posAux.append(posRandom2)
-		while ((posAux in posiciones) or posAux.reverse() in posiciones):
+		posAuxRev = posAux[::-1]
+		
+		while ((posAux in posiciones) or posAuxRev in posiciones):
+			print "UPS! Las posiciones a cambiar ya estan repetidas...:", posAux
+			print "Posiciones ya utilizadas, se generan nuevamente . . ."
 			posRandom1 = random.randint(0, numFac-1)
 			posRandom2 = random.randint(0, numFac-1)
 			while posRandom1 == posRandom2:
 				posRandom2 = random.randint(0, numFac-1)
 			del posAux[:]	
 			posAux.append(posRandom1), posAux.append(posRandom2)
+			posAuxRev = posAux[::-1]
 		#Aca si o si deberia tener un par [rand1,rand2] que no esten en la lista de soluciones,
 		# que contiene todos los movimientos hechos hasta ahora
+		print "Las posiciones a cambiar:", posAux
 		vecino = Solucion(numFac)
 		vecino = self.swap(solucion, posAux[0], posAux[1], numFac)
+		costos = solucion.costoAsignacionMovida(posAux[0], posAux[1])
+		vecino.costoFlujo[0] = solucion.costoFlujo[0] - costos[0]
+		vecino.costoFlujo[1] = solucion.costoFlujo[1] - costos[1]
+		vecino.movimientos.append(posAux[0])
+		vecino.movimientos.append(posAux[1])
 		#Entonces genero el primer vecino, ahora debo iterar este proceso hasta encontrar dominante
+		return vecino
 
 	def buscarDominante(self, solucion):
 		numFac = solucion.numFacilities
 		posiciones = []
 		vecino = Solucion(numFac)
-		resultado = self.generate_One_Neighbor(solucion, posiciones)
+		vecino = self.generate_One_Neighbor(solucion, posiciones)
 		
-		iterator = 0
+		iterator = 1
 		#Mientras el vecino NO domine a la solucion: Hay 3 casos... 
 		#1.- si el vecino domina a la solucion no entra al while y pasa directo a ser agregada
-		#2.- si la solucion domina al vecino 
+		#2.- si la solucion domina al vecino entonces agrego la posicion generada
 		while not(funciones.dominance(vecino, solucion)):
-			
+			#Si la solucion domina al vecino, se agregan las posiciones utilizadas
 			if funciones.dominance(solucion, vecino):
-				posiciones.append(posAux)
+				print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
+				posiciones.append(vecino.movimientos)
+				vecino = self.generate_One_Neighbor(solucion, posiciones)
+				iterator += 1
 			else:
-				pass
-
+				print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
+				posiciones.append(vecino.movimientos)
+				vecino = self.generate_One_Neighbor(solucion, posiciones)
+				iterator += 1
+		print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
+		print "y se encontro en la iteracion: ", iterator
+		return vecino		
 
 
 

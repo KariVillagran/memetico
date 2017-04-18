@@ -30,29 +30,12 @@ def main():
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
 	P = nsga2.ordenPostBusqueda(P, fronteras, 100)
-	#for front in fronteras:
-	#	nsga2.crowdingDistanceAssignment(front)
-	#nsga2.sortCrowding(P)
-	#P = nsga2.ordenPostBusqueda(P, front, 75)
-		
-	#for elemento in P:
-	#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank
 
-	#newPob = nsga2.makeNewPob(P, 1, 1, 75)
-	#fronteras = nsga2.fastNonDominatedSort(newPob)
-	#for front in fronteras:
-	#	nsga2.crowdingDistanceAssignment(front)
-	#nsga2.sortCrowding(newPob)
+	print P[0].solution, P[0].costoFlujo
 
-	#for elemento in newPob:
-	#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance
-	#print "memorybased"
-	#ls = nsga2.memoryBasedPLS(newPob, 75)
+	vecino = nsga2.buscarDominante(P[0])
 
-	#P = nsga2.sortRanking(P)
-
-	#for elemento in P:
-	#	print elemento.solution
+	
 
 
 	#print "Trabajo escrito de tesis"
@@ -64,7 +47,7 @@ def main():
 	#Cada parametro es: 
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
 	
-	nsga2.runAlgorithm(P,100, 5, 0.35, 2, 2, start)
+	#nsga2.runAlgorithm(P,100, 35, 0.35, 2, 2, start)
 
 
 

@@ -129,5 +129,26 @@ def addAndUpdate(self, solucion, archive):
 		return archiveActualizado
 
 
-for i in range(1, 64+1):
-	print i,
+		#tamArchive = int(round(tamPob*0.2))
+		#print tamArchive
+		
+		#En caso que sea mayor a un 20% del tamanio de la poblacion es necesario reducir!
+		#TRASPASAR A FUNCION! IGUAL QUE LA PARTE DE REPETIDAS!
+		
+		#if len(archive) > tamArchive:
+		#	print "MAYOR! A REDUCIR"
+			#Si es mayor, elijo los miembros random (CAMBIAR Y PREGUNTAR SI HACERLO POR crowding distance)
+		#	aux, aux_solution = [], []
+		#	for i in range(tamArchive):
+		#		elem = random.choice(archive)
+		#		while elem.solution in aux_solution:
+		#			elem = random.choice(archive)
+		#		aux.append(elem)
+		#		aux_solution.append(elem.solution)
+		#		elem.visitado = 0
+		#	del archive[:]
+		#	archive = aux[:]
+		#	del aux[:]
+		#for elemento in archive:
+		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance, elemento.visitado 
+	
