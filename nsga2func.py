@@ -76,7 +76,7 @@ class NSGA2:
 
 		
 
-	def runAlgorithm(self, poblacion, tamPob, generaciones, alpha, indCX, indMUT, start):
+	def runAlgorithm(self, poblacion, tamPob, generaciones, indCX, indMUT, start):
 		
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
@@ -106,7 +106,6 @@ class NSGA2:
 			print "Fast Non-Dominated Sorting of Combined Population. . . " 
 			#np.asarray(pobCombinada)
 			fronteras = self.fastNonDominatedSort(pobCombinada)
-			del poblacion[:]
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
 			print "Tamaño poblacion: ", len(poblacion)
 			nArchivo.write("Generacion: " + str(i) + "\n")
@@ -123,8 +122,11 @@ class NSGA2:
 				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 			
 			print "Local Search is beggining. . . "	
-			nextPobla = self.paretoLocalSearch(poblacion, tamPob, alpha)
+			#OJO!!!!!! CAMBIAR EL TERCER PARAMETRO DE LA LS...
+			nextPobla = self.memoryBasedPLS(poblacion, tamPob, 5)
 			print "Local Search has ended."
+			for elemento in nextPobla:
+				print elemento.solution, elemento.costoFlujo
 			
 			if counter == generaciones:
 				print "ULTIMA GENERACION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -177,14 +179,14 @@ class NSGA2:
 		for n_obj in range(0,self.numObjectives):
 			objValues = []
 			poblacion = self.sortCostoAssignacion(poblacion, n_obj)
-			for elem in poblacion:
-				print elem.solution, elem.costoFlujo
+			#for elem in poblacion:
+			#	print elem.solution, elem.costoFlujo
 			minValue = poblacion[0].costoFlujo[n_obj]
 			maxValue = poblacion[tamPob-1].costoFlujo[n_obj]
 			objValues.append(minValue)
 			objValues.append(maxValue)
 			maxMin.append(objValues)
-			print "obj2"
+			#print "obj2"
 		minObj1 = maxMin[0][0]
 		maxObj1 = maxMin[0][1]
 		minObj2 = maxMin[1][0]
@@ -198,7 +200,7 @@ class NSGA2:
 				poblacion_SR.append(elemento)
 				soluciones.append(elemento.solution)
 		del soluciones[:]
-		print "pob sin repetidos"
+		#print "pob sin repetidos"
 		#for elem in poblacion_SR:
 		#	print elem.solution, elem.costoFlujo
 
@@ -227,7 +229,8 @@ class NSGA2:
 			for elem in front:
 				poblacion.append(elem)
 		self.sortCrowding(poblacion)
-		if len(poblacion) >= tamPob:
+		if len(poblacion) > tamPob:
+			#print "es mayor"
 			poblacion = poblacion[:tamPob]
 		#for elemento in poblacion:
 			#print elemento.solution, elemento.rank
@@ -316,10 +319,16 @@ class NSGA2:
 			del solutionArchive[:]			
 		return archive		
 
-	def memoryBasedPLS(self, poblacion, tamPob):
+	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes):
 		#Defino variables para almacenar soluciones
 		archive ,archive_aux ,LS_archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], [], [], []
 		numFac = poblacion[0].numFacilities	
+		#Aqui se almacenan los vecinos dominantes obtenidos en la busqueda... 
+		paretoArchive = []
+		#aqui se almacenan los vecinos candidatos no-dominantes obtenidos en la busqueda
+		candidatesNonDom = []
+		#Aqui se almacenan los que entran al archive...
+		vecinosNDAceptados = []
 		#Para cada solucion de la poblacion cuyo rank sea 1, debo agregarla al archive_aux, que contiene todas las soluciones pero solo 
 		#usa las no repetidas para la LS
 		for solucion in poblacion:
@@ -337,6 +346,9 @@ class NSGA2:
 				archive.append(elemento)
 				soluciones.append(elemento.solution)
 		del soluciones[:]
+		#print "Elementos en el archive: "
+		#for elemento in archive:
+		#	print elemento.solution, elemento.costoFlujo
 		#crear funcion para eliminar repetidos
 		#print "Sin repetir"
 		#for elemento in archive:
@@ -351,21 +363,140 @@ class NSGA2:
 		#Mientras no haya visitado todas las soluciones del archive...
 		while self.contadorVisitados(archive):
 			#Selecciono una solucion no visitada
+			#print "el archivo de entrada es..."
+			#for elemento in archive:
+			#	print elemento.solution, elemento.costoFlujo, elemento.visitado
 			solSeleccionada = self.seleccionar(archive)
+			#print "La sol seleccionada es: ",solSeleccionada.solution, solSeleccionada.costoFlujo
 			#Obtengo un vecino dominante
-			vecino = self.buscarDominante(solSeleccionada)
+			vecinosObtenidos = self.buscarDominante(solSeleccionada)
+			#print "Los elementos en el vecinos obtenidos son:"
+			#for elemento in vecinosObtenidos[1]:
+			#	print elemento.solution
+			#print "tamanio del vector de vecinosObtenidos: ", len(vecinosObtenidos[1])
 			#Ahora debo comparar al vecino dominante con las soluciones en el archive, si el vecino es no-weakly-dominante con todas
 			#las soluciones del archivo... entonces ahi agrego al vecino y elimino a la solucion de donde la obtuve. 
+			vecino = Solucion(numFac)
+			vecino = vecinosObtenidos[0]
+			#print "El vecino obtenido es: ", vecino.solution, vecino.costoFlujo
+			if len(vecinosObtenidos) > 1:
+				for i in range(1,len(vecinosObtenidos)):
+					candidatesNonDom.append(vecinosObtenidos[i])
 			
+			#print "candidates nondom deberian ser los mismos que en vecinso obtenidos"
+			#for elemento in candidatesNonDom:
+			#	print elemento.solution
 
-			solSeleccionada.visitado = 1
+			#Luego de estas ultimas 4 lineas ya tendre al vecino candidato para el PARETO ARCHIVE
+			# y las 'x' nuevas soluciones candidatas para poblar el archive... 	
+			#Primer caso... agrego el vecino a la pareto-archive solo si es no dominante con esta...
+			
+			#Caso 1.1: Si dentro de la busqueda no se encuentra un vecino dominante, es decir, se retorna la misma solucion...
+			# entonces se setea el bit de visita de SolSeleccionada en 1 y se continua la búsqueda
+			if solSeleccionada.solution == vecino.solution:
+				#print "El vecino es igual a la solucion seleccionada..."
+				solSeleccionada.visitado = 1
+			#Caso 1.2: Si se encuentra un vecino dominante entonces se debe comparar el vecino con el Pareto-archive. Solo si el vecino es no-dominado
+			# con el archive, se agrega, si se encuentra un elemento del archive que es dominado por el vecino, se elimina.
+			#Y si un elemento del archive domina al vecino se debe eliminar, y continuar la busqueda. 
+			else:
+				#La variable question es la pregunta para ver si se puede agregar el vecino al archive
+				question = self.checkArchive(vecino, paretoArchive)
+				#Si es True, entonces debo agregar el vecino al archive y eliminar todos los elementos dominados por este
+				# Debo chequear que el vecino no se encuentre en el archivo, si el vecino ya esta ingresado no se agrega. 
+				if question is True:
+					paretoArchive = self.updateArchive(vecino, paretoArchive)
+					#PARAMETRO QUE DEBO REVISAR... COMO SABER CUANTOS INGRESO AL ARCHIVE....
+					if len(candidatesNonDom)>1:
+						if len(candidatesNonDom) < numEntrantes:
+							archive = self.filtrarRepetidos(archive, candidatesNonDom)
+						else:
+							filtro = self.obtenerAlphaRandom(candidatesNonDom, numEntrantes)
+							archive = self.filtrarRepetidos(archive, filtro)
+						
+													
+
+				#Si es False, continuo la busqueda.
+				else:
+				#	print "No puedo agregarlo, continuo..."
+					solSeleccionada.visitado = 1
+				#print "elementos en el archive actualizados..."
+				#for elemento in paretoArchive:
+				#	print elemento.solution, elemento.costoFlujo
+				#print "fin elementos archivo actualizado..."
+
+		return paretoArchive
+	#CREO QUE AQUI ESTA EL ERRORRRRRRRRRRRRRRRRRRRRR
+	def obtenerAlphaRandom(self, candidates, numEntrantes):
+		filtro = []
+		for i in range(numEntrantes):
+			elemento = random.choice(candidates)
+			candidates.remove(elemento)
+			filtro.append(elemento)
+		return filtro
 
 
+	def filtrarRepetidos(self, archive, filtro):
+		archiveSolution = []
+		contRepetidos = 0
+		for elemento in archive:
+			archiveSolution.append(elemento.solution)
+		for candidato in filtro:
+			if candidato.solution in archiveSolution:
+				contRepetidos += 1
+			else:
+				archive.append(candidato)
+		#print "la cantidad de elementos repetidos y que no se agregaron es: ", contRepetidos
+		return archive
+
+
+					
+
+	def updateArchive(self, solucion, archive):
+		updatedArchive = []
+		counter = 0
+		if len(archive)==0:
+			updatedArchive.append(solucion)
+			return updatedArchive
+		else:
+			for elemento in archive:
+				if funciones.dominance(solucion, elemento):
+					counter += 1
+				else:
+					updatedArchive.append(elemento)
+		updatedArchive.append(solucion)
+		#print "la cantidad de elementos que domina es: ", counter
+		return updatedArchive
+
+			
 	
 
+	#Con esta funcion solo chequeo si la solucion a agregar es no-dominado por el resto del archive.
+	def checkArchive(self, solucion, archive):
+		contador = 0
+		soluciones = []
+		if len(archive) == 0:
+			return True
+		for elemento in archive:
+			if elemento.solution not in soluciones:
+				soluciones.append(elemento.solution)
+		if solucion.solution in soluciones:
+			return False
 
+		for elemento in archive:
+			#Si encuentro un elemento dentro del archive que domina a la solucion candidata se acaba la busqueda y no se puede agregar el vecino
+ 			if funciones.dominance(elemento, solucion):
+ 				#print "False"
+ 				return False
+ 			#Si la solucion domina a algun elemento 	
+ 			else:
+ 				contador += 1
 
+ 		if contador == len(archive):
+ 			#print "True"
+ 			return True
 
+			
 	def generate_One_Neighbor(self, solucion, posiciones ):
 		numFac = solucion.numFacilities
 		posAux = []
@@ -378,8 +509,8 @@ class NSGA2:
 		posAuxRev = posAux[::-1]
 		
 		while ((posAux in posiciones) or posAuxRev in posiciones):
-			print "UPS! Las posiciones a cambiar ya estan repetidas...:", posAux
-			print "Posiciones ya utilizadas, se generan nuevamente . . ."
+			#print "UPS! Las posiciones a cambiar ya estan repetidas...:", posAux
+			#print "Posiciones ya utilizadas, se generan nuevamente . . ."
 			posRandom1 = random.randint(0, numFac-1)
 			posRandom2 = random.randint(0, numFac-1)
 			while posRandom1 == posRandom2:
@@ -389,7 +520,7 @@ class NSGA2:
 			posAuxRev = posAux[::-1]
 		#Aca si o si deberia tener un par [rand1,rand2] que no esten en la lista de soluciones,
 		# que contiene todos los movimientos hechos hasta ahora
-		print "Las posiciones a cambiar:", posAux
+		#print "Las posiciones a cambiar:", posAux
 		vecino = Solucion(numFac)
 		vecino = self.swap(solucion, posAux[0], posAux[1], numFac)
 		costos = solucion.costoAsignacionMovida(posAux[0], posAux[1])
@@ -409,34 +540,36 @@ class NSGA2:
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
 		searchLimit = int(round(tamVecindario*0.95))
+		vecinosNoDom = []
+		vecino_DomYCandidatos = []
 		#Mientras el vecino NO domine a la solucion: Hay 3 casos... 
 		#1.- si el vecino domina a la solucion no entra al while y pasa directo a ser agregada
 		#2.- si la solucion domina al vecino entonces agrego la posicion generada
 		while not(funciones.dominance(vecino, solucion)):
 			#Si la solucion domina al vecino, se agregan las posiciones utilizadas
 			if funciones.dominance(solucion, vecino):
-				print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
+				#print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
 				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				iterator += 1
 				if iterator >= searchLimit:
 					break
 			else:
-				print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
+				#print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
 				posiciones.append(vecino.movimientos)
+				vecino_DomYCandidatos.append(vecino)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				iterator += 1
 				if iterator >= searchLimit:
 					break
 		if iterator >= searchLimit:
-			print "no se encontraron resultados e iterator es: ", iterator
-			return solucion
-
-		else:
-			print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
-			print "y se encontro en la iteracion: ", iterator
-			return vecino		
-
+			vecino_DomYCandidatos.insert(0,solucion)
+			#print "no se encontraron resultados e iterator es: ", iterator
+			return vecino_DomYCandidatos
+		#print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
+		#print "y se encontro en la iteracion: ", iterator	
+		vecino_DomYCandidatos.insert(0, vecino)
+		return vecino_DomYCandidatos
 
 
 
@@ -741,8 +874,6 @@ class NSGA2:
 		#print "Iniciando  Fast Non-Dominated-Sort"
 		matrixFrontera = []
 		fronteras = []
-		for sol in poblacion:
-			sol.rank = 0
 		for solP in poblacion:
 			for solQ in poblacion:
 				if solP == solQ:
@@ -765,12 +896,12 @@ class NSGA2:
 							solQ.rank = cont_front+1
 							nextFront.append(solQ)
 			cont_front +=1
-			#fronteras = nextFront[:]
+			fronteras = nextFront[:]
 			if(len(fronteras) == 0):
 				continue
 			else:
 				matrixFrontera.append(fronteras)
-			fronteras = nextFront[:]
+			#fronteras = nextFront[:]
 
 		return matrixFrontera
 

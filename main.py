@@ -26,16 +26,43 @@ def main():
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
 	funciones.crearPoblacion(P,100, numFac)
+
+	#for elem in P:
+	#	print elem.solution, elem.costoFlujo, elem.rank
+	#print len(P)	
+	#print "+++++++++++++++++++++++++++++++++++++++++"
+	
 	#for elemento in P:
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras, 100)
+	P = nsga2.ordenPostBusqueda(P, fronteras,100)
 
-	print P[0].solution, P[0].costoFlujo
+	#print P[0].solution, P[0].costoFlujo
 
-	vecino = nsga2.buscarDominante(P[0])
-
+	#archive = []
+	#print len(P)
 	
+	#vecino = nsga2.buscarDominante(P[0])
+
+	#for elem in P:
+	#	print elem.solution, elem.costoFlujo, elem.rank
+	#	if elem.rank == 1:
+	#		archive.append(elem)
+
+	#print "Archive: "
+	#for elemento in archive:
+	#	print elemento.solution, elemento.costoFlujo, elemento.rank
+
+#	print vecino.solution, vecino.costoFlujo
+
+#	question = nsga2.checkArchive(vecino, archive)
+#	if question is True:
+#		archive = nsga2.updateArchive(vecino, archive)
+
+#	for elemento in archive:
+#		print elemento.solution, elemento.costoFlujo		
+
+
 
 
 	#print "Trabajo escrito de tesis"
@@ -47,7 +74,7 @@ def main():
 	#Cada parametro es: 
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
 	
-	#nsga2.runAlgorithm(P,100, 35, 0.35, 2, 2, start)
+	nsga2.runAlgorithm(P,100, 1250, 2, 2, start)
 
 
 
