@@ -117,13 +117,13 @@ class NSGA2:
 				poblacion = self.makeNewPob(poblacion, indCX, indMUT, tamPob)
 				print len(poblacion)
 				print "Fast Non-Dominated Sorting of new population. . .  "
-				fronteras = self.fastNonDominatedSort(poblacion)
+				#fronteras = self.fastNonDominatedSort(poblacion)
 				#print "la cantidad de fronteras es: ", len(fronteras)
-				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+				#poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 			
 			print "Local Search is beggining. . . "	
 			#OJO!!!!!! CAMBIAR EL TERCER PARAMETRO DE LA LS...
-			nextPobla = self.memoryBasedPLS(poblacion, tamPob, 5)
+			nextPobla = self.memoryBasedPLS(poblacion, tamPob, 10)
 			print "Local Search has ended."
 			for elemento in nextPobla:
 				print elemento.solution, elemento.costoFlujo
@@ -153,6 +153,7 @@ class NSGA2:
 				ref = [1,1]
 				hv = HyperVolume(ref)
 				volume = hv.compute(normalizedValues)
+				nArchivo.seek(0)
 				nArchivo.write(str(volume))
 				#print archiveHyperVolume
 					
@@ -332,8 +333,7 @@ class NSGA2:
 		#Para cada solucion de la poblacion cuyo rank sea 1, debo agregarla al archive_aux, que contiene todas las soluciones pero solo 
 		#usa las no repetidas para la LS
 		for solucion in poblacion:
-			if solucion.rank == 1:
-				archive_aux.append(solucion)
+			archive_aux.append(solucion)
 		#Calculo su crowding de cada individuo y sort por dicho valor		
 		archive_aux = self.crowdingDistanceAssignment(archive_aux)
 		archive_aux = self.sortCrowding(archive_aux)
@@ -426,7 +426,7 @@ class NSGA2:
 				#print "fin elementos archivo actualizado..."
 
 		return paretoArchive
-	#CREO QUE AQUI ESTA EL ERRORRRRRRRRRRRRRRRRRRRRR
+
 	def obtenerAlphaRandom(self, candidates, numEntrantes):
 		filtro = []
 		for i in range(numEntrantes):

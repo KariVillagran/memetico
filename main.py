@@ -35,7 +35,7 @@ def main():
 	#for elemento in P:
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras,100)
+	P = nsga2.ordenPostBusqueda(P, fronteras,500)
 
 	#print P[0].solution, P[0].costoFlujo
 
@@ -74,7 +74,7 @@ def main():
 	#Cada parametro es: 
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
 	
-	nsga2.runAlgorithm(P,100, 1250, 2, 2, start)
+	nsga2.runAlgorithm(P,500, 50, 2, 2, start)
 
 
 
