@@ -74,7 +74,9 @@ def main():
 	#Cada parametro es: 
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
 	
-	nsga2.runAlgorithm(P,500, 50, 2, 2, start)
+	#nsga2.cycleCrossover(P[0], P[1])
+
+	nsga2.runAlgorithm(P,50, 50, 2, 2, start)
 
 
 

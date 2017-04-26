@@ -153,8 +153,6 @@ class NSGA2:
 				ref = [1,1]
 				hv = HyperVolume(ref)
 				volume = hv.compute(normalizedValues)
-				nArchivo.seek(0)
-				nArchivo.write(str(volume))
 				#print archiveHyperVolume
 					
 					#print elem.costoFlujo[0], elem.costoFlujo[1]
@@ -172,6 +170,7 @@ class NSGA2:
 		final = stopTime - startTime
 		nArchivo.seek(0)
 		nArchivo.write("Final time of Execution: " + str(final) + "\n")
+		nArchivo.write("And the HyperVolume of the Last Frontier obtained is: " + str(volume))
 		nArchivo.close()
 		print "Algorithm finished in: " , str(final)
 
@@ -236,24 +235,6 @@ class NSGA2:
 		#for elemento in poblacion:
 			#print elemento.solution, elemento.rank
 		return poblacion
-		#Viejo
-#		del poblacion[:]
-#		for frontera in fronteras:
-#			frontera = self.crowdingDistanceAssignment(frontera)
-			#print "Largo de la frontera: ", len(fronteras)
-#			for elemento in frontera:
-				#print elemento.solution
-#				poblacion.append(elemento)
-#			if len(frontera)==0:
-#					break	
-
-#		self.sortCrowding(poblacion)
-		#if len(poblacion) >= tamPob:
-
-#		poblacion = poblacion[:tamPob]
-		#else: 
-			#print "SOMETHING IS WRONG!! "
-#		return poblacion
 
 	def modifiedPLS(self, poblacion, tamPob, alphaVec):
 		archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], []
@@ -930,6 +911,33 @@ class NSGA2:
 						frontera[i].crowdedDistance += (frontera[i+1].costoFlujo[n_obj] - frontera[i-1].costoFlujo[n_obj])/(frontera[largo-1].costoFlujo[n_obj] - frontera[0].costoFlujo[n_obj])
 		return frontera
 		
+
+	def cycleCrossover(self, sol, other):
+		numFac = sol.numFacilities
+		child1 = Solucion(numFac)
+		child2 = Solucion(numFac)
+		positions = []
+		for i in range(len(sol.solution)):
+			positions.append(i)
+		cycles = []
+		cycle =  []
+		firstPos = 0
+		firstElem1 = sol.solution[firstPos]
+		firstElem2 = other.solution[firstPos]
+		child1.solution.insert(firstPos, firstElem1)
+		child2.solution.insert(firstPos, firstElem2)
+		iterator = 1
+		#while len(child1.solution) != len(sol.solution):
+
+
+
+
+
+
+
+				
+
+
 
 	def onePointCrossover(self,sol,other):
 		#print "One Point Crossover beggining"

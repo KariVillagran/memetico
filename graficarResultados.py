@@ -16,15 +16,20 @@ def lectura():
 			#print "ENCONTRADA!"
 			for new_line in resultados:
 				linea = new_line.strip().split(",")
-				print linea
-				#print "Agregando a listaCosto1: ", linea[0]
-				listaSolC1.append(linea[0])
-				#print "Agregando a listaCosto2: ", linea[1]
-				listaSolC2.append(linea[1])
+				#print linea
+				rank = int(linea[2])
+				if rank == 1:
+					print linea
+					#print "Agregando a listaCosto1: ", linea[0]
+					listaSolC1.append(linea[0])
+					#print "Agregando a listaCosto2: ", linea[1]
+					listaSolC2.append(linea[1])
+				#print "soy rank = 2:", rank+1
+				#print "soy linea[2]: ", linea[2]
 		else:
 			pass
 			#print "NOT YET FOUND"
-	
+	#print listaSolC1, listaSolC2
 	plt.plot(listaSolC1, listaSolC2, 'ro')
 	plt.ylabel('Costo Flujo 2')
 	plt.xlabel('Costo Flujo 1')
