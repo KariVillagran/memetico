@@ -25,7 +25,7 @@ def main():
 	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,150, numFac)
+	funciones.crearPoblacion(P,75, numFac)
 
 	#for elem in P:
 	#	print elem.solution, elem.costoFlujo, elem.rank
@@ -35,7 +35,7 @@ def main():
 	#for elemento in P:
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras,150)
+	P = nsga2.ordenPostBusqueda(P, fronteras,75)
 
 	#print P[0].solution, P[0].costoFlujo
 
@@ -74,10 +74,15 @@ def main():
 	#Cada parametro es: 
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=Seq, 2=Onepoint), indiceMUT (1=2opt, 2=3opt)
 	
-	#nsga2.cycleCrossover(P[0], P[1])
+	#print P[0].solution
+	#print P[1].solution
+	#childs =nsga2.cycleCrossover(P[0], P[1])
+	#for child in childs:
+	#	print child.solution
+	
+	nsga2.runAlgorithm(P,75, 35, 1, start)
 
-	nsga2.runAlgorithm(P,150, 300, 2, 2, start)
-
+	#a = [i for i in range(numFac)]
 
 
 

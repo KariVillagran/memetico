@@ -1,99 +1,157 @@
-# -*- coding: utf-8 -*-
-def paretoLS(self, poblacion, tamPob, cantidadIteraciones):
-		
-		archive = []
-		contador = 0
+def paretoLocalSearch(self, poblacion, tamPob, alphaVec):
+		archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], []
 		numFac = poblacion[0].numFacilities
 		#print "largo pob: ", len(poblacion)
+		#Para cada solucion de la poblacion, si la solucion tiene rank 1 la agrego a mi archive
+		#Ademas seteo su bit de visita en 0.
 		for solucion in poblacion:
-			print solucion.solution
+			#print solucion.solution
 			if solucion.rank == 1:
 				archive.append(solucion)
 				solucion.visitado = 0
 				#print solucion.solution
-		solSeleccionada = self.seleccionar(archive)
-		#print "solucion seleccionada: ", solSeleccionada.solution
-		#print "costo de la solucion seleccionada en obj 1: ", solSeleccionada.costoFlujo[0],
-		#print "costo de la solucion seleccionada en obj 2: ",  solSeleccionada.costoFlujo[1]
-		contadorItera = 0
-		while contador != cantidadIteraciones:
-			#print "Generando Vecinos"
-			vecindad = self.generoVecinos(solSeleccionada, numFac)
-			for vecino in vecindad:
-				#print "solucion vecina: ", vecino.solution
-				#print "costo de la solucion vecina en obj 1: ", vecino.costoFlujo[0],
-				#print "costo de la solucion vecina en obj 2: ",  vecino.costoFlujo[1]
-				if funciones.dominance(vecino, solSeleccionada):
-					#print "el vecino domina a la solucion seleccionada"
-					archive = self.addAndUpdate(vecino, archive)
-					#contadorItera = 0
-					#print "se agrega al archive y  se actualiza "
-				elif funciones.dominance(solSeleccionada, vecino):
-					#print "la solucion seleccionada domina al vecino"
-					#contador += 1
-					#contadorItera += 1
-					#print contadorItera
-					continue
-				else:
-					
-					#print "ninguna se domina!"
-					archive = self.addAndUpdate(vecino, archive)
-					#contadorItera = 0
-					#print "se agrega al archive y  se actualiza "
-
-			archive = np.array(archive)
-			archive = np.unique(archive)
-			archive = archive.tolist()
-			solSeleccionada.visitado = 1
-			contador += 1
-			print contador
-			if len(archive) >= tamPob:
-				self.crowdingDistanceAssignment(archive)
-				self.sortCrowding(archive)
-				del archive[tamPob:]
+		#Mientras no esten todos los elementos del archive visitados
+		while self.contadorVisitados(archive):
+			#Para cada elemento en el archivo, agrego sus vectores solucion a un vector para 
+			#.verificar que si se agregan elementos repetidos sea con el bit de visitado en 1.
+			for elemento in archive:
+				solutionArchive.append(elemento.solution)
+			#Selecciono una solucion cuyo bit de visita sea 0.	
+			#print "seleccionando y  obteniendo vecinos"
 			solSeleccionada = self.seleccionar(archive)
-			#print "nueva solucion seleccionada. ", solSeleccionada.solution
-		#Deberia ordenarlas por crowding ?
-		#print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		#print "elementos del archive: "
-		#for elem in archive:
-		#	print elem.solution
-		newArchive = []
-		newArchive.extend(archive)
-		#print "Len con solo el archive: ", len(newArchive)
-		newArchive.extend(poblacion)
-		#print "len con archive y poblacion", len(newArchive)
-		#print "poblacion:"
-		#for elem in poblacion:
-		#	print elem.solution
-		#print "archive: "
+			#Genero la vecindad TOTAL de la solucion seleccionada
+			if alphaVec >= 0.9:
+				vecindad = self.generoVecinos(solSeleccionada, numFac)
+			else:
+				vecindad = self.generarAlphaVecinos(solSeleccionada, alphaVec)
+			#Agrego el elemento a la vecindad para analizarla con respecto a ND-Sort y Crowding
+			vecindad.append(solSeleccionada)
+			#Agrego para comprobar que este
+			solucionAux.append(solSeleccionada.solution)
+			#Realizo el proceso de FND Sort y luego ordeno por crowding distance de los vecinos
+			#. con el fin de obtener solo los mejores vecinos, los cuales seran agregados al archive
+			fronteras = self.fastNonDominatedSort(vecindad)
+			vecindad = self.ordenPostBusqueda(vecindad, fronteras, tamPob)
+			#Para cada vecino en la vecindad, selecciono solo los con ranking 1, los agrego tanto
+			#. a la lista de listas con soluciones y a la lista de vecinos a agregar al archive.
+			
+			for vecino in vecindad:
+				#print vecino.solution, vecino.costoFlujo[0], vecino.costoFlujo[1], vecino.rank, vecino.crowdedDistance
+				
+				if vecino.rank == 1:
+					soluciones.append(vecino.solution)
+					listaVecinos.append(vecino)
+					#print "vecino a agregar: "
+					#print vecino.solution, vecino.rank
+			#print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			#Si la solSeleccionada esta en las mejores soluciones, la agrego y su bit de visita en 1.
+			#print "Se agregaran ", len(listaVecinos), "elementos"
+			#print "agregando nuevas soluciones"
+			if solSeleccionada.solution in soluciones:
+				#print "esta!!!!!"
+				solSeleccionada.visitado = 1
+				#Ahora todos los elementos del vecindario deben ser agregados excepto la solucion 
+				for elementoVecino in listaVecinos:
+					#Si es la solSeleccionada, continuo
+					if elementoVecino.solution in solucionAux:
+						continue
+					#Si no
+					else:
+						#Si el elementoVecino ya esta en el archive, lo agrego pero con bit de visitado en 1
+						if elementoVecino.solution in solutionArchive:
+							elementoVecino.visitado = 1
+							#archive.append(elementoVecino)
+							#Aqui tengo una duda... siempre que la solucion ya esta en el archive, hare un ordenamiento no dominada?
+							#Deberia solo setear su bit de visita en 0, en otra parte debería ordenarlo, solo cuando se agregan...
+							#REVISAR!!!!
+							#self.fastNonDominatedSort(archive)
+							#archive = self.actualizarArchive(archive)
 
-		#print "new Archive:"
-		#for elem in newArchive:
-		#	print elem.solution
+						#Si no esta, simplemente lo agrego
+						else:
+							#Aca se justifica por que lo estoy agregando.... bien, 
+							archive.append(elementoVecino)
+							self.fastNonDominatedSort(archive)
+							archive = self.actualizarArchive(archive)
+				
+				del listaVecinos[:]			
+			
+			elif solSeleccionada.solution not in soluciones:
+				#print "NO esta !!"
+				archive.remove(solSeleccionada)
+				for elementoVecino in listaVecinos:
+					if elementoVecino.solution in solutionArchive:
+						elementoVecino.visitado = 1
+						#archive.append(elementoVecino)
+						#self.fastNonDominatedSort(archive)
+						#archive = self.actualizarArchive(archive)
+					else:
+						archive.append(elementoVecino)
+						self.fastNonDominatedSort(archive)
+						archive = self.actualizarArchive(archive)					
+				del listaVecinos[:]
+			tamanoPonderar = tamPob*0.1
+			if len(archive)	>= tamanoPonderar*tamPob:
+				print "Population size bigger than setted: ", len(archive),
+				print "Reducing Size. . ."
+				fronteras = self.fastNonDominatedSort(archive)
+				archive = self.ordenPostBusqueda(archive, fronteras, tamPob)
+				for elem in archive:
+					print elem.visitado,
+			else:
+				self.fastNonDominatedSort(archive)
+				archive = self.actualizarArchive(archive)
 
-		#print "tamPob", tamPob
-		#print "len pobla:",len(poblacion)
-		#print "len archive",len(archive)
-		
-		del newArchive[tamPob:]
-		#print "len newArchive",len(newArchive)
-		return newArchive
-		#Tengo que tomar la poblacion resultante del nsga2, tomarla y sacar solo las soluciones de la primera frontera y agregarlas
-		#Al archivo que debe ser del mismo tamao que la poblacion resultante.
-		#Selecciono una solucion del archivo 'solSeleccionada' 
-		#mientras no se hayan visitado todas las soluciones del archivo se debe continuar. 
-			#para cada solucion vecina del solSeleccionada
-				#exploro su vecindario
-				#si solucuionVecinadelaSeleccionada no es dominada por ninguna solucion del archivo:
-					#debo chequear tambien si esta solucion domina a alguna.
-					#Debo chequear el largo del archivo... ¿que pasa si esta lleno? o supera el tamao de m poblacion? 
-					#la agrego al archivo (OJo: AGREGAR AL ARCHIVO DEBE CHEQUEAR SI ESA SOLUCION NUEVA DOMINA A ALGUNA QUE YA ESTA EN EL ARCHIVIO)
-					#seteo su bit de visita en falso	
-			#seteo el bit de visita en True de solSeleccionada
-			#t = t  + 1 ... esto puede ser un contador, puede servir para algo... 
-			#sol Seleccionada elegirDelArchivo(): Funcion que elige una solucion con el bit de visita en Falso del archivo.
-					#Debo considerar las soluciones generadas en la iteracion pasada. 		 		
+
+
+			#print "elementos del archive: "
+			#contador = 0
+			#for elemento in archive:
+			#	print elemento.solution, contador, elemento.visitado
+			#	contador +=1
+			#print "len Archive: ", len(archive)
+				
+			del solutionArchive[:]			
+		#Debo chequear si el archive resultante es menor al tamanio de la poblacion,
+		#. si esto se cumple es necesario generar mutaciones dentro de los mejores elementos 
+		#. de la poblacion para llenar con mutaciones de buenas soluciones
+		#. REVISARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR!!!
+		return archive			
+
+def ready(self, archive):
+		contador = 0
+		contadorVisita = 0
+		listaSolVis = []
+		for elemento in archive:
+			listaAux = []
+			listaAux.append(elemento.solution)
+			listaAux.append(elemento.visitado)
+			listaSolVis.append(listaAux)
+		#print len(listaSolVis)
+		i = 0
+		largo = len(listaSolVis)	
+		while contador != largo:
+			#print len(listaSolVis)
+			if len(listaSolVis) == 0:
+				contador +=1
+				break
+			else:
+				elemSolVis = random.choice(listaSolVis)
+			#print "soy elemSolVis: ",
+			#print elemSolVis
+			if elemSolVis[1] == 1:
+				contadorVisita += 1
+				listaSolVis.remove(elemSolVis)
+				#print "soy listaSolVis: ", listaSolVis
+			elif elemSolVis[0] == 0:
+				listaSolVis.remove(elemSolVis)
+			contador += 1
+		if contadorVisita == len(archive):
+			#print "True"
+			return False
+		else:
+			return True	
+
 
 
 def addAndUpdate(self, solucion, archive):
