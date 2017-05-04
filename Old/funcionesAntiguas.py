@@ -209,4 +209,51 @@ def addAndUpdate(self, solucion, archive):
 		#	del aux[:]
 		#for elemento in archive:
 		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance, elemento.visitado 
+
 	
+	def normalizarValores(self, poblacion, tamPob):
+		maxMin = []
+		for n_obj in range(0,self.numObjectives):
+			objValues = []
+			poblacion = self.sortCostoAssignacion(poblacion, n_obj)
+			#for elem in poblacion:
+			#	print elem.solution, elem.costoFlujo
+			minValue = poblacion[0].costoFlujo[n_obj]
+			maxValue = poblacion[tamPob-1].costoFlujo[n_obj]
+			objValues.append(minValue)
+			objValues.append(maxValue)
+			maxMin.append(objValues)
+			#print "obj2"
+		minObj1 = maxMin[0][0]
+		maxObj1 = maxMin[0][1]
+		minObj2 = maxMin[1][0]
+		maxObj2 = maxMin[1][1]
+		difObj1 = maxObj1 - minObj1
+		difObj2 = maxObj2 - minObj2
+		poblacion_SR = []
+		soluciones = []
+		for elemento in poblacion:
+			if elemento.solution not in soluciones:
+				poblacion_SR.append(elemento)
+				soluciones.append(elemento.solution)
+		del soluciones[:]
+		#print "pob sin repetidos"
+		#for elem in poblacion_SR:
+		#	print elem.solution, elem.costoFlujo
+
+		#print minObj1, maxObj1, minObj2, maxObj2 
+		
+		normValues = []
+		for elemento in poblacion_SR:
+			values = []
+			cost1 = elemento.costoFlujo[0]
+			cost2 = elemento.costoFlujo[1]
+			valueObj1 = (cost1 - minObj1 )/difObj1
+			valueObj2 = (cost2 - minObj2)/difObj2
+			values.append(valueObj1)
+			values.append(valueObj2)
+			normValues.append(values)
+		print "valores normalizados"
+		#for value in normValues:
+		#	print value
+		return normValues		

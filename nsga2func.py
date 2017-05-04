@@ -148,7 +148,7 @@ class NSGA2:
 				#print tamPob
 				for elemento in pobCombi:
 					if elemento.rank == 1:
-						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
+						fPareto.write(""+ str(elemento.solution) + ", " + str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
 				#for elem in pobCombi:
 					#pardeFlujos = []
 					#pardeFlujos.append(elem.costoFlujo[0])
