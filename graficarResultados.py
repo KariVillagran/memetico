@@ -30,6 +30,8 @@ def lectura():
 			pass
 			#print "NOT YET FOUND"
 	#print listaSolC1, listaSolC2
+	resultados.close()
+
 	plt.plot(listaSolC1, listaSolC2, 'ro')
 	plt.ylabel('Costo Flujo 2')
 	plt.xlabel('Costo Flujo 1')

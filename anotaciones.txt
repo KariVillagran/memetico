@@ -1,4 +1,45 @@
-drezler 
-long runs -- alggo nuevo para computar nuevas soluciones
-comparacion literatura --- me comparo con el resto de los algoritmos para el problema. 
+- comparacion con algoritmos literatura
 
+	Objetivo: Lograr evaluar MB-MA (algoritmo en desarrollo) contra algoritmos de la literatura
+	Hacer:  - Buscar todos los Papers donde se trabajen con instancias tipo KC10-2fl-xuni/real
+			- Lograr obtener los datos de las fronteras obtendidas por los algoritmos en cuestión.
+				-Si no, buscar codigos y demases.
+			- Se realizan las 'x' runs del algoritmo para cada 'mem' y luego se deben analizar con estos otros resultados mediante HyperVolume, 	
+				participación dentro de frontera, coverage, y más.
+			-***** NOTA: Aca se debe consultar por como interpretar los resultados, debido a que se grafica también el promedio junto con la desviación standar 	 de los valores, cosa que podría ayudar para representar de dicha forma a las ejecuciones.
+
+
+- memoria global algoritmo
+	Objetivo: Implementar una memoria global del algoritmo dentro de la busqueda local, para evitar visitar soluciones ya visitadas en alguna otra ocasion
+	Hacer: Pensar bien como poder hacer que cuando se generen soluciones en donde el vecindario no entrega una buena solución, no volver a visitar debido a que se habra sabido que no existen posibles mejoras en el vecindario de esa solución. Es como preguntarle a una solucion... ud es la solucion 54231 cierto? Puchi... no creo que le convenga explorar su vecindario, por que miré... en mi memoria ya lo tenia almacenaito a ud, y a tooooda su vecindad y no hay ningun valor mejor que ud mijito, asi que váyase pa la frontera no ma jiji.
+
+
+- seleccion de padres aleatorias, cambiar
+	-Objetivo: Implementar un método de selección de padres basado en alguna metrica
+	-Hacer: Averiguar más que nada como hacer seleccion, como por ejemplo los 'torneos' y la ruleta, para implementar en el algoritmo, y luego buscar por algún métoodo que posea algún tipo de memoria e implementarlo para al seleccion de padres para procesos como cruzamiento... en verdad para cualquier procedimiento que sea aleatorio, debido a que la 'aleatoridad mata la memoria' Mario dijo eso, asi que mejor será buscar algo bueno1!! 
+
+
+- comparar los dos CX mediante el hyperVolume y % de participacion y coverage
+	Objetivo: Comparación de valores de HV y % entre NSGA2-1PCX-MBMA Y NSGA2-CYCX-MBMA
+	Hacer: Hacer el merge de datos entre los valores de las fronteras de los dos conjuntos en las 'x' runs para asi analizar ambos resultados por cada instancia.
+
+
+- esquema poblacion jerarquico? o NSGA2+QPLS hibiridacion **URGENTE
+	Hacer: Se debe justificar que no se hara el esquema jerarquico!!! IMPORTANTE!!
+
+- Revisar donde y a quienes se aplica LS... (Balance between LS and AG)
+	hacer: Revisar paper de "Balance between local search and genetic search..."
+
+
+- Tener cuidado con las semillas para las random. (revisar al final)
+	
+
+
+- PArametros de P, G, k y SearchLimit (search limit limitado por funcion d generacion de vecinos, que en este caso es 2-opt exchange.
+	Establecer que P, G son valroes asociados a las ejecuciones de los otros algoritmos en la literatura, para k y sL se debe hacer analisis y consultar...
+	Aca se podría proponer lo siguiente... 2 operadores de crossover + 4 MB-MA pero cada uno con parámetros de k y SL... Serían 6 combinaciones entre si, contra 2 o 3 de literatura contra NSGA2 solito... pensarthinkbatmanthink.
+
+
+- establecer limites dentro de los graficos (Como en el caso de KC10-2fl-1rl.dat)
+	-Esto se debe hacer con la programación de la grafica de la frontera... ver opcion de R? O aprender matplotlib bien... he ahi el dilema...
+	
