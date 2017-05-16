@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 import funciones
 from nsga2func import Solucion
 from nsga2func import NSGA2
@@ -20,12 +21,13 @@ matrixFlujoDos = []
 
 
 def main():
-
+	seed = sys.argv[2]
+	random.seed(seed)
 	numFac = funciones.distribuirMatrices(funciones.lectura())
 	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,150, numFac)
+	funciones.crearPoblacion(P,50, numFac)
 
 	#for elem in P:
 	#	print elem.solution, elem.costoFlujo, elem.rank
@@ -35,7 +37,7 @@ def main():
 	#for elemento in P:
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras,150)
+	P = nsga2.ordenPostBusqueda(P, fronteras,50)
 
 	#print P[0].solution, P[0].costoFlujo
 
@@ -75,7 +77,7 @@ def main():
 	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=cycleCX, 2=OnepointCX), indiceMUT (3opt)
 
 	
-	nsga2.runAlgorithm(P,150, 300, 1, start)
+	nsga2.runAlgorithm(P,50, 50, 1, start)
 
 	#a = [i for i in range(numFac)]
 

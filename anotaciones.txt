@@ -7,6 +7,8 @@
 			- Se realizan las 'x' runs del algoritmo para cada 'mem' y luego se deben analizar con estos otros resultados mediante HyperVolume, 	
 				participación dentro de frontera, coverage, y más.
 			-***** NOTA: Aca se debe consultar por como interpretar los resultados, debido a que se grafica también el promedio junto con la desviación standar 	 de los valores, cosa que podría ayudar para representar de dicha forma a las ejecuciones.
+	Actualizacion: 
+		- 95% completado.
 
 
 - memoria global algoritmo
@@ -17,21 +19,29 @@
 - seleccion de padres aleatorias, cambiar
 	-Objetivo: Implementar un método de selección de padres basado en alguna metrica
 	-Hacer: Averiguar más que nada como hacer seleccion, como por ejemplo los 'torneos' y la ruleta, para implementar en el algoritmo, y luego buscar por algún métoodo que posea algún tipo de memoria e implementarlo para al seleccion de padres para procesos como cruzamiento... en verdad para cualquier procedimiento que sea aleatorio, debido a que la 'aleatoridad mata la memoria' Mario dijo eso, asi que mejor será buscar algo bueno1!! 
+	
+	ACTUALIZACION: En este caso, robertito lo hizo de nuevo y no se dio cuenta que habia implementaod una selección de torneo binario, en donde se toman dos soluciones al azar de la población y luego se comparan sus 'ranks', el que tenga menor rank es seleccionado mientras que si tienen igual rank, se selecciona la que tenga la mayor distancia de crowding. 
+
 
 
 - comparar los dos CX mediante el hyperVolume y % de participacion y coverage
 	Objetivo: Comparación de valores de HV y % entre NSGA2-1PCX-MBMA Y NSGA2-CYCX-MBMA
 	Hacer: Hacer el merge de datos entre los valores de las fronteras de los dos conjuntos en las 'x' runs para asi analizar ambos resultados por cada instancia.
+	ACTUALIZACION: Se comparte con la actualizaicon de la priemra tarea, estan de la mano.
 
 
 - esquema poblacion jerarquico? o NSGA2+QPLS hibiridacion **URGENTE
 	Hacer: Se debe justificar que no se hara el esquema jerarquico!!! IMPORTANTE!!
+	- Justificar que para estudios futuro si se puede xD.
+
 
 - Revisar donde y a quienes se aplica LS... (Balance between LS and AG)
 	hacer: Revisar paper de "Balance between local search and genetic search..."
+	ACTUALIZACION: AUN NO SE LEE EL PAPER!!!!!!!
 
 
 - Tener cuidado con las semillas para las random. (revisar al final)
+	REVISADO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 
 
@@ -43,3 +53,13 @@
 - establecer limites dentro de los graficos (Como en el caso de KC10-2fl-1rl.dat)
 	-Esto se debe hacer con la programación de la grafica de la frontera... ver opcion de R? O aprender matplotlib bien... he ahi el dilema...
 	
+
+
+
+- REVISAR LAS soluciones en cuanto a nivel de decision.
+- realizar optimizacion con cada funcion objetivo individual y luego converger ambas juntas. 
+- Analisis por generacion, cada vez que modifique la frontera debo registrar en la generacion.
+- branch and bound en 'r' para comparacion con instancias mas grandes
+- realizar analisis con instancias de 20, junto con mGRASP para confirmar los resultados.
+
+gephy
