@@ -57,9 +57,96 @@
 
 
 - REVISAR LAS soluciones en cuanto a nivel de decision.
-- realizar optimizacion con cada funcion objetivo individual y luego converger ambas juntas. 
+	Revissar como son los vectores solucion de cada frontera
+
+- realizar optimizacion con cada funcion objetivo individual y luego converger ambas juntas. ********
+
 - Analisis por generacion, cada vez que modifique la frontera debo registrar en la generacion.
+
 - branch and bound en 'r' para comparacion con instancias mas grandes
-- realizar analisis con instancias de 20, junto con mGRASP para confirmar los resultados.
+
+- realizar analisis con instancias de 20, junto con mGRASP para confirmar los resultados. Listo
 
 gephy
+
+
+3
+
+- caso estudio, usar distancias de jorge y agregar capitulo a tesis:
+	En esto se debe averiguar bien de que tratan las instancias y que problema se esta atacando desde el área de bioinformatica, el profe dijo
+	que vamos a tener que presentarle a unos weones, y es necesario que se sepa en lo que se está haciendo.
+
+
+- NSGA2, porque seria bueno modificarlos... pq vamos a seleccionar de esta forma... planificar pruebas... 
+	Planificar pruebas, es decir, ok realizaré 100.000 evaluaciones o 'x' generaciones, los parametros de k seran variados...
+	los parametros de SL seran... etc... thinkbatmanthink
+
+- Realizar comparacion en terminos de HV, %, y Cov los algoritmos: NSGA2, NSGA2+QPLS-1, NSGA2+QPLS-2, QPLS.
+	-Esto es primordial, considerando el algoritmo que tengo debo lanzar a correr unas... 15 runs por cada algoritmo y luego que termine
+	analizar los resultados obtenidos en base a las métricas que se manejan por el momento, es decir, hypervolume, % participacion y coverage...
+	EMPEZAR PRONTO!!!!!! 
+
+
+- echar a correr el algoritmo y revisar cuantas evaluaciones hizo para un parámetro del algoritmo...
+- base nsga2 y luego realziar parametrizacion y busquedas locales por si solas.
+	Esto también es primordial, y es facil y debe realizarse antes de la tarea anterior debido a que se debe comparar con el algoritmo genetico
+	en base a la cantidad de evaluacioens que se realizan, no en cuanto a un numero de generacioens en particular. 
+
+
+- analizar caso para ver 
+
+- explicar esquemas de memoria a nivel de LS, y genetico. 
+	Esto se refiere mas que nada a identificar todos los esquemas de memoria que utilizamos en el algoritmo, desde el genético y el algoritmo de ls,
+	ejemplo en el algoritmo de ls se utiliza una memoria para guardar las mejores soluciones (archive) entonces ese tipo de cosas se deben identificar...
+
+
+- algoritmo de claudio
+	Enviar correo a claudio para pedir el algoritmo y así poder realizar comparaciones con dicho algoritmo... enviar correo.
+
+
+- modificar optimizacion en base a una funcion obj, utilizar un greedy, o LS, sobre cada funcion objetivo por separado, obtener 2 valores y en base a 
+estos, generar cx y muy para poblar la nueva población. 
+	Esto se refiere a aplicar alguna búsqueda local individual para cada objetivo del algoritmo y así tener como punto de partida "minimos locales" en 
+	cuanto a cada funcion objetivo corresponde... 
+
+
+- antecedentes y motivación: porque quiero seguir leyendo el tabajo, foco en computacion. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -72,114 +72,88 @@ class NSGA2:
 		self.mutationRate = mutationRate
 		self.crossoverRate = crossoverRate
 		self.directorio = None
-		self.hyperVol = None
+		self.numberOfEvaluations = 0
+		self.completado = False
+			
 
-		
+	def checkNumEvalua(self, maxNE):
+		if self.completado is False:
+			return True
+		else:
+			return False
 
-	def runAlgorithm(self, poblacion, tamPob, generaciones, indCX, start):
+
+	def runAlgorithm(self, poblacion, tamPob, indCX, start, nEvalua):
 		
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 		self.directorio = "results/Results_"+tiempo
 		os.makedirs(self.directorio)
-
 		nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+		self.numberOfEvaluations += tamPob
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
 		filePareto = self.directorio + "/pareto.csv"	
 		counter = 1
 		archiveHyperVolume = []
-		for i in range(1,generaciones+1):
+		#for i in range(1,generaciones+1):
+		while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			print "Generation Number: ", i,
-			print "from a Total of ", generaciones
+			print "Generation Number: ", counter
+			#print "from a Total of ", generaciones
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
+			
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
 
-			#Debugger
-			#print "Largo poblacion:" ,len(poblacion)
-			#print "largo bextPobla: ", len(nextPobla)
-			#print "Largo Combinada:", len(pobCombinada)
-			#for elem in pobCombinada:
-			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank,elem.crowdedDistance
-			
 			print "Fast Non-Dominated Sorting of Combined Population. . . " 
-			#np.asarray(pobCombinada)
+
 			fronteras = self.fastNonDominatedSort(pobCombinada)
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
-			print "Tamaño poblacion: ", len(poblacion)
-			nArchivo.write("Generacion: " + str(i) + "\n")
+
+			
+			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
-				
-
+			
 			if counter != 1:
 				poblacion = self.makeNewPob(poblacion, indCX, tamPob)
-				print len(poblacion)
+				self.numberOfEvaluations += tamPob
+				
 				print "Fast Non-Dominated Sorting of new population. . .  "
-				#fronteras = self.fastNonDominatedSort(poblacion)
+				fronteras = self.fastNonDominatedSort(poblacion)
 				#print "la cantidad de fronteras es: ", len(fronteras)
-				#poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 			
 			print "Local Search is beggining. . . "	
-			#OJO!!!!!! CAMBIAR EL TERCER PARAMETRO DE LA LS...
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, 10)
 			print "Local Search has ended."
-			for elemento in nextPobla:
-				print elemento.solution, elemento.costoFlujo
-			
-			if counter == generaciones:
-				#print "ULTIMA GENERACION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			#for elemento in nextPobla:
+				#print elemento.solution, elemento.costoFlujo
+			if self.numberOfEvaluations >= nEvalua:
+				print "Evaluation limit reached... "
+				print "Number of total fitness evaluation: ", self.numberOfEvaluations
+				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
 				fPareto = open(filePareto, 'w')
-				
 				pobCombi = []
-				#normalizedValues = []
 				pobCombi.extend(poblacion)
 				pobCombi.extend(nextPobla)
-				#print len(poblacion)
-				#print len(nextPobla)
-				front =	self.fastNonDominatedSort(pobCombi)
-				pobCombi = self.ordenPostBusqueda(pobCombi, front, tamPob)
-				#print len(pobCombi)
-				#print tamPob
+				
 				for elemento in pobCombi:
 					if elemento.rank == 1:
 						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
-				#for elem in pobCombi:
-					#pardeFlujos = []
-					#pardeFlujos.append(elem.costoFlujo[0])
-					#pardeFlujos.append(elem.costoFlujo[1])
-					#print elem.costoFlujo	
-					
-					#archiveHyperVolume.append(elem.costoFlujo)
-					
-					#archiveHyperVolume.append(pardeFlujos)
-				#normalizedValues = self.normalizarValores(poblacion, tamPob)	
-				#ref = [1,1]
-				#hv = HyperVolume(ref)
-				#volume = hv.compute(normalizedValues)
-				#print archiveHyperVolume
-					
-					#print elem.costoFlujo[0], elem.costoFlujo[1]
-				#print archiveHyperVolume
-				#print len(archiveHyperVolume)
+				fPareto.close()
+
+				self.completado = True		
 			counter += 1
-			#print "NEXTPOBLA"
-			#for elem in nextPobla:
-			#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1], elem.rank, elem.crowdedDistance
-
-
-			#print "largo resultado LS: ", len(nextPobla)
-			#nextPobla = self.paretoLoc(poblacion, tamPob, cantIteraciones)
+		
 		stopTime = datetime.datetime.now()
 		final = stopTime - startTime
 		nArchivo.seek(0)
 		nArchivo.write("Final time of Execution: " + str(final) + "\n")
-		#nArchivo.write("And the HyperVolume of the Last Frontier obtained is: " + str(volume))
-		fPareto.close()
 		nArchivo.close()
 		print "Algorithm finished in: " , str(final)
 
@@ -212,6 +186,7 @@ class NSGA2:
 		#Para cada solucion de la poblacion cuyo rank sea 1, debo agregarla al archive_aux, que contiene todas las soluciones pero solo 
 		#usa las no repetidas para la LS
 		for solucion in poblacion:
+			#if solucion.rank == 1:
 			archive_aux.append(solucion)
 		#Calculo su crowding de cada individuo y sort por dicho valor		
 		archive_aux = self.crowdingDistanceAssignment(archive_aux)
@@ -249,6 +224,7 @@ class NSGA2:
 			#print "La sol seleccionada es: ",solSeleccionada.solution, solSeleccionada.costoFlujo
 			#Obtengo un vecino dominante
 			vecinosObtenidos = self.buscarDominante(solSeleccionada)
+
 			#print "Los elementos en el vecinos obtenidos son:"
 			#for elemento in vecinosObtenidos[1]:
 			#	print elemento.solution
@@ -303,7 +279,7 @@ class NSGA2:
 				#for elemento in paretoArchive:
 				#	print elemento.solution, elemento.costoFlujo
 				#print "fin elementos archivo actualizado..."
-
+		#print evaluations
 		return paretoArchive
 
 	def obtenerAlphaRandom(self, candidates, numEntrantes):
@@ -416,7 +392,7 @@ class NSGA2:
 		posiciones = []
 		vecino = Solucion(numFac)
 		vecino = self.generate_One_Neighbor(solucion, posiciones)
-		
+		self.numberOfEvaluations +=1
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
 		searchLimit = int(round(tamVecindario*0.95))
@@ -431,6 +407,7 @@ class NSGA2:
 				#print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
 				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
+				self.numberOfEvaluations +=1
 				iterator += 1
 				if iterator >= searchLimit:
 					break
@@ -439,6 +416,7 @@ class NSGA2:
 				posiciones.append(vecino.movimientos)
 				vecino_DomYCandidatos.append(vecino)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
+				self.numberOfEvaluations +=1
 				iterator += 1
 				if iterator >= searchLimit:
 					break

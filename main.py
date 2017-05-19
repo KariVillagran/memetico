@@ -27,8 +27,8 @@ def main():
 	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,50, numFac)
-
+	funciones.crearPoblacion(P,200, numFac)
+	
 	#for elem in P:
 	#	print elem.solution, elem.costoFlujo, elem.rank
 	#print len(P)	
@@ -37,7 +37,7 @@ def main():
 	#for elemento in P:
 	#	elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras,50)
+	P = nsga2.ordenPostBusqueda(P, fronteras,200)
 
 	#print P[0].solution, P[0].costoFlujo
 
@@ -74,10 +74,12 @@ def main():
 	#print "y su vecindario, con alpha = 0.3"
 	#nsga2.generarAlphaVecinos(P[0], 0.6)
 	#Cada parametro es: 
-	#tamanio Pob, GENERACIONES, ALPHA(VECINOS A GENERAR), indiceCX (1=cycleCX, 2=OnepointCX), indiceMUT (3opt)
+	#tamanio Pob, indiceCX (1=cycleCX, 2=OnepointCX), indiceMUT (3opt), numEvaluaciones
 
+
+	numEvalua = 100000
 	
-	nsga2.runAlgorithm(P,50, 50, 1, start)
+	nsga2.runAlgorithm(P,200, 1, start, numEvalua)
 
 	#a = [i for i in range(numFac)]
 
