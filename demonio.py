@@ -7,14 +7,15 @@ prueba = [1012993, 1012997, 1013003, 1013009, 1013029]
 
 #print len(seeds)
 #Ejemplo: instances/KC10-2fl-1rL.dat
-exe = sys.argv[2]
-
+exe = sys.argv[1]
+#print exe
 for i in range(20):
 	print "+++++++++++++++++++"
 
 	print "Running Process:  " +  str(i)
 	print "+++++++++++++++++++"
-	lineaCom = "python main.py" + str(exe) + str(prueba[i]) 
+	lineaCom = "python main.py " + str(exe) + " " + str(prueba[i]) 
+	print lineaCom
 	p = subprocess.Popen(lineaCom, shell=True)
 	p.communicate()
 	time.sleep(5)

@@ -393,7 +393,7 @@ class NSGA2:
 		self.numberOfEvaluations +=1
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
-		searchLimit = int(round(tamVecindario*0.35))
+		searchLimit = int(round(tamVecindario*0.85))
 		vecinosNoDom = []
 		vecino_DomYCandidatos = []
 		#Mientras el vecino NO domine a la solucion: Hay 3 casos... 
