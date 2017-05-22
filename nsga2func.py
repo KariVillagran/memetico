@@ -76,40 +76,36 @@ class NSGA2:
 		self.completado = False
 			
 
-	def checkNumEvalua(self, maxNE):
-		if self.completado is False:
-			return True
-		else:
-			return False
-
-
 	def runAlgorithm(self, poblacion, tamPob, indCX, start, nEvalua):
 		
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 		self.directorio = "results/Results_"+tiempo
 		os.makedirs(self.directorio)
-		nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
-		self.numberOfEvaluations += tamPob
+		#nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+		#self.numberOfEvaluations += tamPob
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
 		filePareto = self.directorio + "/pareto.csv"	
 		counter = 1
-		archiveHyperVolume = []
+		
 		#for i in range(1,generaciones+1):
 		while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			print "Generation Number: ", counter
 			#print "from a Total of ", generaciones
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			
+			print "Evaluaciones hasta el momento: ", self.numberOfEvaluations
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
+			if counter == 1:
+				nextPobla = []
 			
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
 
 			print "Fast Non-Dominated Sorting of Combined Population. . . " 
-
 			fronteras = self.fastNonDominatedSort(pobCombinada)
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
 
@@ -118,16 +114,17 @@ class NSGA2:
 			for j in range(len(poblacion)):
 				nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
 			
-			if counter != 1:
-				poblacion = self.makeNewPob(poblacion, indCX, tamPob)
-				self.numberOfEvaluations += tamPob
+			#if counter != 1:
+			#	poblacion = self.makeNewPob(poblacion, indCX, tamPob)
+			#	self.numberOfEvaluations += tamPob
 				
-				print "Fast Non-Dominated Sorting of new population. . .  "
-				fronteras = self.fastNonDominatedSort(poblacion)
+				#print "Fast Non-Dominated Sorting of new population. . .  "
+				#fronteras = self.fastNonDominatedSort(poblacion)
 				#print "la cantidad de fronteras es: ", len(fronteras)
-				poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+				#poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
 			
 			print "Local Search is beggining. . . "	
+			#del poblacion[:]
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, 10)
 			print "Local Search has ended."
 			#for elemento in nextPobla:
@@ -156,6 +153,7 @@ class NSGA2:
 		nArchivo.write("Final time of Execution: " + str(final) + "\n")
 		nArchivo.close()
 		print "Algorithm finished in: " , str(final)
+		return 1
 
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
@@ -443,8 +441,11 @@ class NSGA2:
 			else:
 				return True
 
-
-
+	def checkNumEvalua(self, maxNE):
+		if self.completado is False:
+			return True
+		else:
+			return False
 
 	def sortRanking(self, poblacion):
 		for i in range(len(poblacion)-1, -1,-1):
@@ -556,6 +557,7 @@ class NSGA2:
 					for chil in childs:
 						chil = self.threExchangeMutation(chil)
 				for chil in childs:
+					chil.costoAsignacion()
 					new_pob.append(chil)
 					if len(new_pob) == tamPob:
 						break
@@ -566,9 +568,6 @@ class NSGA2:
 				if random.random() < self.mutationRate:
 					child = self.threExchangeMutation(child)
 				new_pob.append(child)
-
-		for elem in new_pob:
-			elem.costoAsignacion()
 		return new_pob				
 
 	def fastNonDominatedSort(self, poblacion):

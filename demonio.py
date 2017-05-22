@@ -1,17 +1,20 @@
 import subprocess
 import time
-
+import sys
 
 seeds = [1012993, 1012997, 1013003, 1013009, 1013029, 1013041, 1013053, 1013063, 1013143, 1013153, 1013197, 1013203, 1013227, 1013237,1013239, 1013249,1013263, 1013267,1013279, 1013291,1013321,1013329,1013377,1013399,1013401,1013429,1013431,1013471,1013477,1013501]
 prueba = [1012993, 1012997, 1013003, 1013009, 1013029]
 
-print len(seeds)
-for i in range(2):
+#print len(seeds)
+#Ejemplo: instances/KC10-2fl-1rL.dat
+exe = sys.argv[2]
+
+for i in range(20):
 	print "+++++++++++++++++++"
 
 	print "Running Process:  " + str(i)
 	print "+++++++++++++++++++"
-	lineaCom = "python main.py instances/KC10-2fl-1uni.dat " + str(prueba[i]) 
+	lineaCom = "python main.py" + str(exe) + str(prueba[i]) 
 	p = subprocess.Popen(lineaCom, shell=True)
 	p.communicate()
 	time.sleep(5)
