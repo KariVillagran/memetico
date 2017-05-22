@@ -27,13 +27,13 @@ def main():
 	start = datetime.datetime.now()
 	nsga2 = NSGA2(2, 0.1, 1.0)
 	P = []
-	funciones.crearPoblacion(P,100, numFac)
+	funciones.crearPoblacion(P,200, numFac)
 	
 	
 	for elemento in P:
 		elemento.costoAsignacion()
 	fronteras= nsga2.fastNonDominatedSort(P)
-	P = nsga2.ordenPostBusqueda(P, fronteras,100)
+	P = nsga2.ordenPostBusqueda(P, fronteras,200)
 
 
 

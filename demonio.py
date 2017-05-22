@@ -12,7 +12,7 @@ exe = sys.argv[2]
 for i in range(20):
 	print "+++++++++++++++++++"
 
-	print "Running Process:  " + str(i)
+	print "Running Process:  " +  str(i)
 	print "+++++++++++++++++++"
 	lineaCom = "python main.py" + str(exe) + str(prueba[i]) 
 	p = subprocess.Popen(lineaCom, shell=True)
