@@ -40,6 +40,25 @@ def lectura():
 				arreglo.append(int(num))
 	return arreglo
 
+def readParameters():
+	archivo = sys.argv[2]
+	parameters = open(archivo, 'r')
+	param, allValues, values, result = [], [], [], []
+	for line in parameters:
+		line2 = line.strip('\n')
+		for caract in line2.split("="):
+			allValues.append(caract)
+	for i in range(len(allValues)):
+		if i%2==0:
+			param.append(allValues[i])
+		else:
+			values.append(allValues[i])
+	param.pop()
+	for i in values:
+		newVal = i.replace(' ', '')
+		result.append(newVal)
+	return result
+
 #DISTRIBUCION EN MATRICES DE FLUJO Y DISTANCIA, UTILES	
 def distribuirMatrices(arreglo):
 	numFac = int(arreglo[0])

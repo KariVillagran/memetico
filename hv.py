@@ -65,7 +65,7 @@ class HyperVolume:
         self.preProcess(relevantPoints)
         bounds = [-1.0e308] * dimensions
         hyperVolume = self.hvRecursive(dimensions - 1, len(relevantPoints), bounds)
-        print "El valor de hyperVolumen es: ", hyperVolume
+        #print "El valor de hyperVolumen es: ", hyperVolume
         return hyperVolume
 
 

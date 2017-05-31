@@ -257,3 +257,181 @@ def addAndUpdate(self, solucion, archive):
 		#for value in normValues:
 		#	print value
 		return normValues		
+
+
+
+
+	def generarAlphaVecinos(self, sol, alpha):
+		numFac = sol.numFacilities
+		tamVecindario = (numFac*(numFac-1))/2
+		cantVecinos = tamVecindario*alpha
+		cantVecinos = int(round(cantVecinos))
+		vecindad, posiciones = [], []
+		for i in range(cantVecinos):
+			posAux = []
+			posRandom1 = random.randint(0, numFac-1)
+			posRandom2 = random.randint(0, numFac-1)
+			while posRandom1 == posRandom2:
+				posRandom2 = random.randint(0, numFac-1)
+			posAux.append(posRandom1), posAux.append(posRandom2)
+			while ((posAux in posiciones) or posAux.reverse() in posiciones):
+				posRandom1 = random.randint(0, numFac-1)
+				posRandom2 = random.randint(0, numFac-1)
+				while posRandom1 == posRandom2:
+					posRandom2 = random.randint(0, numFac-1)
+				posAux.append(posRandom1), posAux.append(posRandom2)
+			posiciones.append(posAux)
+			vecino = Solucion(numFac)
+			vecino = self.swap(sol, posRandom1, posRandom2, numFac)
+			costos = sol.costoAsignacionMovida(posRandom1, posRandom2)
+			vecino.costoFlujo[0] = sol.costoFlujo[0] - costos[0]
+			vecino.costoFlujo[1] = sol.costoFlujo[1] - costos[1]
+			vecindad.append(vecino)
+
+		#print len(vecindad)	
+		#for elem in vecindad:
+		#	print elem.solution, elem.costoFlujo[0], elem.costoFlujo[1]
+		return vecindad	
+
+	def generoVecinos(self, sol, numFac):
+		vecindad, soluciones = [], []
+		for i in range(numFac):
+			for j in range(numFac):
+				if i != j:
+					vecino = Solucion(numFac)
+					vecino = self.swap(sol, i, j, numFac)
+					if vecino.solution not in soluciones:
+						soluciones.append(vecino.solution)
+						costos = sol.costoAsignacionMovida(i,j)
+						vecino.costoFlujo[0] = sol.costoFlujo[0] - costos[0]
+						vecino.costoFlujo[1] = sol.costoFlujo[1] - costos[1]
+						vecindad.append(vecino)
+						#print vecino.solution
+		del soluciones[:]
+		#print len(vecindad)
+		return vecindad
+
+
+	def binaryTournament(self,poblacion):
+		participantes = random.sample(poblacion, 2)
+		best = None
+		for solParticipante in participantes:
+			if (best is None) or self.crowdedComparisonOperator(solParticipante, best) == 1:
+				best = solParticipante
+		return best
+
+	def sequentialConstructiveCrossover(self, sol, other):
+		numFac = sol.numFacilities
+		child = Solucion(numFac)
+		soluciones = []
+		soluciones.append(sol), soluciones.append(other)
+		#print soluciones[0].solution, soluciones[1].solution
+		sol.costoAsignacion(), other.costoAsignacion()
+		#print "Costos iniciales de sol : ", sol.costoFlujo[0], sol.costoFlujo[1]
+		#print "Costos iniciales de other: ", other.costoFlujo[0], other.costoFlujo[1]
+		aux = random.choice(soluciones)
+		locationP = aux.solution[0]
+		#print aux.solution
+		
+		child.solution.insert(0, locationP)
+		childAux1 = Solucion(numFac)
+		childAux2 = Solucion(numFac)
+
+		while len(child.solution) != len(sol.solution):
+
+			nextElem = self.findNextLoc(soluciones[0], child, locationP, numFac)
+			nextElem2 = self.findNextLoc(soluciones[1], child, locationP, numFac)
+
+			childAux1.solution = child.solution[:]
+			childAux2.solution = child.solution[:]
+
+
+			childAux1.solution.append(nextElem)
+			childAux2.solution.append(nextElem2)
+
+			#print childAux1.solution, childAux2.solution
+			childAux1.costoAsignacionParcial(nextElem)
+			childAux2.costoAsignacionParcial(nextElem2)
+
+			if funciones.dominance(childAux1, childAux2):
+				
+				child.solution = childAux2.solution[:]
+				locationP = nextElem2
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+			elif funciones.dominance(childAux2, childAux1):
+				child.solution = childAux1.solution[:]
+				locationP = nextElem
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+			else:
+				child.solution = childAux1.solution[:]
+				locationP = nextElem
+				del childAux1.solution[:]
+				del childAux2.solution[:]
+
+		child.costoAsignacion()		
+		return child
+
+	def findNextLoc(self, sol, child, locationP, numFac):
+		index = sol.solution.index(locationP)
+		#print "indice de location P: ", index
+		for x in range(index+1, index+len(sol.solution)):
+			elemento = sol.solution[x%numFac]
+			if elemento in child.solution:
+				continue
+			else:
+				return elemento
+
+
+	def createNewPob(self, poblacion, indiceCX, indiceMut):
+	
+		print "Creating a new Population. . . "
+		numFac = poblacion[0].numFacilities
+		new_pob, rankedPop, restPop = [], [], []
+		for elemento in poblacion:
+			if elemento.rank == 1:
+				rankedPop.append(elemento)
+				new_pob.append(elemento)
+			else:
+				restPop.append(elemento)
+		#AQUI SETEO EL % DE RANDOM
+		indiceRand = 0.2
+		indiceCruz = 1 - indiceRand
+		largoRestante = len(poblacion)-len(new_pob)
+		cantidadCX = int(round(largoRestante * indiceCruz))
+		cantidadRand = int(round(largoRestante*indiceRand))
+		for i in range(1, cantidadCX+1):
+			child = Solucion(numFac)
+			solSeleccionadas = [None, None]
+			for i in range(2):
+				sol1 = random.choice(rankedPop)
+				sol2 = random.choice(restPop)
+				if crowdedComparisonOperator(sol1, sol2) > 0:
+					solSeleccionadas[i] = sol1
+				else: 
+					solSeleccionadas[i] = sol2
+			if indiceCX == 1:
+				if random.random() < self.crossoverRate:
+					child = self.sequentialConstructiveCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			elif indiceCX == 2:
+				if random.random() < self.crossoverRate:
+					child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
+			if indiceMut == 1:
+				if random.random() < self.mutationRate:
+					child = self.twOptSearch(child)
+			elif indiceMut == 2:
+				if random.random() < self.mutationRate:
+					child = self.threExchangeMutation(child)
+			new_pob.append(child)
+		for i in range(1, cantidadRand+1):
+			randomChild = Solucion(numFac)
+			randomChild = funciones.generarSolucionRandom(randomChild, numFac)
+			randomChild.costoAsignacion()
+			new_pob.append(randomChild)
+		del rankedPop[:]
+		del restPop[:]
+
+		return new_pob
