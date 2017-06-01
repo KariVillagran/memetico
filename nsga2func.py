@@ -78,18 +78,179 @@ class NSGA2:
 
 	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
 		
+		
+	
+		if algorithm == "MEMETIC":
+			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua)
+
+		elif algorithm == "NSGA2":
+			self.runNSGA2(poblacion, tamPob, indCX, start, nEvalua)
+
+		elif algorithm == "QPLS":
+			self.runQPLS(poblacion, tamPob, k, limitSearch, start, nEvalua)
+
+		elif algorithm == "GQPLS":
+			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua)
+
+		else:
+			print "Can't execute algorithm,", algorithm ,"check the 'parameters.dat' file"
+			print "The Algorithms are: NSGA2, QPLS, GQPLS or MEMETIC"
+		return 1
+
+
+	def runNSGA2(self,poblacion, tamPob, indCX, start, nEvalua):
+		print "Initializing Non Sorting Genetic Algorithm 2. . .  "
+		counter = 1
+		startTime = start
+		tiempo = funciones.convertTime(startTime)
+		self.directorio = "results/Results_" + tiempo
+		os.makedirs(self.directorio)
+		nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+		self.numberOfEvaluations += tamPob
+		
+		nombreArchivo = self.directorio + "/generaciones.csv"
+		nArchivo = open(nombreArchivo, 'w' )	
+		filePareto = self.directorio + "/pareto.csv"
+		pareto = open(filePareto, 'w')
+
+		#t_max = time.time() + 60 * 15 (correra por 15 minutos.)
+		#while time.time() < t_max:
+		#for i in range(1,generaciones+1):
+		while self.checkNumEvalua(nEvalua):
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			print "Generation Number: ", counter
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			
+			pobCombinada = []
+			print "Extending Populations into Combined Population. . ."
+			pobCombinada.extend(poblacion)
+			pobCombinada.extend(nextPobla)
+
+			print "Fast Non-Dominated Sorting of Combined Population"
+			fronteras = self.fastNonDominatedSort(pobCombinada)
+			poblacion = self.ordenPostBusqueda( poblacion,fronteras, tamPob)
+
+
+			nArchivo.write("Generacion: " + str(counter) + "\n")
+			for j in range(len(poblacion)):
+				if poblacion[j].rank == 1:
+					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) +  "," + str(poblacion[j].crowdedDistance) + 	"\n")
+
+			if counter != 1:
+				nextPobla = self.makeNewPob(poblacion, tamPob, indCX)
+				self.numberOfEvaluations += tamPob
+			
+			if self.numberOfEvaluations >= nEvalua:
+				print "Evaluation limit reached... "
+				print "Number of total fitness evaluation: ", self.numberOfEvaluations
+				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
+				fPareto = open(filePareto, 'w')
+				pobCombi = []
+				pobCombi.extend(poblacion)
+				pobCombi.extend(nextPobla)
+				
+				for elemento in pobCombi:
+					if elemento.rank == 1:
+						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
+				fPareto.close()
+				self.completado = True			
+			counter += 1	
+		stopTime = datetime.datetime.now()
+		final = stopTime - startTime
+		nArchivo.seek(0)
+		nArchivo.write("Final time of Execution: " + str(final) + "\n")
+		nArchivo.close()
+		pareto.close()
+		print "Genetic Algorithm Finished in: ", str(final)	
+		return 1
+			
+	def runGeneticQPLS(self,poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+		print "Initializing Genetic Pareto Local Search. . . ."
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 		self.directorio = "results/Results_"+tiempo
 		os.makedirs(self.directorio)
-		
 		#nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
 		#self.numberOfEvaluations += tamPob
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
 		filePareto = self.directorio + "/pareto.csv"	
-		
 		counter = 1
+		
+		#for i in range(1,generaciones+1):
+		while self.checkNumEvalua(nEvalua):
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			print "Generation Number: ", counter
+			#print "from a Total of ", generaciones
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			
+			print "Evaluaciones hasta el momento: ", self.numberOfEvaluations
+			pobCombinada = []
+			print "Extending Populations into Combined Population. . ."
+			if counter == 1:
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+			
+			pobCombinada.extend(poblacion)
+			pobCombinada.extend(nextPobla)
+
+			print "Fast Non-Dominated Sorting of Combined Population. . . " 
+			fronteras = self.fastNonDominatedSort(pobCombinada)
+			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
+
+			
+			nArchivo.write("Generacion: " + str(counter) + "\n")
+			for j in range(len(poblacion)):
+				if poblacion[j].rank == 1:
+					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
+			
+			if counter != 1:
+				
+				print "Local Search is beggining. . . "	
+				poblacion = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				print "Local Search has ended."
+				nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+			
+			if self.numberOfEvaluations >= nEvalua:
+				print "Evaluation limit reached... "
+				print "Number of total fitness evaluation: ", self.numberOfEvaluations
+				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
+				fPareto = open(filePareto, 'w')
+				pobCombi = []
+				pobCombi.extend(poblacion)
+				pobCombi.extend(nextPobla)
+				
+				for elemento in pobCombi:
+					if elemento.rank == 1:
+						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
+				fPareto.close()
+
+				self.completado = True		
+			counter += 1
+		
+		stopTime = datetime.datetime.now()
+		final = stopTime - startTime
+		nArchivo.seek(0)
+		nArchivo.write("Final time of Execution: " + str(final) + "\n")
+		nArchivo.close()
+		print "Algorithm finished in: " , str(final)
+		return 1
+
+
+
+	def runQPLS(self, poblacion, tamPob,k, limitSearch, start, nEvalua):
+		startTime = start
+		tiempo = funciones.convertTime(startTime)
+		self.directorio = "results/Results_"+tiempo
+		os.makedirs(self.directorio)
+		#nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+		#self.numberOfEvaluations += tamPob
+		nombreArchivo = self.directorio + "/generaciones.csv"
+		nArchivo = open(nombreArchivo, 'w' )
+		filePareto = self.directorio + "/pareto.csv"	
+		counter = 1
+		
 		#for i in range(1,generaciones+1):
 		while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -113,24 +274,11 @@ class NSGA2:
 			
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
-				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
-			
-			#if counter != 1:
-			#	poblacion = self.makeNewPob(poblacion, indCX, tamPob)
-			#	self.numberOfEvaluations += tamPob
-				
-				#print "Fast Non-Dominated Sorting of new population. . .  "
-				#fronteras = self.fastNonDominatedSort(poblacion)
-				#print "la cantidad de fronteras es: ", len(fronteras)
-				#poblacion = self.ordenPostBusqueda(poblacion, fronteras, tamPob)
+				nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
 			
 			print "Local Search is beggining. . . "	
-			#del poblacion[:]
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
 			print "Local Search has ended."
-			#for elemento in nextPobla:
-				#print elemento.solution, elemento.costoFlujo
 			if self.numberOfEvaluations >= nEvalua:
 				print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
@@ -143,9 +291,6 @@ class NSGA2:
 				
 				for elemento in pobCombi:
 					if elemento.rank == 1:
-						#nArchivo.write(""+ str(elemento.solution) + ", " + str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + "\n")
-						#nArchivo.write("" + str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + "\n")
-
 						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
 				fPareto.close()
 
@@ -160,18 +305,80 @@ class NSGA2:
 		print "Algorithm finished in: " , str(final)
 		return 1
 
+	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+		print "Running Memetic Algorithm. . . . . . . . . . . . "
+		
+		startTime = start
+		tiempo = funciones.convertTime(startTime)
 
-	def runNSGA2(self):
-		raise "asd"
+		self.directorio = "results/Results_"+tiempo
+		os.makedirs(self.directorio)
+		nombreArchivo = self.directorio + "/generaciones.csv"
+		
+		nArchivo = open(nombreArchivo, 'w' )
+		filePareto = self.directorio + "/pareto.csv"
+		counter = 1
+		nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+		self.numberOfEvaluations += tamPob
+		#for i in range(1,generaciones+1):
+		while self.checkNumEvalua(nEvalua):
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			print "Generation Number: ", counter
+			#print "from a Total of ", generaciones
+			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			
+			print "Number of Evaluations done:  ", self.numberOfEvaluations
+			pobCombinada = []
+			print "Extending Populations into Combined Population. . ."
+					
+			pobCombinada.extend(poblacion)
+			pobCombinada.extend(nextPobla)
 
-	def runQPLS(self):
-		raise "sds"
+			print "Fast Non-Dominated Sorting of Combined Population. . . " 
+			fronteras = self.fastNonDominatedSort(pobCombinada)
+			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
 
-	def runMemetic(self):
-		raise "nope"
+			
+			nArchivo.write("Generacion: " + str(counter) + "\n")
+			for j in range(len(poblacion)):
+				if poblacion[j].rank == 1:
+					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
+			
+			if counter != 1:
+				poblacion = self.makeNewPob(poblacion, indCX, tamPob)
+				self.numberOfEvaluations += tamPob
+	
+				print "Local Search is beggining. . . "	
+				#del poblacion[:]
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				print "Local Search has ended."
+			
+			if self.numberOfEvaluations >= nEvalua:
+				print "Evaluation limit reached... "
+				print "Number of total fitness evaluation: ", self.numberOfEvaluations
+				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
+				fPareto = open(filePareto, 'w')
+				pobCombi = []
+				pobCombi.extend(poblacion)
+				pobCombi.extend(nextPobla)
 
-	def runGeneticQPLS(self):
-		raise "notyet"
+				print "Fast non dominated sorting of Last Population. . ."
+				fronteras = self.fastNonDominatedSort(pobCombi)
+				pobCombi = self.ordenPostBusqueda(pobCombi, fronteras, tamPob)
+				
+				for elemento in pobCombi:
+					if elemento.rank == 1:
+						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
+				fPareto.close()
+				self.completado = True		
+			counter += 1
+		stopTime = datetime.datetime.now()
+		final = stopTime - startTime
+		nArchivo.seek(0)
+		nArchivo.write("Final time of Execution: " + str(final) + "\n")
+		nArchivo.close()
+		print "Algorithm finished in: " , str(final)
 
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
@@ -506,7 +713,7 @@ class NSGA2:
 	def makeNewPob(self, poblacion, indiceCX, tamPob):
 		print "Creating a new Population. . ."
 		new_pob = []
-		#childs = []
+		childs = []
 		while len(new_pob) != tamPob:
 			#print "new_pob vs tamPOb:", len(new_pob), tamPob
 			#child = Solucion(poblacion[0].numFacilities)

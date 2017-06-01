@@ -21,6 +21,20 @@ matrixFlujoDos = []
 # 4.- DECIDIR UNA ESTRATEGIA DE MANEJO DEL ARCHIVO
 # 5.- DECIRIDE UN CRITERIO TERMINO
 
+class Parametros:
+	def __init__(self, data):
+		self.algorithm = data[0]
+		self.cxOp = int(data[1])
+		self.mutOp = data[2]
+		self.cxRate = float(data[3])
+		self.mutRate = float(data[4])
+		self.tamPob = int(data[5])
+		self.finishStrat = data[6]
+		self.finishLimit = int(data[7])
+		self.k = int(data[8])
+		self.limitSearch = float(data[9])
+		self.init = data[10]
+
 
 
 def lectura():
