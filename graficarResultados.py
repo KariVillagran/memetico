@@ -12,7 +12,7 @@ def lectura():
 	listaSolC1 = []
 	listaSolC2 = []
 	for line in resultados:
-		if generacionCorrecta in line:
+		if generacionCorrecta	 in line:
 			#print "ENCONTRADA!"
 			for new_line in resultados:
 				linea = new_line.strip().split(",")

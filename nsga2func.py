@@ -431,12 +431,8 @@ class NSGA2:
 		#for elemento in archive:
 		#	print elemento.solution, elemento.costoFlujo[0], elemento.costoFlujo[1], elemento.rank, elemento.crowdedDistance 
 		
-		#Setear tamanio archive... como justificar tamaño seleccionado. 
-		#SOlo para probar se utiliza que el tamano del archive sea como maximo el 10% del tamPob . Ej: Tam pob: 100 --> tam Archive = 10
-		# ACA DEFINO TAMANIO DEL ARCHIVE, PERO POR AHORA NO LO USO. SE VA A CODIGO VIEJO
-
 		#Tengo el archive listo, falta un t.
-		t = 0
+		#t = 0
 		#Mientras no haya visitado todas las soluciones del archive...
 		while self.contadorVisitados(archive):
 			#Selecciono una solucion no visitada
