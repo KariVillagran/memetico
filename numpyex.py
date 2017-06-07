@@ -5,7 +5,7 @@ import numpy as np
 import os
 from hv import HyperVolume
 import matplotlib.pyplot as plt
-
+import datetime
 
 #Creo matriz con 15 elementos, distribuidos en dimensiones (3,5), es decir, 3 arreglos de tamaño 5 cada uno
 a = np.arange(15).reshape(3,5)
@@ -46,7 +46,7 @@ def resultsNSGA2(carpeta):
 	print dirs
 	theResults = []
 	#delete
-	allValuesF1, allValuesF2 = [], []
+	#allValuesF1, allValuesF2 = [], []
 	for i in range(len(dirs)):
 		counter = 1
 		strs = "Generacion: "
@@ -67,10 +67,10 @@ def resultsNSGA2(carpeta):
 				aux.append(val2)
 				listLine.append(aux)
 				#delete
-				if val1 not in allValuesF1:
-					allValuesF1.append(val1)
-				if val2 not in allValuesF2:
-					allValuesF2.append(val2)
+				#if val1 not in allValuesF1:
+				#	allValuesF1.append(val1)
+				#if val2 not in allValuesF2:
+				#	allValuesF2.append(val2)
 				#delete
 			#print osf
 			if strs in line:
@@ -89,10 +89,10 @@ def resultsNSGA2(carpeta):
 						aux.append(val2)
 						if aux not in listLine:
 							listLine.append(aux)
-						if val1 not in allValuesF1:
-							allValuesF1.append(val1)
-						if val2 not in allValuesF2:
-							allValuesF2.append(val2)
+						#if val1 not in allValuesF1:
+						#	allValuesF1.append(val1)
+						#if val2 not in allValuesF2:
+						#	allValuesF2.append(val2)
 				counter += 1
 			allLines.append(listLine)
 			#for lines in listLine:
@@ -103,28 +103,28 @@ def resultsNSGA2(carpeta):
 		theResults.append(allLines)
 		print len(theResults)
 		#h = input(" . . .")
-	allValuesF1.sort()
-	allValuesF2.sort()
+	#allValuesF1.sort()
+	#allValuesF2.sort()
 	maxMin, ref1, ref2 = [], [], []
-	minObj1 = allValuesF1[0]
-	maxObj1 = allValuesF1[len(allValuesF1)-1]
-	#minObj1 = 719589618.0
-	#maxObj1 = 1052456717.0
-	ref1.append(minObj1), ref1.append(maxObj1)
-	minObj2 = allValuesF2[0]
-	maxObj2 = allValuesF1[len(allValuesF2)-1]
+	#minObj1 = allValuesF1[0]
+	#maxObj1 = allValuesF1[len(allValuesF1)-1]
+	
+	#ref1.append(minObj1), ref1.append(maxObj1)
+	#minObj2 = allValuesF2[0]
+	#maxObj2 = allValuesF1[len(allValuesF2)-1]
 	#minObj2 = 642493898.0
 	#maxObj2 = 1052456716.0
-	ref2.append(minObj2), ref2.append(maxObj2)
-	maxMin.append(ref1)
-	maxMin.append(ref2)
+	#ref2.append(minObj2), ref2.append(maxObj2)
+	#maxMin.append(ref1)
+	#maxMin.append(ref2)
 
-	results = []
-	results.append(theResults)
-	results.append(maxMin)
-	print maxMin
-	print len(theResults)
-	return results
+	#results = []
+	#results.append(theResults)
+	#results.append(maxMin)
+	#print maxMin
+	return theResults
+	#print len(theResults)
+	#return results
 	#print len(allValues)
 
 def computeHyperVolume(maxMinValues, fronteras, generacion):
@@ -285,14 +285,17 @@ def getPareto(values, instance):
 				#o = input(". . .. ")
 
 
-def plot(results):
-	xAxis = results[0]
-	yAxis = results[1]
-	pl = plt.plot(xAxis, yAxis)
+def plot(results1, results2):
+	xAxis_1 = results1[0]
+	yAxis_1 = results1[1]
+	xAxis_2 = results2[0]
+	yAxis_2 = results2[1]
+	pl = plt.plot(xAxis_1, yAxis_1, '-bo', label = "Gen2")
+	pl2 = plt.plot(xAxis_2, yAxis_2, '-go', label ="Gen3")
 	plt.xlabel('Generaciones')
 	plt.ylabel('HyperVolumen')
-	plt.title('Variacion del HyperVolumen por cada 10 generaciones')
-	
+	plt.title('Variacion del HyperVolumen por cada generacion')
+	plt.legend(loc = 'upper right')
 	plt.show()
 
 
@@ -302,36 +305,63 @@ if __name__ == "__main__":
 	print cwd
 
 	#result = "/Resultados"
-	gen3 = "/NSGA2/resultsGen3"
+	
+	start = datetime.datetime.now()
 	gen2 = '/NSGA2/resultsGen2'
 	
-	dirs = cwd + gen3
-	#res = resultsNSGA2(dirs)
-	#values = res[0]
-	#maxMins = res[1]
-
 	dors = cwd + gen2
-	ros = resultsNSGA2(dors)
-
-	values = ros[0]
-	maxMins = ros[1]
+	values = resultsNSGA2(dors)
 
 	#getPareto(values, 11)
+	#Max min de los gen2
+	minObj1_g2 = 62171264.0
+	maxObj1_g2 = 140629788.0
+	minObj2_g2 = 29521532.0
+	maxObj2_g2 = 140629788.0
+	#[[62171264.0, 140629788.0], [29521532.0, 140629788.0]]
+	maxMins, aux1, aux2 = [], [], []
+	aux1.append(minObj1_g2), aux1.append(maxObj1_g2)
+	aux2.append(minObj2_g2), aux2.append(maxObj2_g2)
+	maxMins.append(aux1), maxMins.append(aux2)
 	
-	#res = computeHyperVolumeIns(maxMins, values, 11)
+	results1 = computeHyperVolumeIns(maxMins, values, 10)
+
+	gen3 = "/NSGA2/resultsGen3"
+
+	directory = cwd + gen3
+	valuesGen3 = resultsNSGA2(directory)
+
+	#getPareto(valuesGen3, 10)
+	#plot(valuesGen3)
+	#max min de lso gen3
+	minObj1_g3 = 719589618.0
+	maxObj1_g3 = 1052456717.0
+	minObj2_g3 = 642493898.0
+	maxObj2_g3 = 1052456716.0
+	maxiMins, ayud1, ayud2 = [], [], []
+	ayud1.append(minObj1_g3), ayud1.append(maxObj1_g3)
+	ayud2.append(minObj2_g3), ayud2.append(maxObj2_g3)
+	maxiMins.append(ayud1), maxiMins.append(ayud2)
+
+	results2 = computeHyperVolumeIns(maxiMins, valuesGen3, 11)
+
+	finish = datetime.datetime.now()
+	total = finish - start
+	print "execution time: ", total
+	plot(results1, results2)
+
+	#valores = computeHyperVolume(maxMins, values, 25999)
+	#for i, val in enumerate(valores):
+	#	print val, i
 	
-	#plot(res)
 
-
-
-	valores = computeHyperVolume(maxMins, values, 25999)
-	for i, val in enumerate(valores):
-		print val, i
+	#sbatch --array=0-9 punto.sh
 	
-	valores.sort()
-	print "sorted"
-	for i, val in enumerate(valores):
-		print val, i
-	median = np.median(np.array(valores))
-	print "LA MEDIANA ES. . .", median
+	#valores.sort()
+	#print "sorted"
+	#for i, val in enumerate(valores):
+	#	print val, i
+	#median = np.median(np.array(valores))
+	#print "LA MEDIANA ES. . .", median
 	#Selected = 11. 
+	#Selected2 = 10

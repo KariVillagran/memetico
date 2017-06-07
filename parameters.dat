@@ -1,11 +1,11 @@
-algorithm = MEMETIC
+algorithm = NSGA2
 cxOperator = 1
 mutOperator = 3opt
-cxRate = 0.95
+cxRate = 0.9
 mutRate = 0.01
 tamPoblacion = 200
-finishStrategy = EVAL
-finishLimit = 30000
+finishStrategy = GEN
+finishLimit = 75
 k = 10
 limitSearch = 0.5
 initialization = True

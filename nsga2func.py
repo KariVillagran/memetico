@@ -112,11 +112,11 @@ class NSGA2:
 		nArchivo = open(nombreArchivo, 'w' )	
 		filePareto = self.directorio + "/pareto.csv"
 		pareto = open(filePareto, 'w')
-
+		generaciones = nEvalua
 		#t_max = time.time() + 60 * 15 (correra por 15 minutos.)
 		#while time.time() < t_max:
-		#for i in range(1,generaciones+1):
-		while self.checkNumEvalua(nEvalua):
+		for i in range(1,generaciones+1):
+		#while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			print "Generation Number: ", counter
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -134,13 +134,15 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) +  "," + str(poblacion[j].crowdedDistance) + 	"\n")
+					nArchivo.write(""+ str(poblacion[j].solution) + "\n")
 
 			if counter != 1:
-				nextPobla = self.makeNewPob(poblacion, tamPob, indCX)
+				#print len(poblacion)
+				nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
 				self.numberOfEvaluations += tamPob
 			
-			if self.numberOfEvaluations >= nEvalua:
+			#if self.numberOfEvaluations >= nEvalua:
+			if counter ==  nEvalua: 
 				print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
 				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -202,7 +204,7 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
+					nArchivo.write(""+ str(poblacion[j].solution)+"\n")
 			
 			if counter != 1:
 				
@@ -274,7 +276,7 @@ class NSGA2:
 			
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
-				nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
+				nArchivo.write(""+ str(poblacion[j].solution) + "\n")
 			
 			print "Local Search is beggining. . . "	
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
@@ -342,7 +344,7 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].rank) + ", " +  str(poblacion[j].crowdedDistance) +"\n")
+					nArchivo.write(""+ str(poblacion[j].solution) +"\n")
 			
 			if counter != 1:
 				poblacion = self.makeNewPob(poblacion, indCX, tamPob)
@@ -722,23 +724,26 @@ class NSGA2:
 				else:
 					solSeleccionadas[i] = sol2
 			if indiceCX == 1:
+				childs = []
 				if random.random() < self.crossoverRate:
 					childs = self.cycleCrossover(solSeleccionadas[0], solSeleccionadas[1])
 				if random.random() < self.mutationRate:
 					for chil in childs:
 						chil = self.threExchangeMutation(chil)
-				for chil in childs:
-					chil.costoAsignacion()
-					new_pob.append(chil)
-					if len(new_pob) == tamPob:
-						break
+				if len(childs) != 0:
+					for chil in childs:
+						chil.costoAsignacion()
+						new_pob.append(chil)
+						if len(new_pob) == tamPob:
+							break
 			elif indiceCX == 2:
 				child = Solucion(poblacion[0].numFacilities)
 				if random.random() < self.crossoverRate:
 					child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
 				if random.random() < self.mutationRate:
 					child = self.threExchangeMutation(child)
-				new_pob.append(child)
+				if len(child.solution) != 0:
+					new_pob.append(child)
 		return new_pob				
 
 	def fastNonDominatedSort(self, poblacion):
