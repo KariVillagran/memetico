@@ -77,21 +77,21 @@ class NSGA2:
 		self.completado = False
 			
 
-	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen):
+	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
 		
 		
 	
 		if algorithm == "MEMETIC":
-			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen)
+			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen)
 
 		elif algorithm == "NSGA2":
 			self.runNSGA2(poblacion, tamPob, indCX, start, nEvalua)
 
 		elif algorithm == "QPLS":
-			self.runQPLS(poblacion, tamPob, k, limitSearch, start, nEvalua)
+			self.runQPLS(poblacion, tamPob, k, limitSearch, start, nEvalua, -1)
 
 		elif algorithm == "GQPLS":
-			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua)
+			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, -1)
 
 		else:
 			print "Can't execute algorithm,", algorithm ,"check the 'parameters.dat' file"
@@ -245,7 +245,7 @@ class NSGA2:
 
 
 
-	def runQPLS(self, poblacion, tamPob,k, limitSearch, start, nEvalua):
+	def runQPLS(self, poblacion, tamPob,k, limitSearch, start, nEvalua, maxEvalGen):
 		self.numberOfEvaluations = 0
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
@@ -284,7 +284,7 @@ class NSGA2:
 				nArchivo.write(""+ str(poblacion[j].solution) + "\n")
 			
 			print "Local Search is beggining. . . "	
-			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 			print "Local Search has ended."
 			if self.numberOfEvaluations >= nEvalua:
 				print "Evaluation limit reached... "
@@ -312,7 +312,7 @@ class NSGA2:
 		print "Algorithm finished in: " , str(final)
 		return 1
 
-	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen):
+	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
 		print "Running Memetic Algorithm. . . . . . . . . . . . "
 		
 		self.numberOfEvaluations = 0
@@ -359,7 +359,7 @@ class NSGA2:
 	
 				print "Local Search is beggining. . . "	
 				#del poblacion[:]
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, gen)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 				print "Local Search has ended."
 			
 			#if self.numberOfEvaluations >= nEvalua:
@@ -452,7 +452,7 @@ class NSGA2:
 			#print elemento.solution, elemento.rank
 		return poblacion
 
-	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit, gen):
+	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit, maxEvalGen):
 		self.numberOfEvalPerGen = 0
 		#Defino variables para almacenar soluciones
 		archive ,archive_aux ,LS_archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], [], [], []
@@ -557,8 +557,9 @@ class NSGA2:
 				#print "fin elementos archivo actualizado..."
 			#print "number: ", self.numberOfEvalPerGen
 			#o = input(". . . .")
-			if self.numberOfEvalPerGen >= gen:
-				break
+			if maxEvalGen != -1:
+				if self.numberOfEvalPerGen >= maxEvalGen:
+					break
 		#print evaluations
 		return paretoArchive
 
