@@ -31,12 +31,17 @@ def main():
 
 	P = []
 	funciones.crearPoblacion(P, params.tamPob, numFac)
+
 	#print "Trabajo escrito de tesis"
-
+	
 	#Runnning Algorithm
-	nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit)
-
-	#a = [i for i in range(numFac)]
+	if params.init == "True":
+		initPobla = nsga2.initAlgorithm(P, params.tamPob)
+		nsga2.runAlgorithm(params.algorithm, initPobla, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit)	
+	else:
+		nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit)
+	
+#a = [i for i in range(numFac)]
 if __name__ == '__main__':
 	main()
 

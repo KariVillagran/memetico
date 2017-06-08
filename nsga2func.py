@@ -142,7 +142,8 @@ class NSGA2:
 				self.numberOfEvaluations += tamPob
 			
 			#if self.numberOfEvaluations >= nEvalua:
-			if counter ==  nEvalua: 
+			if counter ==  nEvalua:
+				print "ULTIMA GENERACION....."
 				print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
 				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -382,6 +383,52 @@ class NSGA2:
 		nArchivo.close()
 		print "Algorithm finished in: " , str(final)
 
+
+	def initAlgorithm(self, poblacion, tamPob):
+		#inTime = datetime.datetime.now()
+		nextPobla = self.memoryBasedPLS(poblacion, tamPob, 25, 0.98)
+		fronteras = self.fastNonDominatedSort(nextPobla)
+		nextPobla = self.ordenPostBusqueda(nextPobla, fronteras, tamPob)
+		itPoblacion = []
+		for i in range(2):
+			nextPobla = self.sortCostoAssignacion(nextPobla, i)
+			itPoblacion.append(nextPobla[0]),itPoblacion.append(nextPobla[1])
+		new_pob = self.constructNewPob(itPoblacion, tamPob)
+		fronteras = self.fastNonDominatedSort(new_pob)
+		new_pob = self.ordenPostBusqueda(new_pob, fronteras, tamPob)
+		stopTime = datetime.datetime.now()
+		#final = stopTime - inTime
+		#print "Se demoro: ", final
+		return new_pob
+
+	def constructNewPob(self, poblacion, tamPob):
+		print "Constructing a new Population. . ."
+		counter = 1
+		while len(poblacion) != tamPob:
+			solSeleccionadas = [None, None]
+			for i in range(2):
+				sol1 = random.choice(poblacion)
+				sol2 = random.choice(poblacion)
+				if self.crowdedComparisonOperator(sol1, sol2) > 0:
+					solSeleccionadas[i] = sol1
+				else:
+					solSeleccionadas[i] = sol2
+			if counter%2==0:
+				childs = []
+				childs = self.cycleCrossover(solSeleccionadas[0], solSeleccionadas[1])
+				if len(childs) != 0:
+					for chil in childs:
+						chil.costoAsignacion()
+						poblacion.append(chil)
+						if len(poblacion) == tamPob:
+							break
+			elif counter%2!=0:
+				child = Solucion(poblacion[0].numFacilities)
+				child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
+				if len(child.solution) != 0:
+					poblacion.append(child)
+			counter += 1		
+		return poblacion		
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
 		

@@ -1,4 +1,4 @@
-%matplotlib inline
+#%matplotlib inline
 
 from PyGMO import *
 from PyGMO.problem import base
@@ -8,6 +8,8 @@ from math import sqrt
 
 import matplotlib.pyplot as plt 
 import numpy as np
+import os
+import csv
 
 class multi_qap (base):
 
@@ -60,10 +62,73 @@ class mo_problem(base):
 	def human_readble_extra(self):
 		return "\n\t Multi-objective problem"
 
-prob = problem.zdt(1)
-pop = population(prob, 100)
-pop.compute_pareto_fronts()
-pop.plot_pareto_fronts()
+
+def obtainResults(carpetas, dirs):
+	print dirs
+	#print carpetas
+	#carpetas.sort()
+	allTimes = []
+	#Este for va desde 0 hasta el largo de carpetas, que en este caso es 25. 
+	for i in range(len(carpetas)):
+		#print carpetas[i]
+		metodo = dirs + "/resultsMem" + str(i)
+		print metodo
+		subcarp = os.listdir(metodo)
+		cantCarp = len(subcarp)
+		#print cantCarp
+		tiempos = []
+		for j in range(len(subcarp)):
+			path = ""
+			path = metodo + "/" + subcarp[j] + "/" + "generaciones.csv"
+			try:
+				with open(path) as file:
+					lines = file.readline()
+					time = lines.strip().split(":")
+					#print time
+					mins = 60*float(time[2])
+					secs = float(time[3])
+					total = mins + secs
+					tiempos.append(total)
+					#print "Se demoro : ", total, "segundos"
+					#print times
+			except IOError as exc:
+				if exc.errno != errno.EISDIR:
+					raise
+		allTimes.append(tiempos)
+	return allTimes	
+	
+def writeTimes(allTimes):
+	listInstance = []
+	meanSTD = []
+	fin = []
+	inst = "Mem"
+	for i in range(len(allTimes)):
+		instance = inst + str(i)
+		print instance
+		arreglo = np.array(allTimes[i])
+		mean = np.mean(arreglo)
+		std = np.std(arreglo)
+		value = str(mean) + " (" + str(std) + ")"
+		print value
+		listInstance.append(instance)
+		meanSTD.append(value)
+
+	file = open('tiempos.csv', "wt")
+	writer = csv.writer(file, delimiter = ' ')	
+	for i in range(len(listInstance)):
+		writer.writerow( (listInstance[i], meanSTD[i]) )
+	#writer.writerow(listInstance)
+	#writer.writerow(meanSTD)
+
+
+if __name__ == "__main__":
+	cwd = os.getcwd()
+	carpeta = "/ResultsNSGA2"
+	directory = cwd + carpeta
+	resultsMems = os.listdir(directory)
+
+	results = obtainResults(resultsMems, directory)
+	writeTimes(results)	
 
 
 
@@ -74,6 +139,18 @@ pop.plot_pareto_fronts()
 
 
 
+
+
+
+
+
+
+
+
+#prob = problem.zdt(1)
+#pop = population(prob, 100)
+#pop.compute_pareto_fronts()
+#pop.plot_pareto_fronts()
 
 #PAra mo_problem(base)
 #prob = mo_problem()
