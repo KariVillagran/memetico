@@ -34,6 +34,7 @@ class Parametros:
 		self.k = int(data[8])
 		self.limitSearch = float(data[9])
 		self.init = data[10]
+		self.evalPerGen = int(data[11])
 
 
 

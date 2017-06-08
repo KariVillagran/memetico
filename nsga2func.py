@@ -73,15 +73,16 @@ class NSGA2:
 		self.crossoverRate = crossoverRate
 		self.directorio = None
 		self.numberOfEvaluations = 0
+		self.numberOfEvalPerGen = 0
 		self.completado = False
 			
 
-	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen):
 		
 		
 	
 		if algorithm == "MEMETIC":
-			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua)
+			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen)
 
 		elif algorithm == "NSGA2":
 			self.runNSGA2(poblacion, tamPob, indCX, start, nEvalua)
@@ -99,6 +100,7 @@ class NSGA2:
 
 
 	def runNSGA2(self,poblacion, tamPob, indCX, start, nEvalua):
+		self.numberOfEvaluations = 0
 		print "Initializing Non Sorting Genetic Algorithm 2. . .  "
 		counter = 1
 		startTime = start
@@ -169,6 +171,7 @@ class NSGA2:
 		return 1
 			
 	def runGeneticQPLS(self,poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+		self.numberOfEvaluations = 0
 		print "Initializing Genetic Pareto Local Search. . . ."
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
@@ -243,6 +246,7 @@ class NSGA2:
 
 
 	def runQPLS(self, poblacion, tamPob,k, limitSearch, start, nEvalua):
+		self.numberOfEvaluations = 0
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 		self.directorio = "results/Results_"+tiempo
@@ -308,9 +312,10 @@ class NSGA2:
 		print "Algorithm finished in: " , str(final)
 		return 1
 
-	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, gen):
 		print "Running Memetic Algorithm. . . . . . . . . . . . "
 		
+		self.numberOfEvaluations = 0
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 
@@ -323,8 +328,9 @@ class NSGA2:
 		counter = 1
 		nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
 		self.numberOfEvaluations += tamPob
-		#for i in range(1,generaciones+1):
-		while self.checkNumEvalua(nEvalua):
+		generaciones = nEvalua
+		for i in range(1,generaciones+1):
+		#while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			print "Generation Number: ", counter
 			#print "from a Total of ", generaciones
@@ -353,11 +359,12 @@ class NSGA2:
 	
 				print "Local Search is beggining. . . "	
 				#del poblacion[:]
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, gen)
 				print "Local Search has ended."
 			
-			if self.numberOfEvaluations >= nEvalua:
-				print "Evaluation limit reached... "
+			#if self.numberOfEvaluations >= nEvalua:
+			if counter == generaciones:
+				#print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
 				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
@@ -445,7 +452,8 @@ class NSGA2:
 			#print elemento.solution, elemento.rank
 		return poblacion
 
-	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit):
+	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit, gen):
+		self.numberOfEvalPerGen = 0
 		#Defino variables para almacenar soluciones
 		archive ,archive_aux ,LS_archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], [], [], []
 		numFac = poblacion[0].numFacilities	
@@ -547,6 +555,10 @@ class NSGA2:
 				#for elemento in paretoArchive:
 				#	print elemento.solution, elemento.costoFlujo
 				#print "fin elementos archivo actualizado..."
+			#print "number: ", self.numberOfEvalPerGen
+			#o = input(". . . .")
+			if self.numberOfEvalPerGen >= gen:
+				break
 		#print evaluations
 		return paretoArchive
 
@@ -661,6 +673,7 @@ class NSGA2:
 		vecino = Solucion(numFac)
 		vecino = self.generate_One_Neighbor(solucion, posiciones)
 		self.numberOfEvaluations +=1
+		self.numberOfEvalPerGen +=1
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
 		searchLimit = int(round(tamVecindario*sL))
@@ -676,6 +689,7 @@ class NSGA2:
 				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
+				self.numberOfEvalPerGen +=1
 				iterator += 1
 				if iterator >= searchLimit:
 					break
@@ -685,6 +699,7 @@ class NSGA2:
 				vecino_DomYCandidatos.append(vecino)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
+				self.numberOfEvalPerGen +=1
 				iterator += 1
 				if iterator >= searchLimit:
 					break

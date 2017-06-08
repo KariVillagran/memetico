@@ -37,9 +37,9 @@ def main():
 	#Runnning Algorithm
 	if params.init == "True":
 		initPobla = nsga2.initAlgorithm(P, params.tamPob)
-		nsga2.runAlgorithm(params.algorithm, initPobla, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit)	
+		nsga2.runAlgorithm(params.algorithm, initPobla, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen)	
 	else:
-		nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit)
+		nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen)
 	
 #a = [i for i in range(numFac)]
 if __name__ == '__main__':
