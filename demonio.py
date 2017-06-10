@@ -12,13 +12,15 @@ seeds = [1013197, 1013203, 1013227, 1013237,1013239, 1013249,1013263, 1013267,10
 #Ejemplo: instances/KC10-2fl-1rL.dat
 exe = sys.argv[1]
 
+params = sys.argv[2]
+
 #print exe
-for i in range(2):
+for i in range(10):
 	print "+++++++++++++++++++"
 
 	print "Running Process:  " +  str(i)
 	print "+++++++++++++++++++"
-	lineaCom = "python main.py " + str(exe) + " parameters.dat " + str(seeds[i]) 
+	lineaCom = "python main.py " + str(exe) + " Casos/" + str(params) + " "  + str(seeds[i]) 
 	print lineaCom
 	p = subprocess.Popen(lineaCom, shell=True)
 	p.communicate()
