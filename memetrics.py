@@ -614,84 +614,10 @@ def computeCoverage(pobEvaluada, pobMetodos, indice):
 
 
 
-def resultsNSGA2(carpeta):
-	dirs = os.listdir(carpeta)
-	print dirs
-	theResults = []
-	allValuesF1, allValuesF2 = [], []
-	for i in range(len(dirs)):
-		counter = 1
-		strs = "Generacion: "
-		dirc = carpeta + "/" + dirs[i] + '/pareto.csv'
-		print dirc
-		f = open(dirc, 'r')
-		#allLines debe almacenar todas las listas por cada generacion, con largo igual al numero de gen que hice
-		allLines = []
-		for line in f:
-			listLine = []
-			if counter != 1:
-				line = line + strs
-				osf = line.strip().split(",")
-				aux = []
-				val1 = float(osf[0])
-				val2 = float(osf[1])
-				aux.append(val1)
-				aux.append(val2)
-				listLine.append(aux)
-				if val1 not in allValuesF1:
-					allValuesF1.append(val1)
-				if val2 not in allValuesF2:
-					allValuesF2.append(val2)
-			#print osf
-			if strs in line:
-				#print strs + str(counter)
-				for line in f:
-					linea = line.strip().split(",")
-					#print linea
-					if strs in linea[0]:
-						#line = strs
-						break
-					if linea[3] != 0.0:
-						aux = []
-						val1 = float(linea[0])
-						val2 = float(linea[1])
-						aux.append(val1)
-						aux.append(val2)
-						if aux not in listLine:
-							listLine.append(aux)
-						if val1 not in allValuesF1:
-							allValuesF1.append(val1)
-						if val2 not in allValuesF2:
-							allValuesF2.append(val2)
-				counter += 1
-			allLines.append(listLine)
-			#for lines in listLine:
-			#	print lines				
-			#o = input(". . . .")
-			#print listLine
-		print len(allLines)
-		theResults.append(allLines)
-		print len(theResults)
-		#h = input(" . . .")
-	allValuesF1.sort()
-	allValuesF2.sort()
-	maxMin, ref1, ref2 = [], [], []
-	minObj1 = allValuesF1[0]
-	maxObj1 = allValuesF1[len(allValuesF1)-1]
-	ref1.append(minObj1), ref1.append(maxObj2)
-	minObj2 = allValuesF2[0]
-	maxObj2 = allValuesF1[len(allValuesF2)-1]
-	ref2.append(minObj2), ref2.append(maxObj2)
-	maxMin.append(ref1)
-	maxMin.append(ref2)
 
-	results = []
-	results.append(theResults)
-	results.append(maxMin)
-	print maxMin
-	print len(theResults)
-	return results
-	#print len(allValues)
+
+
+
 
 if __name__ == "__main__":
 
@@ -720,12 +646,12 @@ if __name__ == "__main__":
 
 
 	cwd = os.getcwd()
-	print cwd
+	#print cwd
 
-	result = "/Resultados"
-	nsgass = "/NSGA2/resultsGen3"
-	dirs = cwd + nsgass
-	resultsNSGA2(dirs)
+	#result = "/Resultados"
+	#nsgass = "/NSGA2/resultsGen3"
+	#dirs = cwd + nsgass
+	#resultsNSGA2(dirs)
 	
 	direct = cwd + result
 	carpetas = os.listdir(direct)

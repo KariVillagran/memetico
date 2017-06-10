@@ -138,10 +138,10 @@ class NSGA2:
 				if poblacion[j].rank == 1:
 					nArchivo.write(""+ str(poblacion[j].solution) + "\n")
 
-			if counter != 1:
+			#if counter != 1:
 				#print len(poblacion)
-				nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
-				self.numberOfEvaluations += tamPob
+			nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+			self.numberOfEvaluations += tamPob
 			
 			#if self.numberOfEvaluations >= nEvalua:
 			if counter ==  nEvalua:
@@ -269,7 +269,7 @@ class NSGA2:
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
 			if counter == 1:
-				nextPobla = []
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
 			
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
@@ -353,14 +353,14 @@ class NSGA2:
 				if poblacion[j].rank == 1:
 					nArchivo.write(""+ str(poblacion[j].solution) +"\n")
 			
-			if counter != 1:
-				poblacion = self.makeNewPob(poblacion, indCX, tamPob)
-				self.numberOfEvaluations += tamPob
+			#if counter != 1:
+			poblacion = self.makeNewPob(poblacion, indCX, tamPob)
+			self.numberOfEvaluations += tamPob
 	
-				print "Local Search is beggining. . . "	
-				#del poblacion[:]
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
-				print "Local Search has ended."
+			print "Local Search is beggining. . . "	
+			#del poblacion[:]
+			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+			print "Local Search has ended."
 			
 			#if self.numberOfEvaluations >= nEvalua:
 			if counter == generaciones:
@@ -814,6 +814,8 @@ class NSGA2:
 		matrixFrontera = []
 		fronteras = []
 		for solP in poblacion:
+			solP.numSolDominantes = 0
+			solP.setSolDominadas = []
 			for solQ in poblacion:
 				if solP == solQ:
 					continue

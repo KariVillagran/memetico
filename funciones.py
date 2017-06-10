@@ -3,6 +3,7 @@ from nsga2func import Solucion
 from nsga2func import NSGA2
 import random
 import numpy as np
+import math
 #import matplotlib.pyplot as plt
 import sys
 
@@ -38,13 +39,15 @@ class Parametros:
 
 
 
-def lectura():
+def lectura2():
 	archivo = sys.argv[1]
 	instancias = open(archivo, 'r')
+	print archivo
 	arreglo = []
 	tamano = instancias.readline()
 	arreglo.append(tamano)
 	for line in instancias:
+		#print line
 		for caract in line.split(' '):
 			if caract == "":
 				pass
@@ -52,7 +55,29 @@ def lectura():
 				pass
 			else:
 				num = caract
-				arreglo.append(int(num))
+				#print num
+				if archivo == "instances/BIO/arabidopsis.dat":
+					#print num
+					arreglo.append(float(num))
+				else:
+					arreglo.append(int(num))
+	return arreglo
+
+def lectura():
+	archivo = sys.argv[1]
+	instancias = open(archivo, 'r')
+	arreglo = []
+	tamano = int(instancias.readline())
+	instancias.readline()
+	arreglo.append(tamano)
+	for m in range(3):
+		for i in range(tamano):
+			linea = instancias.readline().strip().split()
+			#print linea
+			for j in linea:
+				arreglo.append(float(j))
+		instancias.readline()
+	instancias.close()
 	return arreglo
 
 def readParameters():
@@ -91,6 +116,8 @@ def distribuirMatrices(arreglo):
 			matrixFlujoDos.append(arreglo[i])
 		else:
 			pass
+	
+	#imprimeMatriz(matrixFlujoDos)		
 	return numFac
 #UTILES
 def imprimeMatriz(arreglo):

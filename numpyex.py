@@ -14,9 +14,9 @@ b = np.array([6,7,8])
 #Creo array con dimensiones y EDA que yo decida
 c = np.array([(1,2,3), (1,4,3)], dtype = float)
 # Funciones: 
-#	np.zero((3,4)) ---> Crea matriz con ceros
-#	np.ones((3,4)) ---> Crea matriz con unos
-#	np.empty((2,3)) --> Crea matriz con random float64
+# np.zero((3,4)) ---> Crea matriz con ceros
+# np.ones((3,4)) ---> Crea matriz con unos
+# np.empty((2,3)) --> Crea matriz con random float64
 #Creo array que parte en 10 y va hasta el 30, en numeros de a 5. el resultado es d = [10,15,20,25]
 d = np.arange(10,30,5)
 #Para usar arange con numeros flotantes se usa linspace que recibe como argumento el numero de elementos que queremos, en vez de los 'pasos'
@@ -66,20 +66,20 @@ def resultsNSGA2(carpeta):
 				aux.append(val1)
 				aux.append(val2)
 				listLine.append(aux)
-				#delete
-				#if val1 not in allValuesF1:
-				#	allValuesF1.append(val1)
-				#if val2 not in allValuesF2:
-				#	allValuesF2.append(val2)
-				#delete
+			#delete
+			#if val1 not in allValuesF1:
+			# allValuesF1.append(val1)
+			#if val2 not in allValuesF2:
+			# allValuesF2.append(val2)
+			#delete
 			#print osf
 			if strs in line:
-				#print strs + str(counter)
+			#print strs + str(counter)
 				for line in f:
 					linea = line.strip().split(",")
 					#print linea
 					if strs in linea[0]:
-						#line = strs
+					#line = strs
 						break
 					if linea[3] != 0.0:
 						aux = []
@@ -87,22 +87,22 @@ def resultsNSGA2(carpeta):
 						val2 = float(linea[1])
 						aux.append(val1)
 						aux.append(val2)
-						if aux not in listLine:
-							listLine.append(aux)
-						#if val1 not in allValuesF1:
-						#	allValuesF1.append(val1)
-						#if val2 not in allValuesF2:
-						#	allValuesF2.append(val2)
-				counter += 1
+					if aux not in listLine:
+						listLine.append(aux)
+					#if val1 not in allValuesF1:
+					# allValuesF1.append(val1)
+					#if val2 not in allValuesF2:
+					# allValuesF2.append(val2)
+			counter += 1
 			allLines.append(listLine)
-			#for lines in listLine:
-			#	print lines				
-			#o = input(". . . .")
-			#print listLine
-		print len(allLines)
-		theResults.append(allLines)
-		print len(theResults)
-		#h = input(" . . .")
+		#for lines in listLine:
+		# print lines       
+		#o = input(". . . .")
+		#print listLine
+	print len(allLines)
+	theResults.append(allLines)
+	print len(theResults)
+	#h = input(" . . .")
 	#allValuesF1.sort()
 	#allValuesF2.sort()
 	maxMin, ref1, ref2 = [], [], []
@@ -140,13 +140,13 @@ def computeHyperVolume(maxMinValues, fronteras, generacion):
 	#h = input("")
 	for i in range(len(fronteras)):
 		normValues = []
-		#print i
+	#print i
 		for j,frontera in enumerate(fronteras[i]):
-			
+		
 			if j == generacion:
 				for elemento in frontera:
 
-					#h = input(". . . .")
+				#h = input(". . . .")
 					values = []
 					cost1 = elemento[0]
 					cost2 = elemento[1]
@@ -158,13 +158,13 @@ def computeHyperVolume(maxMinValues, fronteras, generacion):
 						valueObj2 = 0
 					else: 
 						valueObj2 = (cost2 - minObj2)/difObj2
-					values.append(valueObj1), values.append(valueObj2)
-					normValues.append(values)
-				#print "valores normalizados"
-				#for value in normValues:
-				#   print value
+						values.append(valueObj1), values.append(valueObj2)
+						normValues.append(values)
+			#print "valores normalizados"
+			#for value in normValues:
+			#   print value
 				normalizados.append(normValues)
-			#self.normalizedValues.append(normValues)
+		#self.normalizedValues.append(normValues)
 	#h = input("")
 	referencePoint = [2,2]
 	for i in range(len(normalizados)):
@@ -173,7 +173,6 @@ def computeHyperVolume(maxMinValues, fronteras, generacion):
 		listaHyperVol.append(volume)
 	print "Valores de HV para cada run: ", listaHyperVol    
 	print len(listaHyperVol)
-	
 	return listaHyperVol
 
 
@@ -190,18 +189,18 @@ def computeHyperVolumeIns(maxMinValues, fronteras, instance):
 	#h = input("")
 	listOfIndexes = []
 	for i in range(len(fronteras)):
-		#print i
+	#print i
 		if i == instance:
 			print len(fronteras[i])
-			#Cada 10 generaciones calculo HV, al final deberia tener 1300 valores de HV
-			
+		#Cada 10 generaciones calculo HV, al final deberia tener 1300 valores de HV
+		
 			for j in range(1,len(fronteras[i])):
 				normValues = []
 				listOfIndexes.append(j)
 				#print j
 				#h = input("DEBERIA SER 13.000 SI ES ASÍ ESTOY BIEN")
 				for elemento in fronteras[i][j]:
-				#h = input(". . . .")
+			#h = input(". . . .")
 					values = []
 					cost1 = elemento[0]
 					cost2 = elemento[1]
@@ -210,30 +209,30 @@ def computeHyperVolumeIns(maxMinValues, fronteras, instance):
 					else:
 						valueObj1 = (cost1 - minObj1)/difObj1
 					if difObj2 == 0:
-							valueObj2 = 0
+						valueObj2 = 0
 					else: 
 						valueObj2 = (cost2 - minObj2)/difObj2
-					values.append(valueObj1), values.append(valueObj2)
-					normValues.append(values)
-				#print "valores normalizados"
-				#for value in normValues:
-				#   print value
+						values.append(valueObj1), values.append(valueObj2)
+						normValues.append(values)
+		#print "valores normalizados"
+		#for value in normValues:
+		#   print value
 				normalizados.append(normValues)
-			#self.normalizedValues.append(normValues)
+		#self.normalizedValues.append(normValues)
 	#h = input("")
 	#en normValues tengo toda la caca
 	print len(normalizados)
 	#for i in range(len(normalizados)):
-	##	print normalizados[i]
-	#	h = input(". . . .")
+	##  print normalizados[i]
+	# h = input(". . . .")
 	referencePoint = [2,2]
 	for i in range(len(normalizados)):
 		print "Calculando HV . . . .", i 
 		hv = HyperVolume(referencePoint)
 		volume = hv.compute(normalizados[i])
 
-		#print volume
-		#io = input(". . . .")
+	#print volume
+	#io = input(". . . .")
 		listaHyperVol.append(volume)
 	results = []
 	results.append(listOfIndexes)
@@ -272,7 +271,7 @@ def getPareto(values, instance):
 	aa = plt.plot(a, b, 'b+', label = "Gen 1" )
 	bb = plt.plot(c,d, 'g+', label = "Gen 5000")
 	cc = plt.plot(e, f, 'r', label = "Gen 13000")
-	#dd = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre)	
+	#dd = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre) 
 	plt.setp(aa, "linestyle", "none", "marker", "o")
 	plt.setp(bb, "linestyle", "none", "marker", "o")
 	plt.setp(cc, "linestyle", "none", "marker", "*")
@@ -280,9 +279,9 @@ def getPareto(values, instance):
 	plt.xlabel('Costo Flujo 1')
 	plt.legend(loc = 'upper right')
 	plt.show()
-			#print values[i][j]
+		#print values[i][j]
 	
-				#o = input(". . .. ")
+		#o = input(". . .. ")
 
 
 def plot(results1, results2):
@@ -299,11 +298,9 @@ def plot(results1, results2):
 	plt.show()
 
 
-
-if __name__ == "__main__":
+def getMainNSGA2():
 	cwd = os.getcwd()
 	print cwd
-
 	#result = "/Resultados"
 	
 	start = datetime.datetime.now()
@@ -349,10 +346,189 @@ if __name__ == "__main__":
 	total = finish - start
 	print "execution time: ", total
 	plot(results1, results2)
+	return 1
+
+
+def obtainResults(carpetas, directory):
+	theResults = []
+	allValuesF1_1, allValuesF2_1 = [], []
+	allValuesF1_2, allValuesF2_2 = [], []
+	#3
+	for i in range(1,len(carpetas)+1):
+		carpeta = directory + "resultsMem" + str(i) + "/"
+		#print carpeta
+		listaResults = os.listdir(carpeta)
+		#print listaResults
+		#Aca almaceno los dos valores que devuelvo, es decir, listaDeFronteras y allvalues. 
+		
+		results = [] 
+		listaDeFronterasINS = []
+		
+		for j in range(len(listaResults)):
+			new_path = carpeta + listaResults[j]
+			file = new_path + "/pareto.csv"
+			fronteraRun = []
+			print file
+			try:
+				with open(file) as f:
+					for lines in f:
+						costoFlujo = []
+						linea = lines.split(",")
+						crowding = float(linea[2])
+						if crowding != 0.0:
+							costoFlujo.append(float(linea[0]))
+							costoFlujo.append(float(linea[1]))
+						#Obtengo el costo y lo agrego a la lista de allvalues para obtener luego mayores y menores. 
+							if i <= 11:
+								if costoFlujo[0] not in allValuesF1_1:
+									allValuesF1_1.append(costoFlujo[0])
+								if costoFlujo[1] not in allValuesF2_1:
+									allValuesF2_1.append(costoFlujo[1])
+							elif i > 11 and i <= 22:
+								if costoFlujo[0] not in allValuesF1_2:
+									allValuesF1_2.append(costoFlujo[0])
+								if costoFlujo[1] not in allValuesF2_2:
+									allValuesF2_2.append(costoFlujo[1])
+							if costoFlujo not in fronteraRun:
+								fronteraRun.append(costoFlujo)
+							#print costoFlujo
+				#print len(fronteraRun)			
+				listaDeFronterasINS.append(fronteraRun)
+				#print len(listaDeFronterasINS)    
+			#print linea
+			except IOError as exc:
+				if exc.errno != errno.EISDIR:
+					raise
+			#AQUI QUEDE ESTOY CONFUNDIDO... MEJOR DUERMO.
+		theResults.append(listaDeFronterasINS)
+		
+	#print len(theResults)
+	allValuesF1_1.sort(), allValuesF2_1.sort()
+	allValuesF1_2.sort(), allValuesF2_2.sort()
+	#print allValuesF2_1
+	
+	minObj1 = allValuesF1_2[0]
+	maxObj1 = allValuesF1_2[len(allValuesF1_2)-1]
+	minObj2 = allValuesF2_2[0]
+	maxObj2 = allValuesF2_2[len(allValuesF2_2)-1]
+	#print minObj1, maxObj1, minObj2, maxObj2
+	#14778308.0 26841406.0 6318426.0 15098852.0
+	#584070592.0 935190348.0 551090208.0 904603230.0
+	return theResults
+	#print new_path
+
+	#print carpetas[i]
+
+
+def getData(results):
+	cantInstancias = 2
+	#listaHV1, listaHV2 = [], []
+	allListaHV1, allListaHV2 = [], []
+	for i in range(len(results)):
+		if i < 11:
+			maxMins = [ [14778308.0, 26841406.0 ], [6318426.0, 15098852.0]]
+			listaHV1 = computeHV(maxMins,results[i])
+			allListaHV1.append(listaHV1)
+		elif i >= 11 and i <= 22:
+			maxMins = [[584070592.0, 935190348.0], [551090208.0, 904603230.0]]
+			listaHV2 = computeHV(maxMins,results[i])
+			allListaHV2.append(listaHV2)
+	
+	f = open("resultados.csv", "w")		
+	#print "resultados instancia KC20"
+	for elem in allListaHV1:
+		for e in elem:
+			f.write(str(e) + "\n")
+	#print "resultados instancia GAR60"
+	for elem in allListaHV2:
+		for e in elem:
+			f.write(str(e)+ "\n")
+	f.close()
+
+def computeHV(maxMinValues, fronteras):
+	minObj1, maxObj1 = maxMinValues[0][0], maxMinValues[0][1]
+	minObj2, maxObj2 = maxMinValues[1][0], maxMinValues[1][1]
+	#print minObj1, maxObj1, minObj2, maxObj2
+	difObj1 = maxObj1 - minObj1
+	difObj2 = maxObj2 - minObj2
+	#Se guarda en esta lista debido a que los resultados iran dentro del objeto... en normalizedValues...
+	listaHyperVol = []
+	normalizados = []
+	for i in range(len(fronteras)):
+		#print i
+		normValues = []
+		for elemento in fronteras[i]:
+			#print elemento
+			values = []
+			cost1 = elemento[0]
+			cost2 = elemento[1]
+			if difObj1 == 0:
+				valueObj1 = 0
+			else:
+				valueObj1 = (cost1 - minObj1)/difObj1
+			if difObj2 == 0:
+				valueObj2 = 0
+			else: 
+				valueObj2 = (cost2 - minObj2)/difObj2
+			values.append(valueObj1), values.append(valueObj2)
+			normValues.append(values)
+		normalizados.append(normValues)
+	referencePoint = [2,2]
+	for i in range(len(normalizados)):
+		hv = HyperVolume(referencePoint)
+		volume = hv.compute(normalizados[i])
+		listaHyperVol.append(volume)
+	#print "Valores de HV para cada run: ", listaHyperVol    
+	return listaHyperVol	
+
+def preProcessData(dirs, carpetas):
+	out = open("BIO133.dat", 'w')
+	out.write("133" + "\n")
+	for i in range(len(carpetas)):
+		#print carpetas
+		path = dirs + "/" + carpetas[i]
+		print path
+
+		try:
+			with open(path) as f:
+				f.next()
+				for lines in f:
+					#print lines
+					stre = ",".join(lines.split(',')[1:])
+					new_str = stre.replace(",", " ")
+					out.write(new_str)
+					#print new_str
+					#os = input(". . . .")	
+		
+		except IOError as exc:
+			if exc.errno != EISDIR:
+				raise
+		out.write("\n")
+		#o = input(". . . .")
+		#print path
+		
+if __name__ == "__main__":
+	
+	#Funcion para obtener resultados de NSGA2.
+	#getMainNSGA2()
+
+	cwd = os.getcwd()
+	#carpeta = "/ResultadosCASOS/"
+	#path = cwd + carpeta
+	#dirs = os.listdir(path)
+	#results = obtainResults(dirs, path)
+	#data = getData(results)
+	#print dirs
+
+	carpeta = "/biological/arabidopsis"
+	path = cwd + carpeta
+	dirs = os.listdir(path)
+	print dirs
+	preProcessData(path,dirs)
 
 	#valores = computeHyperVolume(maxMins, values, 25999)
 	#for i, val in enumerate(valores):
-	#	print val, i
+	# print val, i
 	
 
 	#sbatch --array=0-9 punto.sh
@@ -360,7 +536,7 @@ if __name__ == "__main__":
 	#valores.sort()
 	#print "sorted"
 	#for i, val in enumerate(valores):
-	#	print val, i
+	# print val, i
 	#median = np.median(np.array(valores))
 	#print "LA MEDIANA ES. . .", median
 	#Selected = 11. 
