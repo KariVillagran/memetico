@@ -4,8 +4,12 @@
 import numpy as np
 import os
 from hv import HyperVolume
-import matplotlib.pyplot as plt
 import datetime
+import matplotlib as mpl
+
+mpl.use('agg')
+ 
+import matplotlib.pyplot as plt
 
 #Creo matriz con 15 elementos, distribuidos en dimensiones (3,5), es decir, 3 arreglos de tamaño 5 cada uno
 a = np.arange(15).reshape(3,5)
@@ -353,6 +357,7 @@ def obtainResults(carpetas, directory):
 	theResults = []
 	allValuesF1_1, allValuesF2_1 = [], []
 	allValuesF1_2, allValuesF2_2 = [], []
+	allValuesF1_3, allValuesF2_3 = [], []
 	#3
 	for i in range(1,len(carpetas)+1):
 		carpeta = directory + "resultsMem" + str(i) + "/"
@@ -389,6 +394,12 @@ def obtainResults(carpetas, directory):
 									allValuesF1_2.append(costoFlujo[0])
 								if costoFlujo[1] not in allValuesF2_2:
 									allValuesF2_2.append(costoFlujo[1])
+							elif i > 22 and i <= 33:
+								if costoFlujo[0] not in allValuesF1_3:
+									allValuesF1_3.append(costoFlujo[0])
+								if costoFlujo[1] not in allValuesF2_3:
+									allValuesF2_3.append(costoFlujo[1])
+
 							if costoFlujo not in fronteraRun:
 								fronteraRun.append(costoFlujo)
 							#print costoFlujo
@@ -405,34 +416,54 @@ def obtainResults(carpetas, directory):
 	#print len(theResults)
 	allValuesF1_1.sort(), allValuesF2_1.sort()
 	allValuesF1_2.sort(), allValuesF2_2.sort()
+	allValuesF1_3.sort(), allValuesF2_3.sort()
 	#print allValuesF2_1
 	
-	minObj1 = allValuesF1_2[0]
-	maxObj1 = allValuesF1_2[len(allValuesF1_2)-1]
-	minObj2 = allValuesF2_2[0]
-	maxObj2 = allValuesF2_2[len(allValuesF2_2)-1]
+	minObj1 = allValuesF1_3[0]
+	maxObj1 = allValuesF1_3[len(allValuesF1_3)-1]
+	minObj2 = allValuesF2_3[0]
+	maxObj2 = allValuesF2_3[len(allValuesF2_3)-1]
 	#print minObj1, maxObj1, minObj2, maxObj2
-	#14778308.0 26841406.0 6318426.0 15098852.0
-	#584070592.0 935190348.0 551090208.0 904603230.0
+	#15071714.0 25238352.0 6224236.0 14883234.0
+	#601774990.0 908145682.0 541841820.0 898464818.0
+	#11368.976593 11517.7483789 13148.1703743 13236.9167113
 	return theResults
 	#print new_path
 
 	#print carpetas[i]
 
+def getMeanSTD(listofHV):
+	arr = np.array(listofHV)
+	prom = np.mean(arr, axis = 0)
+	std = np.std(arr, axis = 0)
+	meanStandar = str(prom) + " +- " +  str(std)
+	#print str(prom) + " +- " +  str(std)
+	return meanStandar
 
 def getData(results):
 	cantInstancias = 2
 	#listaHV1, listaHV2 = [], []
-	allListaHV1, allListaHV2 = [], []
+	allListaHV1, allListaHV2, allListaHV3 = [], [], []
+	meanSTD = []
 	for i in range(len(results)):
 		if i < 11:
-			maxMins = [ [14778308.0, 26841406.0 ], [6318426.0, 15098852.0]]
+			maxMins = [ [15071714.0, 25238352.0 ], [6224236.0, 14883234.0]]
 			listaHV1 = computeHV(maxMins,results[i])
 			allListaHV1.append(listaHV1)
-		elif i >= 11 and i <= 22:
-			maxMins = [[584070592.0, 935190348.0], [551090208.0, 904603230.0]]
+			std = getMeanSTD(listaHV1)
+			#meanSTD.append(std)
+		elif i >= 11 and i < 22:
+			maxMins = [[601774990.0, 908145682.0], [541841820.0, 898464818.0]]
 			listaHV2 = computeHV(maxMins,results[i])
 			allListaHV2.append(listaHV2)
+			std = getMeanSTD(listaHV2)
+			#meanSTD.append(std)
+		elif i >= 22 and i <= 33:
+			maxMins = [ [11368.976593, 11517.7483789], [13148.1703743, 13236.9167113] ]
+			listaHV3 = computeHV(maxMins, results[i])
+			allListaHV3.append(listaHV3)
+			std = getMeanSTD(listaHV3)
+			meanSTD.append(std)
 	
 	f = open("resultados.csv", "w")		
 	#print "resultados instancia KC20"
@@ -443,7 +474,51 @@ def getData(results):
 	for elem in allListaHV2:
 		for e in elem:
 			f.write(str(e)+ "\n")
+	for elem in allListaHV3:
+		for e in elem:
+			f.write(str(e)+ "\n")
 	f.close()
+	#for mean,i in enumerate(meanSTD):
+	#	print mean, i	
+	getBoxPlots(allListaHV1, "KC20-2fl-1rl")
+	#getBoxPlots(allListaHV2, "Gar60-2fl-4rl")
+	#getBoxPlots(allListaHV3, "arabidopsis")
+
+
+def getBoxPlots(allListaHV, instancia):
+	fig = plt.figure(1, figsize=(9,6))
+
+	ax = fig.add_subplot(111)
+	##fill color
+	bp = ax.boxplot(allListaHV, patch_artist = True)
+	titulo = 'Instancia: ' + instancia
+	fig.suptitle(titulo, fontsize = 20)
+	plt.xlabel('Casos', fontsize = 16)
+	plt.ylabel('HyperVolumen', fontsize = 16)
+
+	ax.set_xticklabels(['Caso 1', 'Caso 2','Caso 3','Caso 4','Caso 5','Caso 6','Caso 7','Caso 8','Caso 9','Caso 10','Caso 11' ])
+	##cambio el color
+	ax.get_xaxis().tick_bottom()
+	ax.get_yaxis().tick_left()
+	for box in bp['boxes']:
+		box.set(color = '#7570b3', linewidth=2)
+		box.set(facecolor = '#1b9e77')
+	#cambio	color y ancho de linea para "whiskers"
+	for whisker in bp['whiskers']:
+		whisker.set(color = '#7570b3', linewidth = 2)
+	for cap in bp['caps']:
+		cap.set(color = '#7570b3', linewidth= 2)
+	for median in bp['medians']:
+		median.set(color = '#b2df8a', linewidth= 2)	
+	for flier in bp['fliers']:
+		flier.set(marker = 'o', color = '#e7298a', alpha = 0.5)
+
+	name = 'fig-' + instancia + '.png'
+	fig.savefig(name, bbox_inches = 'tight')
+
+	#plt.show()
+
+
 
 def computeHV(maxMinValues, fronteras):
 	minObj1, maxObj1 = maxMinValues[0][0], maxMinValues[0][1]
@@ -506,6 +581,7 @@ def preProcessData(dirs, carpetas):
 		out.write("\n")
 		#o = input(". . . .")
 		#print path
+	out.close()
 		
 if __name__ == "__main__":
 	
@@ -513,18 +589,18 @@ if __name__ == "__main__":
 	#getMainNSGA2()
 
 	cwd = os.getcwd()
-	#carpeta = "/ResultadosCASOS/"
-	#path = cwd + carpeta
-	#dirs = os.listdir(path)
-	#results = obtainResults(dirs, path)
-	#data = getData(results)
-	#print dirs
-
-	carpeta = "/biological/arabidopsis"
+	carpeta = "/ResultadosCASOS/"
 	path = cwd + carpeta
 	dirs = os.listdir(path)
-	print dirs
-	preProcessData(path,dirs)
+	results = obtainResults(dirs, path)
+	data = getData(results)
+	#print dirs
+
+	#carpeta = "/biological/arabidopsis"
+	#path = cwd + carpeta
+	#dirs = os.listdir(path)
+	#print dirs
+	#preProcessData(path,dirs)
 
 	#valores = computeHyperVolume(maxMins, values, 25999)
 	#for i, val in enumerate(valores):

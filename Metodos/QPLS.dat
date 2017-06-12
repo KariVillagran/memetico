@@ -1,12 +1,12 @@
-algorithm = GQPLS
+algorithm = QPLS
 cxOperator = 1
 mutOperator = 3opt
 cxRate = 0.9
 mutRate = 0.01
 tamPoblacion = 200
 finishStrategy = GEN
-finishLimit = 70
+finishLimit = 20000
 k = 10
 limitSearch = 0.5
 initialization = False
-evalPerGen = 86
+evalPerGen = -1

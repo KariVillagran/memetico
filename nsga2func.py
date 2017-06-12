@@ -91,7 +91,7 @@ class NSGA2:
 			self.runQPLS(poblacion, tamPob, k, limitSearch, start, nEvalua, -1)
 
 		elif algorithm == "GQPLS":
-			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, -1)
+			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen)
 
 		else:
 			print "Can't execute algorithm,", algorithm ,"check the 'parameters.dat' file"
@@ -136,7 +136,7 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].solution) + "\n")
+					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")
 
 			#if counter != 1:
 				#print len(poblacion)
@@ -170,7 +170,7 @@ class NSGA2:
 		print "Genetic Algorithm Finished in: ", str(final)	
 		return 1
 			
-	def runGeneticQPLS(self,poblacion, tamPob, indCX, k, limitSearch, start, nEvalua):
+	def runGeneticQPLS(self,poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
 		self.numberOfEvaluations = 0
 		print "Initializing Genetic Pareto Local Search. . . ."
 		startTime = start
@@ -183,9 +183,9 @@ class NSGA2:
 		nArchivo = open(nombreArchivo, 'w' )
 		filePareto = self.directorio + "/pareto.csv"	
 		counter = 1
-		
-		#for i in range(1,generaciones+1):
-		while self.checkNumEvalua(nEvalua):
+		generaciones = nEvalua
+		for i in range(1,generaciones+1):
+		#while self.checkNumEvalua(nEvalua):
 			print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			print "Generation Number: ", counter
 			#print "from a Total of ", generaciones
@@ -195,7 +195,7 @@ class NSGA2:
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
 			if counter == 1:
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 			
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
@@ -208,16 +208,17 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].solution)+"\n")
-			
+					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")
 			if counter != 1:
 				
 				print "Local Search is beggining. . . "	
-				poblacion = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				poblacion = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 				print "Local Search has ended."
 				nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+				self.numberOfEvaluations += tamPob
 			
-			if self.numberOfEvaluations >= nEvalua:
+			#if self.numberOfEvaluations >= nEvalua:
+			if counter == generaciones:
 				print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
 				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -269,7 +270,7 @@ class NSGA2:
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
 			if counter == 1:
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 			
 			pobCombinada.extend(poblacion)
 			pobCombinada.extend(nextPobla)
@@ -281,7 +282,8 @@ class NSGA2:
 			
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
-				nArchivo.write(""+ str(poblacion[j].solution) + "\n")
+				if poblacion[j].rank == 1:
+					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")
 			
 			print "Local Search is beggining. . . "	
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
@@ -351,8 +353,7 @@ class NSGA2:
 			nArchivo.write("Generacion: " + str(counter) + "\n")
 			for j in range(len(poblacion)):
 				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].solution) +"\n")
-			
+					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")			
 			#if counter != 1:
 			poblacion = self.makeNewPob(poblacion, indCX, tamPob)
 			self.numberOfEvaluations += tamPob

@@ -1,5 +1,5 @@
-algorithm = GQPLS
-cxOperator = 1
+algorithm = MEMETIC
+cxOperator = 2
 mutOperator = 3opt
 cxRate = 0.9
 mutRate = 0.01
