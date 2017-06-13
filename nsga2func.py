@@ -791,9 +791,9 @@ class NSGA2:
 				childs = []
 				if random.random() < self.crossoverRate:
 					childs = self.cycleCrossover(solSeleccionadas[0], solSeleccionadas[1])
-				if random.random() < self.mutationRate:
-					for chil in childs:
-						chil = self.threExchangeMutation(chil)
+					if random.random() < self.mutationRate:
+						for chil in childs:
+							chil = self.threExchangeMutation(chil)
 				if len(childs) != 0:
 					for chil in childs:
 						chil.costoAsignacion()
@@ -804,8 +804,8 @@ class NSGA2:
 				child = Solucion(poblacion[0].numFacilities)
 				if random.random() < self.crossoverRate:
 					child = self.onePointCrossover(solSeleccionadas[0], solSeleccionadas[1])
-				if random.random() < self.mutationRate:
-					child = self.threExchangeMutation(child)
+					if random.random() < self.mutationRate:
+						child = self.threExchangeMutation(child)
 				if len(child.solution) != 0:
 					new_pob.append(child)
 		return new_pob				
