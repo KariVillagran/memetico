@@ -1,0 +1,18 @@
+
+### GENERAL ########################################################################
+# --help=0                                 # -h : Prints this message
+# --stopOnUnknownParam=1                   # Stop if unkown param entered
+# --seed=1475042897                        # -S : Random number seed
+
+### PERSISTENCE ####################################################################
+--instance=/home/c3197552/MQAP++/benchmark/exp/gar/data/Gar60-2fl-3rl.dat # -i : A data file to read instances from
+# --load=                                  # -L : A save file to restart from
+# --schema=                                # -s : An xml file mapping processes
+--statusFile=main.Gar60-2fl-3rl.dat.11i.status # Status file (This file can be used as main parameter file)
+
+### REFINEMENT #####################################################################
+--finalRefinement=0                      # Apply an final refinement to the population
+
+### TOPOLOGY CONFIGURATION #########################################################
+--numIslands=11                          # -N : Number of islands or population groups (1: single thread)
+--topology=Complete                      # Island topology for multi-populations: Star, Ring, Complete (others to be implemented)

@@ -1,0 +1,63 @@
+
+### GENERAL ########################################################################
+# --help=0                                 # -h : Prints this message
+# --stopOnUnknownParam=1                   # Stop if unkown param entered
+
+### ARCHIVE SETTINGS ###############################################################
+--archiveComparator=Pareto               # Archive comparator: Pareto, Epsilon(epsilon), Objective, Strict, Weak
+--archive=ImprOnlyBounded(99)            # Archive type: Unbounded(replace), ImprOnlyBounded(size), EpsilonHyperbox(epsilon), Relaxed(replace)
+
+### EVOLUTION ENGINE ###############################################################
+--popSize=9                              # -P : Population size
+
+### GENETIC OPERATORS ##############################################################
+--crossOp=QuadXover                      # -C : Crossover Operator (QuadXover, OrderXover, PartialMappedXover, CycleXover)
+--mutOp=swap                             # -M : Mutation Operator (swap, shift, swap+shift)
+--pCross=0.9                             # -c : Probability of Crossover
+--pMut=0.01                              # -r : Probability of Mutation
+--crossRate=1                            # -p : Relative rate for the only crossover
+
+### ISLAND CONFIGURATION ###########################################################
+--islandAlgo=easy                        # -A : Algorithm used in the island
+--islandEvaluator=normal                 # -E : Island Evaluator
+--islandComparator=FitnessThenDiversity  # -O : Comparator strategy used in the island: FitnessThenDiversity, DiversityThenFitness or Aggregative
+--islandFitness=DomDepth                 # -F : Fitness assignment scheme: Dummy, DomDepth, DomRank, DomCount, DomCountRank or IndicatorBased
+--islandDiversity=FxFCrowding            # -D : Diversity assignment scheme: Dummy, Sharing(nicheSize), FxFSharing(nicheSize), FxFCrowding or Crowding
+--islandSelection=DetTour(2)             # -S : Parent selection scheme: DetTour(N), StochTour(t), Roulette(t) or Random
+--islandReplacement=Elitist              # -R : Replacement scheme: Elitist, Environmental or Generational
+# --islandDiversityDistance=Euclidean      # Distance used in diversity assignment scheme: Euclidean or Manhattan
+
+### LOCAL SEARCH ###################################################################
+--ls=1                                   # -l : Are we using Local Search in the island?
+--lsApply=2                              # How to apply Local Search. 1:individual - 2:population
+--lsMaxGen=0                             # Maximum number of generations (0 = none) in Local Search
+--lsMaxTime=5                            # Maximum running time in seconds (0 = none) for Local Search
+# --lsMaxEval=0                            # Maximum evaluations (0 = none) for Local Search
+--lsArchiveComparator=Pareto             # Local Search Archive comparator: Pareto, Epsilon(epsilon), Objective, Strict, Weak
+--lsArchive=ImprOnlyBounded(100)         # Local Search archive: Unbounded(replace), ImprOnlyBounded(size), EpsilonHyperbox(epsilon), Relaxed(replace), Inclusive(replace)
+--lsNeighbor=Swap                        # Neighbor type: Swap, Shift
+--lsNeighborhood=Order                   # Neighborhood type: Order, RndWithoutRep, RndWithRep
+--lsNeighborEval=Full                    # Neighbor evaluator type: Incremental, Full
+--lsNeighborhoodExplorer=FirstImproving  # Neighborhood explorer: Exhaustive, FirstImproving, NoDesimproving, Simple, TabuSearch
+# --lsNeighborhoodSize=1770                # NeighborhoodSize Size for moeo Explorer
+--lsSelection=Number(1)                  # Unvisited neighbor selector: Number(N), Exhaustive, NumberElistist(p), Percentage(p), DominanceRank, HypervolumeMetric(p), AdditiveEpsilonMetric(p), NearestNeighbor(p), FurthestNeighbor(p), nOHI(N), pOHI(p), nDiversity
+--lsAlgo=UDBLS                           # Local Search algorithm: UDBLS, PLS1, PLS2, AnytimePLS, DynaHyperboxPLS (note: PLS[1-2] use by default selector Number(1) and Exhaustive respectively & Exhaustive exploration)
+
+### PERSISTENCE ####################################################################
+--statusFile=island.17t.1i.status        # -f : Status file (This file can be used as main parameter file)
+# --Load=                                  # -L : A save file to restart from
+# --recomputeFitness=0                     # -x : Recompute the fitness after re-loading the pop.?
+
+### STOPPING CRITERION #############################################################
+--minGen=0                               # -g : Minimum number of iterations
+--maxGen=100                             # -G : Maximum number of iterations
+--maxTime=300                            # -T : Maximum running time in seconds (0 = none)
+--ctrlC=1                                # -t : Terminate current generation upon Ctrl C
+--maxEval=0                              # Total number of evaluation for the algorithm the objective function (0 = none)
+
+### MIGRATION AND INTEGRATION POLICIES #############################################
+--migMigrants=2                          # -e : Number of migrants per island (% or absolute)
+--migCycle=5                             # -n : How often (num. of generations) we send solutions to island in the topology
+--migComparator=FitnessThenDiversity     # Comparator for Integration scheme: FitnessThenDiversity, DiversityThenFitness, or Aggregative
+--migSelection=DetTour(2)                # Selection for migration scheme: DetTour(N), StochTour(t), Roulette(t) or Random
+--migReplacement=Elitist                 # Replacement (Integration) of individuals scheme: Elitist, Environmental or Generational

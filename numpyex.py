@@ -480,9 +480,9 @@ def getData(results):
 	f.close()
 	#for mean,i in enumerate(meanSTD):
 	#	print mean, i	
-	getBoxPlots(allListaHV1, "KC20-2fl-1rl")
+	#getBoxPlots(allListaHV1, "KC20-2fl-1rl")
 	#getBoxPlots(allListaHV2, "Gar60-2fl-4rl")
-	#getBoxPlots(allListaHV3, "arabidopsis")
+	getBoxPlots(allListaHV3, "arabidopsis")
 
 
 def getBoxPlots(allListaHV, instancia):
@@ -558,9 +558,11 @@ def computeHV(maxMinValues, fronteras):
 
 def preProcessData(dirs, carpetas):
 	out = open("BIO133.dat", 'w')
-	out.write("133" + "\n")
+	out.write("133")
+	out.write("\n")
+	carpetas.sort()
 	for i in range(len(carpetas)):
-		#print carpetas
+		print carpetas[i]
 		path = dirs + "/" + carpetas[i]
 		print path
 
@@ -583,24 +585,29 @@ def preProcessData(dirs, carpetas):
 		#print path
 	out.close()
 		
-if __name__ == "__main__":
-	
-	#Funcion para obtener resultados de NSGA2.
-	#getMainNSGA2()
-
+def gerResultCasos():
 	cwd = os.getcwd()
 	carpeta = "/ResultadosCASOS/"
 	path = cwd + carpeta
 	dirs = os.listdir(path)
 	results = obtainResults(dirs, path)
 	data = getData(results)
-	#print dirs
 
-	#carpeta = "/biological/arabidopsis"
-	#path = cwd + carpeta
-	#dirs = os.listdir(path)
+if __name__ == "__main__":
+	
+	#Funcion para obtener resultados de NSGA2.
+	#getMainNSGA2()
+
+	#Funcion para traer casos de los resultados.
+	#getResultCasos()
+	
 	#print dirs
-	#preProcessData(path,dirs)
+	cwd = os.getcwd()
+	carpeta = "/biological/arabidopsis"
+	path = cwd + carpeta
+	dirs = os.listdir(path)
+	#print dirs
+	preProcessData(path,dirs)
 
 	#valores = computeHyperVolume(maxMins, values, 25999)
 	#for i, val in enumerate(valores):

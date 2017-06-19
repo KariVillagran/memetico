@@ -43,6 +43,110 @@ class Metrics:
 		self.participation = []
 
 
+	def openPASMOQAP(self):
+		direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/pasMOQAP/'
+		carpetas = os.listdir(direct)
+		carpetas.sort()
+		print carpetas
+		base = 16
+		count = 0
+		#resultados = []
+		for i in range(base,len(carpetas)+base):
+			resultsFront = []
+			#print i
+			results = direct + carpetas[count]
+			subcarp = os.listdir(results)
+			#print results
+			self.folders.append(carpetas[count])
+			for j in range(len(subcarp)):
+				runFront = []
+				runs = results + "/" + subcarp[j]
+				#print runs
+				subsubcarp = os.listdir(runs)
+				#Al hacer el sort, me doy cuenta que el archivo que necesito (fecha.rfront) esta siempre en la 3 posicion... por ende lo saco
+				subsubcarp.sort()
+				rfront = subsubcarp[3]
+				final_path = runs + "/" + rfront
+				#print final_path
+				try:
+					with open(final_path) as f:
+						useless = f.readline()
+						for line in f:
+							costo = []	
+							linea = line.split(" ")
+							costo.append(float(linea[0]))
+							costo.append(float(linea[1]))
+							#print costo
+							runFront.append(costo)
+							
+				except IOError as exc:
+					if errno != errno.EISDIR:
+						raise
+				resultsFront.append(runFront)
+
+				#print rfront
+				#print subsubcarp
+				#print runs
+			#resultados.append(resultsFront)
+			self.paretoFrontiers.append(resultsFront)
+			#print len(resultsFront)
+			#for front in resultsFront:
+			#	print len(front)
+			#ososos = input("...............")
+			count +=1
+		#for i in range(len(self.paretoFrontiers)):
+		#	print i, self.folders[i]
+		#	for front in self.paretoFrontiers[i]:
+		#		print len(front)
+		return 1
+
+	def getMAXIMOSMINIMOS(self, fronteras):
+		for i in range(len(fronteras)):
+			#AQUI QUEDE, DEBO HACER QUE PARA CADA FRONTERAS[i] se meta y genere una lista global con cada 
+			allLista, listaObj1, listaObj2, maxMinValues, aux, aux2 = [], [], [], [], [], []
+			#print self.folders[i]
+			for front in fronteras[i]:
+				#print "front"
+				for elemento in front:
+					if elemento not in allLista:
+						allLista.append(elemento)
+			for elements in allLista:
+				listaObj1.append(elements[0])
+				listaObj2.append(elements[1])
+			listaObj1.sort()
+			listaObj2.sort()
+			aux.append(float(listaObj1[0])), aux.append(float(listaObj1[len(listaObj1)-1]))
+			maxMinValues.append(aux)
+			aux2.append(float(listaObj2[0])), aux2.append(float(listaObj2[len(listaObj2)-1]))
+			maxMinValues.append(aux2)
+			self.maxMinInstance.append(maxMinValues)
+			#print len(allLista)
+		#for i in range(len(self.maxMinInstance)):
+		#   print i
+		#   for pares in self.maxMinInstance[i]:
+		#       print pares
+
+	def poMaxMin(self, paretoOptimas):
+		for i in range(len(paretoOptimas)):
+			lista, listaObj1, listaObj2, maxMinValues, aux, aux2 = [], [], [], [], [], []
+			for results in paretoOptimas[i]:
+				if results not in lista:
+					lista.append(results)
+			for elements in lista:
+				listaObj1.append(elements[0])
+				listaObj2.append(elements[1])
+			listaObj1.sort()
+			listaObj2.sort()
+			aux.append(float(listaObj1[0])), aux.append(float(listaObj1[len(listaObj1)-1]))
+			maxMinValues.append(aux)
+			aux2.append(float(listaObj2[0])), aux2.append(float(listaObj2[len(listaObj2)-1]))
+			maxMinValues.append(aux2)
+			self.maxMinInstance.append(maxMinValues)
+		#for i in range(len(self.maxMinInstance)):
+		#   print i
+		#   for pares in self.maxMinInstance[i]:
+		#       print pares		
+
 	def openResults(self):
 		direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/literature/'
 		carpetas = os.listdir(direct)
@@ -141,10 +245,10 @@ class Metrics:
 		#allFronts las contiene todas, para sacar el mayor y el menor. 
 		return retorne
 
-	def poMaxMin(self):
-		for i in range(len(self.paretoOptimas)):
+	def poMaxMin(self, paretoOptimas):
+		for i in range(len(paretoOptimas)):
 			lista, listaObj1, listaObj2, maxMinValues, aux, aux2 = [], [], [], [], [], []
-			for results in self.paretoOptimas[i]:
+			for results in paretoOptimas[i]:
 				if results not in lista:
 					lista.append(results)
 			for elements in lista:
@@ -158,7 +262,7 @@ class Metrics:
 			maxMinValues.append(aux2)
 			self.maxMinInstance.append(maxMinValues)
 		#for i in range(len(self.maxMinInstance)):
-		#   print i
+		#  print i
 		#   for pares in self.maxMinInstance[i]:
 		#       print pares
 
@@ -352,6 +456,7 @@ def obtainResults(carpetas):
 		instanceList[i].nombre = carpetas[i]
 		#print instanceList[i].nombre
 		subcarp = os.listdir(metodo)
+		#Aqui abro cada uno de los resultsMem de cada carpetas
 		for j in range(len(subcarp)):
 			datos = metodo + "/resultsMem" + str(j)
 			metrics = Metrics()
@@ -501,6 +606,8 @@ def ordenarMergedFronts(mergedFronts, numFac):
 def grafiqueFrontera(listPoblacion, po, instance, instanceList):
 	#listaSolC1, listaSolC2 = [], []
 	#listaObtC1, listaObtC2 = [], []
+	instance1 = instance[1:]
+
 	listaOfCosts = []
 	listaObtC1, listaObtC2 = [], []
 	for i in range(len(listPoblacion)):
@@ -516,7 +623,8 @@ def grafiqueFrontera(listPoblacion, po, instance, instanceList):
 	a = plt.plot(listaOfCosts[0], listaOfCosts[1], 'b+', label = instanceList[0].nombre )
 	b = plt.plot(listaOfCosts[2], listaOfCosts[3], 'g+', label = instanceList[1].nombre)
 	c = plt.plot(listaOfCosts[4], listaOfCosts[5], 'c', label = instanceList[2].nombre)
-	d = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre)	
+	d = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre)
+	f = plt.plot(listaOfCosts[8], listaOfCosts[9], 'k', label = instanceList[4].nombre)
 	if len(po) == 0:
 		pass	
 	else:
@@ -527,11 +635,12 @@ def grafiqueFrontera(listPoblacion, po, instance, instanceList):
 		e = plt.plot(listaObtC1, listaObtC2, 'r', label = 'Pareto Optima')
 		plt.setp(e, "linestyle", "none", "marker", "*")
 	
-	plt.title('Comparacion con instancia: ' + instance)
+	plt.title('Comparacion con instancia: ' + instance1)
 	plt.setp(a, "linestyle", "none", "marker", "o")
 	plt.setp(b, "linestyle", "none", "marker", ".")
 	plt.setp(c, "linestyle", "none", "marker", "8")
 	plt.setp(d, "linestyle", "none", "marker", "o")
+	plt.setp(f, "linestyle", "none", "marker", ">")
 		
 	plt.ylabel('Costo Flujo 2')
 	plt.xlabel('Costo Flujo 1')
@@ -574,6 +683,7 @@ def computeParticipation(poblations, representative):
 			if solucion.costoFlujo in representative:
 				contador += 1
 				#print solucion.costoFlujo
+		print "contador = ", contador
 		listaContador.append(contador)
 	for cantidad in listaContador:
 		cantAux = float(cantidad)/float(len(representative))
@@ -603,17 +713,72 @@ def getMeanSTD(listofHV):
 	print str(prom) + " +- " +  str(std)
 					#print listofHV
 
-def computeCoverage(pobEvaluada, pobMetodos, indice):
+def computeCoverage(pobEvaluada, pobMetodos, indice, instanceList):
 	cov = []
+	
 	for j in range(len(pobMetodos)):
 		if indice != j:
-			for sols in pobEvaluada:
-				for solus in pobMetodos[j]:
-					pass
-#			print frontera
+			#print "cobertura de ", instanceList[indice].nombre, "contra: ",instanceList[j].nombre 
+			#Aqui empieza el coverage... 
+			counter = 0
+			for solP in pobMetodos[j]:
+				for solQ in pobEvaluada:
+					if funciones.dominance(solQ, solP):
+						counter +=1.0
+						break
+					else:
+						continue	
+			#print counter
+			largo = float(len(pobMetodos[j]))
+			result = counter/largo
+			
+			#print result
+			cov.append(result)
+		else:
+			result = -1.0
+			cov.append(result)		
+	#print len(cov)
+	
+	#ossfa = input("computecoverage finished..... ")
+	return cov		
 
 
-
+def compareMaxMins(maxMin1, maxMin2):
+	newMaxMin = []
+	aux1, aux2 = [], []
+	#minObj1
+	if maxMin1[0][0] < maxMin2[0][0]:
+		aux1.append(maxMin1[0][0])
+	elif maxMin1[0][0] > maxMin2[0][0]:
+		aux1.append(maxMin2[0][0])
+	else:
+		aux1.append(maxMin1[0][0])
+	#MaxObj1
+	if maxMin1[0][1] < maxMin2[0][1]:
+		aux1.append(maxMin1[0][1])
+	elif maxMin1[0][1] > maxMin2[0][1]:
+		aux1.append(maxMin2[0][0])
+	else:
+		aux1.append(maxMin1[0][1])
+	#minObj2
+	if maxMin1[1][0] < maxMin2[1][0]:
+		aux2.append(maxMin1[1][0])
+	elif maxMin1[1][0] > maxMin2[1][0]:
+		aux2.append(maxMin2[1][0])
+	else:
+		aux2.append(maxMin1[1][0])
+	#maxObj2
+	if maxMin1[1][1] < maxMin2[1][1]:
+		aux2.append(maxMin1[1][1])
+	elif maxMin1[1][1] > maxMin2[1][1]:
+		aux2.append(maxMin2[1][1])
+	else:
+		aux2.append(maxMin1[1][1])		
+	newMaxMin.append(aux1)
+	newMaxMin.append(aux2)
+	#print "viejos:", maxMin1, maxMin2
+	#print newMaxMin
+	return newMaxMin
 
 
 
@@ -622,18 +787,19 @@ def computeCoverage(pobEvaluada, pobMetodos, indice):
 if __name__ == "__main__":
 
 	# Example:
-	direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/Resultados'
-	carpetas = os.listdir(direct)
+	#direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/Resultados'
+	#carpetas = os.listdir(direct)
 	#print carpetas
-	instancias = '/home/rsandova/Desktop/Tesis/Memetico/AM/instances'
+	instancias = '/home/rsandova/Desktop/Tesis/Memetico/AM/instances/all'
 	inst = os.listdir(instancias)
 	inst.sort()
-		
+	
+
 	allMaxMin = []
 	myMetr = Metrics()
 	myMetr.openParetOptimas()
-	myMetr.poMaxMin()
-	
+	myMetr.poMaxMin(myMetr.paretoOptimas)
+	print "Opening Pareto Optimas for KC10-instances"
 	#for i in range(len(myMetr.maxMinInstance)):
 		#print(myMetr.maxMinInstance[i])
 	#print "paretoOptimas, ", myMetr.paretoOptimas
@@ -641,23 +807,36 @@ if __name__ == "__main__":
 
 	graspMetr = Metrics()
 	graspMetr.openResults()
+	print "Opening mGRASP/H results..."
 
+	pasMOQAP = Metrics()
+	#Abro los resultados y los guardo en .paretoFrontiers
+	pasMOQAP.openPASMOQAP()
+	#Abro los paretoFrontiers y obtengo sus maxMins.
+	pasMOQAP.getMAXIMOSMINIMOS(pasMOQAP.paretoFrontiers)
+	print "Opening pasMOQAP results. . . "
+	#Resultados de Claudio: listos...
+	#MANANA DEBO REVISAR BIEN MIS RESULTADOS... ESO CHAO.
 
-
+	#a = input("waiting. . . .")
 
 	cwd = os.getcwd()
 	#print cwd
 
+	results = "/ResultadosConfiguracion"
+	#res = raw_input("Carpeta que contiene los resultados: . . . ")
+	#results = "/"+res
 	#result = "/Resultados"
 	#nsgass = "/NSGA2/resultsGen3"
 	#dirs = cwd + nsgass
 	#resultsNSGA2(dirs)
 	
-	direct = cwd + result
-	carpetas = os.listdir(direct)
-	#print carpetas
 
-	h = input(" . . .")
+	direct = cwd + results
+	carpetas = os.listdir(direct)
+	print carpetas
+
+	
 	#Lista de listas que contiene los mejores de cada ejecucion (indice)
 	mejoresDeMejores = []
 	#Aqui obtengo todos los datos por cada ejecucion para cada metodo y se almacenan en instanceList,
@@ -668,48 +847,138 @@ if __name__ == "__main__":
 	#Del tipo [[minObj1, MaxObj1], [MinObj2, MaxObj2]]
 	for i in range(len(instanceList)):
 		print instanceList[i].nombre
+	h = input(" . . .")	
 	allMaxMin = getMaxMinMetodos(instanceList)
 	#print len(allMaxMin)
 	#pobMetodos = []
+	
+	#counter = 0
+	#for i in range(len(allMaxMin)):
+	#	if i > 15 and i < 26:
+	#		print i
+	#		newMaxMin = compareMaxMins(pasMOQAP.maxMinInstance[counter], allMaxMin[i])
+	#		allMaxMin[i] = newMaxMin	
+	#		counter += 1
+	#print "new maxmins"
+	#for maxmin in allMaxMin:
+	#	print maxmin	
+
+	#sadas = input(".....................................")	
+	salida  = 'resultadosMetodos.csv'
+	resultadosMet = open(salida, 'w')
+	resultadosMet.write("Instancia, Caso, Ejecucion, HV")
+	count = 0
+	listOfPobMetodos = []
+	out = "metrics.csv"
+	fileOut = open(out, 'w')
 	for i in range(len(allMaxMin)):
 		pobMetodos = []
 		combined = []
 		print "Resultados para Mem" + str(i)
+		c = 0
 		for j in range(len(instanceList)):
 			if i < 8:
 				print instanceList[j].nombre
-				if i == 3:
-					listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
-					getMeanSTD(listofHV)
-					pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
-					pobMetodos.append(pob)
+				#if i == 3:
+					#pass
+					#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+					#for k,HV in enumerate(listofHV):
+					#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
+					#getMeanSTD(listofHV)
+				#	pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
+				#	pobMetodos.append(pob)
 					
-				listofHV = computeHyperVolume(myMetr.maxMinInstance[i], instanceList[j].listOFrontiers[i])
-				getMeanSTD(listofHV)
+				#listofHV = computeHyperVolume(myMetr.maxMinInstance[i], instanceList[j].listOFrontiers[i])
+				#getMeanSTD(listofHV)
+				#for k,HV in enumerate(listofHV):
+				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
 				#print listofHV
 				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
 				pobMetodos.append(pob)	
-			else:
+			elif i >= 8 and i < 16:
 				print instanceList[j].nombre
-				listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
-				getMeanSTD(listofHV)
+				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+				#getMeanSTD(listofHV)
+				#for k,HV in enumerate(listofHV):
+				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + ","+ str(HV) + "\n")
+				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
+				pobMetodos.append(pob)
+			elif i >= 16 and i < 26:
+				print instanceList[j].nombre
+				#print count
+				#newMaxMin = compareMaxMins(pasMOQAP.maxMinInstance[count], allMaxMin[i])
+				#hop = input("...")
+				#listofHVpasMOQAP = computeHyperVolume(allMaxMin[i], pasMOQAP.paretoFrontiers[count])
+				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+				#getMeanSTD(listofHV)
+				#for k,HV in enumerate(listofHV):
+				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," + str(HV) + "\n")
+				#getMeanSTD(listofHVpasMOQAP)
+				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 60)
+				pobMetodos.append(pob)
+				#h = input("")
+				#c+=1
+				#if c == 5:
+				#	count += 1
+				#listofHV = computeHyperVolume()
+			elif i == 26:
+				print instanceList[j].nombre
+				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+				#getMeanSTD(listofHV)
+				#for k,HV in enumerate(listofHV):
+				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
 				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
 				pobMetodos.append(pob)
 		print "pobMetodos: ", len(pobMetodos)		
-
+		#listOfPobMetodos.append(pobMetodos)
+		
 		if i < 8:
+			listOFcovMetodo = []
 			computeParticipation(pobMetodos, myMetr.paretoOptimas[i])
-			#for i in range(len(pobMetodos)):
-			#	computeCoverage(pobMetodos[i], pobMetodos, i)
-			grafiqueFrontera(pobMetodos, myMetr.paretoOptimas[i], inst[i], instanceList )
+			fileOut.write(inst[i][1:])
+			fileOut.write("\n")
+			for k in range(len(pobMetodos)):
+				covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
+				for elem in covMetodo:
+					fileOut.write(str(elem) + ",")
+				
+				fileOut.write("\n")	#
+			fileOut.write("\n")
+			fileOut.write("\n")
+				#listOFcovMetodo.append(covMetodo)
+			
+			#funciones.imprimeMatriz(listOFcovMetodo)
+			#for e in range(len(listOFcovMetodo)):
+			#	print listOFcovMetodo[e]
+				
+			#a=input("...")
+			#grafiqueFrontera(pobMetodos, myMetr.paretoOptimas[i], inst[i], instanceList )
 		else:
+			#pass
 			paretoRep = getParetoRepresentative(pobMetodos)
 			aporteFrontera = computeParticipation(pobMetodos, paretoRep)
+			listOFcovMetodo = []
+			fileOut.write(inst[i][1:])
+			fileOut.write("\n")
+			for k in range(len(pobMetodos)):
+				covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
+				for elem in covMetodo:
+					fileOut.write(str(elem) + ",")
+					#fileOut.write("\n")
+				fileOut.write("\n")			
+			fileOut.write("\n")
+			fileOut.write("\n")
+			#ahora debo imprimir la matriz que me resulta listofcovmetodos.
+			#funciones.imprimeMatriz(listOFcovMetodo)
+			#for matriz in listOFcovMetodo:
+			#	print matriz 
 			#computeCoverage(pobMetodos)
-			grafiqueFrontera(pobMetodos, [], inst[i], instanceList)
-
-
-		h = input("")
+			#a=input("waiting...")
+			#grafiqueFrontera(pobMetodos, [], inst[i], instanceList)
+	#print "listOFPobMetodos", len(listOfPobMetodos)		
+	fileOut.close()
+	resultadosMet.close()		
+		#h = input("")
 
 
 

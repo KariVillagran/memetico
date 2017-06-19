@@ -212,10 +212,15 @@ class NSGA2:
 			if counter != 1:
 				
 				print "Local Search is beggining. . . "	
-				poblacion = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+				pob = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
 				print "Local Search has ended."
-				nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
-				self.numberOfEvaluations += tamPob
+				if len(pob) == 0:
+					nextPobla = self.makeNewPob(poblacion, indCX, tamPob)
+					self.numberOfEvaluations += tamPob
+				else:
+					nextPobla = self.makeNewPob(pob, indCX, tamPob)
+					self.numberOfEvaluations += tamPob
+	
 			
 			#if self.numberOfEvaluations >= nEvalua:
 			if counter == generaciones:

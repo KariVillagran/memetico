@@ -22,12 +22,12 @@ exe = sys.argv[1]
 params = sys.argv[2]
 
 #print exe
-for i in range(10):
+for i in range(20):
 	print "+++++++++++++++++++"
 
 	print "Running Process:  " +  str(i)
 	print "+++++++++++++++++++"
-	lineaCom = "python main.py " + str(exe) + " Casos/" + str(params) + " "  + str(seeds[i]) 
+	lineaCom = "python main.py " + str(exe) + " Metodos/" + str(params) + " "  + str(seeds[i]) 
 	print lineaCom
 	p = subprocess.Popen(lineaCom, shell=True)
 	p.communicate()
