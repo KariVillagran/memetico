@@ -22,7 +22,7 @@ exe = sys.argv[1]
 params = sys.argv[2]
 
 #print exe
-for i in range(20):
+for i in range(30):
 	print "+++++++++++++++++++"
 
 	print "Running Process:  " +  str(i)

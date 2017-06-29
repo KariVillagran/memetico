@@ -34,6 +34,8 @@ def main():
 
 	#print "Trabajo escrito de tesis"
 	
+	#child =nsga2.onePointCrossover(P[0], P[1])
+
 	#Runnning Algorithm
 	if params.init == "True":
 		initPobla = nsga2.initAlgorithm(P, params.tamPob)
