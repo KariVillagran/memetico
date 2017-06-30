@@ -1,5 +1,5 @@
-algorithm = GQPLS
-cxOperator = 1
+algorithm = MEMETIC
+cxOperator = 2
 mutOperator = 3opt
 cxRate = 0.95
 mutRate = 0.01
@@ -11,4 +11,4 @@ limitSearch = 0.5
 initialization = False
 evalPerGen = 86
 populationStrategy = 1
-searchStrategy = 1
+searchStrategy = 2

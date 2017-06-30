@@ -1,7 +1,7 @@
 algorithm = MEMETIC
 cxOperator = 1
 mutOperator = 3opt
-cxRate = 0.9
+cxRate = 0.95
 mutRate = 0.01
 tamPoblacion = 200
 finishStrategy = GEN
@@ -10,3 +10,5 @@ k = 10
 limitSearch = 0.5
 initialization = False
 evalPerGen = 86
+populationStrategy = 1
+searchStrategy = 2

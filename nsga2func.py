@@ -24,7 +24,9 @@ class Solucion:
 		self.crowdedDistance = 0.0
 		self.visitado = 0
 		self.movimientos = []
-		self.cyclePositions = []
+		self.noMoreSearch = 0
+		self.tabooList = []
+		self.dontLookBit = 0
 
 	def costoAsignacion(self):
 		self.costoFlujo[0] = 0.0
@@ -77,21 +79,21 @@ class NSGA2:
 		self.completado = False
 			
 
-	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
+	def runAlgorithm(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen, pobStr, searchStr, instancia, direct):
 		
 		
 	
 		if algorithm == "MEMETIC":
-			self.runMemetic(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen)
+			self.runMemetic(algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen, pobStr, searchStr, instancia, direct)
 
 		elif algorithm == "NSGA2":
-			self.runNSGA2(poblacion, tamPob, indCX, start, nEvalua)
+			self.runNSGA2(algorithm, poblacion, tamPob, indCX, start, nEvalua, instancia, direct)
 
 		elif algorithm == "QPLS":
-			self.runQPLS(poblacion, tamPob, k, limitSearch, start, nEvalua, -1)
+			self.runQPLS(algorithm, poblacion, tamPob, k, limitSearch, start, nEvalua, -1,  pobStr, searchStr, instancia, direct)
 
 		elif algorithm == "GQPLS":
-			self.runGeneticQPLS(poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen)
+			self.runGeneticQPLS(algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen,  pobStr, searchStr, instancia, direct)
 
 		else:
 			print "Can't execute algorithm,", algorithm ,"check the 'parameters.dat' file"
@@ -99,14 +101,14 @@ class NSGA2:
 		return 1
 
 
-	def runNSGA2(self,poblacion, tamPob, indCX, start, nEvalua):
+	def runNSGA2(self, algorithm, poblacion, tamPob, indCX, start, nEvalua, instancia, direct):
 		self.numberOfEvaluations = 0
-		print "Initializing Non Sorting Genetic Algorithm 2. . .  "
+		print "Initializing: ", algorithm
 		counter = 1
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 
-		self.directorio = "results/Results_" + tiempo
+		self.directorio = direct +str(instancia)+"Results_" + tiempo
 		os.makedirs(self.directorio)
 		
 		nombreArchivo = self.directorio + "/generaciones.csv"
@@ -160,18 +162,16 @@ class NSGA2:
 		nArchivo.seek(0)
 		nArchivo.write("Final time of Execution: " + str(final) + "\n")
 		nArchivo.close()
-		pareto.close()
 		print "Genetic Algorithm Finished in: ", str(final)	
 		return 1
 			
-	def runGeneticQPLS(self,poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
+	def runGeneticQPLS(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen, pobStr, searchStr, instancia, direct):
 		self.numberOfEvaluations = 0
-		print "Initializing Genetic Pareto Local Search. . . ."
-		
+		print "Initializing: ", algorithm
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 
-		self.directorio = "results/Results_"+tiempo
+		self.directorio = direct +str(instancia)+"Results_" + tiempo
 		os.makedirs(self.directorio)
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
@@ -191,13 +191,13 @@ class NSGA2:
 			print "Extending Populations into Combined Population. . ."
 			if counter == 1:
 				print "Initializating Population with QPLS. . ."
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 				print "Genetic Search is running. . . ."
 				geneticSearchPobla = self.makeNewPob(nextPobla, indCX, tamPob)
 				self.numberOfEvaluations += tamPob
 				print "Genetic Search has ended."
 				print "Local Search is running. . . ."
-				nextnextPobla = self.memoryBasedPLS(geneticSearchPobla, tamPob, k, limitSearch, maxEvalGen)
+				nextnextPobla = self.memoryBasedPLS(geneticSearchPobla, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 				print "Local Search has ended."
 				pobCombinada.extend(poblacion)
 				pobCombinada.extend(nextPobla)
@@ -208,8 +208,12 @@ class NSGA2:
 				poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
 			
 			else:
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+				print "Local Search is Running. . ."
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
+				print "Local Search has ended."
+				print "Genetic Search is Running. . ."
 				geneticPobla = self.makeNewPob(nextPobla, indCX, tamPob)
+				print "Genetic Search has ended."
 				self.numberOfEvaluations += tamPob
 				pobCombinada.extend(poblacion)
 				pobCombinada.extend(geneticPobla)
@@ -244,12 +248,12 @@ class NSGA2:
 		print "Algorithm finished in: " , str(final)
 		return 1
 
-	def runQPLS(self, poblacion, tamPob,k, limitSearch, start, nEvalua, maxEvalGen):
+	def runQPLS(self, algorithm,poblacion, tamPob,k, limitSearch, start, nEvalua, maxEvalGen, pobStr, searchStr, instancia, direct):
 		self.numberOfEvaluations = 0
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
-
-		self.directorio = "results/Results_"+tiempo
+		print "Initializing: ", algorithm
+		self.directorio = direct +str(instancia)+"Results_" + tiempo
 		os.makedirs(self.directorio)
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
@@ -268,7 +272,7 @@ class NSGA2:
 			
 			if counter == 1:
 				print "Local Search is running. . ."
-				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 				print "Local Search has ended."
 			
 			print "Extending Populations into Combined Population. . ."
@@ -285,7 +289,7 @@ class NSGA2:
 					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")
 			
 			print "Local Search is beggining. . . "	
-			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 			print "Local Search has ended."
 			if self.numberOfEvaluations >= nEvalua:
 				print "Evaluation limit reached... "
@@ -308,14 +312,13 @@ class NSGA2:
 		print "Algorithm finished in: " , str(final)
 		return 1
 
-	def runMemetic(self, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen):
-		print "Running Memetic Algorithm. . . . . . . . . . . . "
-		
+	def runMemetic(self, algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen, pobStr, searchStr, instancia, direct):
+		print "Initializing: ", algorithm
 		self.numberOfEvaluations = 0
 		startTime = start
 		tiempo = funciones.convertTime(startTime)
 
-		self.directorio = "results/Results_"+tiempo
+		self.directorio = direct +str(instancia)+"Results_" + tiempo
 		os.makedirs(self.directorio)
 		nombreArchivo = self.directorio + "/generaciones.csv"
 		nArchivo = open(nombreArchivo, 'w' )
@@ -339,7 +342,7 @@ class NSGA2:
 			print "Genetic Search has ended."
 
 			print "Local Search is running. . . "	
-			pobla = self.memoryBasedPLS(nextPobla, tamPob, k, limitSearch, maxEvalGen)
+			pobla = self.memoryBasedPLS(nextPobla, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 			print "Local Search has ended."
 
 			print "Extending Populations into Combined Population. . ."
@@ -347,6 +350,7 @@ class NSGA2:
 			pobCombinada.extend(nextPobla)
 			pobCombinada.extend(pobla)
 
+			
 			print "Fast Non-Dominated Sorting of Combined Population. . . " 
 			fronteras = self.fastNonDominatedSort(pobCombinada)
 			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
@@ -426,13 +430,13 @@ class NSGA2:
 		return poblacion		
 
 	def ordenPostBusqueda(self, poblacion, fronteras, tamPob):
-		
 		del poblacion[:]
 		for front in fronteras:
 			self.crowdingDistanceAssignment(front)
 			for elem in front:
 				poblacion.append(elem)
 		self.sortCrowding(poblacion)
+		
 		if len(poblacion) > tamPob:
 			#print "es mayor"
 			poblacion = poblacion[:tamPob]
@@ -440,7 +444,7 @@ class NSGA2:
 			#print elemento.solution, elemento.rank
 		return poblacion
 
-	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit, maxEvalGen):
+	def memoryBasedPLS(self, poblacion, tamPob, numEntrantes, searchLimit, maxEvalGen, pobStrategy, searchStrategy):
 		self.numberOfEvalPerGen = 0
 		#Defino variables para almacenar soluciones
 		archive ,archive_aux ,LS_archive, solutionArchive, vecindad, soluciones, listaVecinos, solucionAux = [], [], [], [], [], [], [], []
@@ -453,9 +457,14 @@ class NSGA2:
 		vecinosNDAceptados = []
 		#Para cada solucion de la poblacion cuyo rank sea 1, debo agregarla al archive_aux, que contiene todas las soluciones pero solo 
 		#usa las no repetidas para la LS
-		for solucion in poblacion:
-			#if solucion.rank == 1:
-			archive_aux.append(solucion)
+		if pobStrategy == 1:
+			for solucion in poblacion:
+				archive_aux.append(solucion)
+		elif pobStrategy == 2:
+			for solucion in poblacion:
+				if solucion.rank == 1:
+					archive_aux.append(solucion)
+		
 		#Calculo su crowding de cada individuo y sort por dicho valor		
 		archive_aux = self.crowdingDistanceAssignment(archive_aux)
 		archive_aux = self.sortCrowding(archive_aux)
@@ -487,7 +496,10 @@ class NSGA2:
 			solSeleccionada = self.seleccionar(archive)
 			#print "La sol seleccionada es: ",solSeleccionada.solution, solSeleccionada.costoFlujo
 			#Obtengo un vecino dominante
-			vecinosObtenidos = self.buscarDominante(solSeleccionada, searchLimit)
+			if searchStrategy == 1:
+				vecinosObtenidos = self.buscarDominante(solSeleccionada, searchLimit, maxEvalGen)
+			elif searchStrategy == 2:
+				vecinosObtenidos = self.buscarFirst(solSeleccionada, searchLimit, maxEvalGen)
 
 			#print "Los elementos en el vecinos obtenidos son:"
 			#for elemento in vecinosObtenidos[1]:
@@ -497,6 +509,7 @@ class NSGA2:
 			#las soluciones del archivo... entonces ahi agrego al vecino y elimino a la solucion de donde la obtuve. 
 			vecino = Solucion(numFac)
 			vecino = vecinosObtenidos[0]
+			continuar = vecino.noMoreSearch 
 			#print "El vecino obtenido es: ", vecino.solution, vecino.costoFlujo
 			if len(vecinosObtenidos) > 1:
 				for i in range(1,len(vecinosObtenidos)):
@@ -545,9 +558,14 @@ class NSGA2:
 				#print "fin elementos archivo actualizado..."
 			#print "number: ", self.numberOfEvalPerGen
 			#o = input(". . . .")
-			if maxEvalGen != -1:
-				if self.numberOfEvalPerGen >= maxEvalGen:
-					break
+			if continuar == -1:
+				break
+
+			#if maxEvalGen != -1:
+			#	if self.numberOfEvalPerGen >= maxEvalGen:
+			#		print "NUmber of REAL evals done :", self.numberOfEvalPerGen
+			#		break
+		
 		#print evaluations
 		pobCombinada = []
 		pobCombinada.extend(poblacion)
@@ -627,9 +645,10 @@ class NSGA2:
  			return True
 
 			
-	def generate_One_Neighbor(self, solucion, posiciones ):
+	def generate_One_Neighbor(self, solucion, posiciones):
 		numFac = solucion.numFacilities
 		posAux = []
+		
 		#Selecciono las posiciones, no pueden ser iguales
 		posRandom1 = random.randint(0, numFac-1)
 		posRandom2 = random.randint(0, numFac-1)
@@ -656,12 +675,16 @@ class NSGA2:
 		costos = solucion.costoAsignacionMovida(posAux[0], posAux[1])
 		vecino.costoFlujo[0] = solucion.costoFlujo[0] - costos[0]
 		vecino.costoFlujo[1] = solucion.costoFlujo[1] - costos[1]
+		#Duda... si modifico informacion de solucion, pero no la retorno esta se mantiene? o debo retornar tambien la solucion?
+		#solucion.tabooList.append(posAux)
 		vecino.movimientos.append(posAux[0])
-		vecino.movimientos.append(posAux[1])
+		vecino.movimientos.append(posAux[1])		
+		
+
 		#Entonces genero el primer vecino, ahora debo iterar este proceso hasta encontrar dominante
 		return vecino
 
-	def buscarDominante(self, solucion, sL):
+	def buscarDominante(self, solucion, sL, maxEvalGen ):
 		numFac = solucion.numFacilities
 		posiciones = []
 		vecino = Solucion(numFac)
@@ -680,31 +703,75 @@ class NSGA2:
 			#Si la solucion domina al vecino, se agregan las posiciones utilizadas
 			if funciones.dominance(solucion, vecino):
 				#print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
-				posiciones.append(vecino.movimientos)
+				#solucion.tabooList.append(vecino.movimientos)
+				#posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
 				self.numberOfEvalPerGen +=1
 				iterator += 1
+				if maxEvalGen != -1:
+					if self.numberOfEvalPerGen >= maxEvalGen:
+						vecino.noMoreSearch = -1
+						break
+				elif maxEvalGen == -1:
+					if self.numberOfEvaluations >= 20000:
+						vecino.noMoreSearch = -1
+						break
 				if iterator >= searchLimit:
 					break
 			else:
 				#print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
-				posiciones.append(vecino.movimientos)
+				#posiciones.append(vecino.movimientos)
 				vecino_DomYCandidatos.append(vecino)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
 				self.numberOfEvalPerGen +=1
 				iterator += 1
+				if maxEvalGen != -1:
+					if self.numberOfEvalPerGen >= maxEvalGen:
+						vecino.noMoreSearch = -1
+						break
+				elif maxEvalGen == -1:
+					if self.numberOfEvaluations >= 20000:
+						vecino.noMoreSearch = -1
+						break		
 				if iterator >= searchLimit:
 					break
 		if iterator >= searchLimit:
-			vecino_DomYCandidatos.insert(0,solucion)
+			vecino_DomYCandidatos.insert(0, solucion)
 			#print "no se encontraron resultados e iterator es: ", iterator
 			return vecino_DomYCandidatos
 		#print "El vecino dominantes es: ", vecino.solution, vecino.costoFlujo
 		#print "y se encontro en la iteracion: ", iterator	
 		vecino_DomYCandidatos.insert(0, vecino)
+		#print "end of buscar dominante..."
 		return vecino_DomYCandidatos
+
+	def buscarFirst(self, solucion, sL, maxEvalGen ):
+		numFac = solucion.numFacilities	
+		posiciones = []	
+		vecino = Solucion(numFac)
+		vecino = self.generate_One_Neighbor(solucion, posiciones)
+		self.numberOfEvaluations +=1
+		self.numberOfEvalPerGen +=1
+		iterator = 1
+		tamVecindario = (numFac*(numFac-1))/2
+		searchLimit = int(round(tamVecindario*sL))
+		vecinosNoDom = []
+		vecino_DomYCandidatos = []
+		while not(funciones.dominance(vecino, solucion)):
+			vecino = self.generate_One_Neighbor(solucion, posiciones)
+			self.numberOfEvaluations +=1
+			self.numberOfEvalPerGen +=1
+			iterator += 1
+			if iterator >= searchLimit or self.numberOfEvalPerGen >= maxEvalGen:
+				vecino.noMoreSearch = -1
+				break
+		if iterator >= searchLimit:
+			vecino_DomYCandidatos.insert(0, solucion)
+			return vecino_DomYCandidatos
+		vecino_DomYCandidatos.insert(0, vecino)
+		return vecino_DomYCandidatos	
 
 
 	def contadorVisitados(self, archive):
@@ -810,8 +877,8 @@ class NSGA2:
 			solP.numSolDominantes = 0
 			solP.setSolDominadas = []
 			for solQ in poblacion:
-				if solP == solQ:
-					continue
+				#if solP == solQ:
+				#	continue
 				if funciones.dominance(solP,solQ):
 					solP.setSolDominadas.append(solQ)
 				elif funciones.dominance(solQ,solP):
@@ -836,7 +903,6 @@ class NSGA2:
 			else:
 				matrixFrontera.append(fronteras)
 			#fronteras = nextFront[:]
-
 		return matrixFrontera
 
 	def crowdingDistanceAssignment(self,frontera):
@@ -854,7 +920,7 @@ class NSGA2:
 			else:
 				frontera[0].crowdedDistance = float('Inf')
 				frontera[largo-1].crowdedDistance = float('Inf')
-				for i in range(1,largo-1):
+				for i in range(2,largo-1):
 					#pass
 					#print frontera[i].crowdedDistance,
 					#print frontera[i+1].costoFlujo[n_obj]
@@ -934,12 +1000,12 @@ class NSGA2:
 
 
 	def onePointCrossover(self,sol,other):
-		print "One Point Crossover beggining"
+		#print "One Point Crossover beggining"
 		numFac = sol.numFacilities
 		child = Solucion(numFac)
 		sol.costoAsignacion(), other.costoAsignacion()
-		print "sol1: ",sol.solution, sol.costoFlujo[0], sol.costoFlujo[1]
-		print "Sol2:", other.solution, other.costoFlujo[0], other.costoFlujo[1]
+		#print "sol1: ",sol.solution, sol.costoFlujo[0], sol.costoFlujo[1]
+		#print "Sol2:", other.solution, other.costoFlujo[0], other.costoFlujo[1]
 		posRestringidas, posLibres, objPendiente  = [], [], []
 		rangoA,rangoB = random.randint(0, numFac-1), random.randint(2, numFac-2)
 		rangoC = rangoA+rangoB
@@ -961,9 +1027,9 @@ class NSGA2:
 		for x in posLibres:	
 			child.solution.insert(x,objPendiente[cont])
 			cont +=1
-		print "child: ", 
+		#print "child: ", 
 		child.costoAsignacion()
-		print child.solution, child.costoFlujo[0], child.costoFlujo[1]
+		#print child.solution, child.costoFlujo[0], child.costoFlujo[1]
 		
 		#print "One Point Crossover Finished"
 		return child

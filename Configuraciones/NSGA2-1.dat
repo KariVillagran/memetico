@@ -1,4 +1,4 @@
-algorithm = GQPLS
+algorithm = NSGA2
 cxOperator = 1
 mutOperator = 3opt
 cxRate = 0.95

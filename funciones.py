@@ -36,7 +36,8 @@ class Parametros:
 		self.limitSearch = float(data[9])
 		self.init = data[10]
 		self.evalPerGen = int(data[11])
-
+		self.pobStrategy = int(data[12])
+		self.searchStrategy = int(data[13])
 
 
 def lectura2():

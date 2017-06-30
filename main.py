@@ -18,6 +18,7 @@ matrixDistancia, matrixFlujoUno, matrixFlujoDos = [], [], []
 def main():
 	numFac = funciones.distribuirMatrices(funciones.lectura())
 	
+	instancia = sys.argv[1]
 	#Read parameters
 	data = funciones.readParameters()
 	params = Parametros(data)
@@ -25,6 +26,8 @@ def main():
 	seed = sys.argv[3]
 	random.seed(seed)
 	#Set Time
+	direct = sys.argv[4]
+
 	start = datetime.datetime.now()
 	#Create NSGA2
 	nsga2 = NSGA2(2, params.mutRate, params.cxRate)
@@ -34,14 +37,13 @@ def main():
 
 	#print "Trabajo escrito de tesis"
 	
-	#child =nsga2.onePointCrossover(P[0], P[1])
-
+	
 	#Runnning Algorithm
 	if params.init == "True":
 		initPobla = nsga2.initAlgorithm(P, params.tamPob)
-		nsga2.runAlgorithm(params.algorithm, initPobla, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen)	
+		nsga2.runAlgorithm(params.algorithm, initPobla, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen, params.pobStrategy, params.searchStrategy, instancia, direct)	
 	else:
-		nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen)
+		nsga2.runAlgorithm(params.algorithm, P, params.tamPob, params.cxOp , params.k , params.limitSearch, start, params.finishLimit, params.evalPerGen, params.pobStrategy, params.searchStrategy, instancia, direct)
 	
 #a = [i for i in range(numFac)]
 if __name__ == '__main__':

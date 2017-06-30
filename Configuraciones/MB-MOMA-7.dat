@@ -11,4 +11,4 @@ limitSearch = 0.5
 initialization = False
 evalPerGen = 86
 populationStrategy = 1
-searchStrategy = 1
+searchStrategy = 2
