@@ -190,10 +190,15 @@ class NSGA2:
 			pobCombinada = []
 			print "Extending Populations into Combined Population. . ."
 			if counter == 1:
+				print "Initializating Population with QPLS. . ."
 				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
+				print "Genetic Search is running. . . ."
 				geneticSearchPobla = self.makeNewPob(nextPobla, indCX, tamPob)
 				self.numberOfEvaluations += tamPob
+				print "Genetic Search has ended."
+				print "Local Search is running. . . ."
 				nextnextPobla = self.memoryBasedPLS(geneticSearchPobla, tamPob, k, limitSearch, maxEvalGen)
+				print "Local Search has ended."
 				pobCombinada.extend(poblacion)
 				pobCombinada.extend(nextPobla)
 				pobCombinada.extend(nextnextPobla)
@@ -204,10 +209,7 @@ class NSGA2:
 			
 			else:
 				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen)
-				if len(nextPobla) == 0:
-					geneticPobla = self.makeNewPob(poblacion, indCX, tamPob)
-				else:
-					geneticPobla = self.makeNewPob(nextPobla, indCX, tamPob)
+				geneticPobla = self.makeNewPob(nextPobla, indCX, tamPob)
 				self.numberOfEvaluations += tamPob
 				pobCombinada.extend(poblacion)
 				pobCombinada.extend(geneticPobla)
@@ -547,7 +549,12 @@ class NSGA2:
 				if self.numberOfEvalPerGen >= maxEvalGen:
 					break
 		#print evaluations
-		return paretoArchive
+		pobCombinada = []
+		pobCombinada.extend(poblacion)
+		pobCombinada.extend(paretoArchive)
+		fronteras = self.fastNonDominatedSort(pobCombinada)
+		localSearchPob = self.ordenPostBusqueda(pobCombinada,fronteras, tamPob)
+		return localSearchPob
 
 	def obtenerAlphaRandom(self, candidates, numEntrantes):
 		filtro = []
