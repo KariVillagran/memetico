@@ -291,6 +291,8 @@ class NSGA2:
 			print "Local Search is beggining. . . "	
 			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 			print "Local Search has ended."
+
+
 			if self.numberOfEvaluations >= nEvalua:
 				print "Evaluation limit reached... "
 				print "Number of total fitness evaluation: ", self.numberOfEvaluations
@@ -566,6 +568,7 @@ class NSGA2:
 				#print "fin elementos archivo actualizado..."
 			#print "number: ", self.numberOfEvalPerGen
 			#o = input(". . . .")
+			#print "CONTINUAR....................................", continuar
 			if continuar == -1:
 				break
 
@@ -712,7 +715,7 @@ class NSGA2:
 			if funciones.dominance(solucion, vecino):
 				#print "La solucion domina al vecino", vecino.solution, vecino.costoFlujo
 				#solucion.tabooList.append(vecino.movimientos)
-				#posiciones.append(vecino.movimientos)
+				posiciones.append(vecino.movimientos)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
 				self.numberOfEvalPerGen +=1
@@ -729,7 +732,7 @@ class NSGA2:
 					break
 			else:
 				#print "El vecino y la solucion son no-dominadas entre si", vecino.solution, vecino.costoFlujo
-				#posiciones.append(vecino.movimientos)
+				posiciones.append(vecino.movimientos)
 				vecino_DomYCandidatos.append(vecino)
 				vecino = self.generate_One_Neighbor(solucion, posiciones)
 				self.numberOfEvaluations +=1
@@ -761,20 +764,26 @@ class NSGA2:
 		vecino = Solucion(numFac)
 		vecino = self.generate_One_Neighbor(solucion, posiciones)
 		self.numberOfEvaluations +=1
-		self.numberOfEvalPerGen +=1
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
 		searchLimit = int(round(tamVecindario*sL))
 		vecinosNoDom = []
 		vecino_DomYCandidatos = []
 		while not(funciones.dominance(vecino, solucion)):
+			posiciones.append(vecino.movimientos)
 			vecino = self.generate_One_Neighbor(solucion, posiciones)
 			self.numberOfEvaluations +=1
-			self.numberOfEvalPerGen +=1
+			#self.numberOfEvalPerGen +=1
 			iterator += 1
-			if iterator >= searchLimit or self.numberOfEvalPerGen >= maxEvalGen:
-				vecino.noMoreSearch = -1
-				break
+			if maxEvalGen != -1:
+				if iterator >= searchLimit or self.numberOfEvalPerGen >= maxEvalGen:
+					vecino.noMoreSearch = -1
+					break
+			elif maxEvalGen == -1: 
+				if iterator >= searchLimit or self.numberOfEvaluations >= 20000:
+					#print "Enough for: ", solucion.solution
+					vecino.noMoreSearch = -1
+					break		
 		if iterator >= searchLimit:
 			vecino_DomYCandidatos.insert(0, solucion)
 			return vecino_DomYCandidatos
