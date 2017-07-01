@@ -341,6 +341,9 @@ class NSGA2:
 			self.numberOfEvaluations += tamPob
 			print "Genetic Search has ended."
 
+			self.fastNonDominatedSort(nextPobla)
+
+
 			print "Local Search is running. . . "	
 			pobla = self.memoryBasedPLS(nextPobla, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 			print "Local Search has ended."
@@ -464,7 +467,12 @@ class NSGA2:
 			for solucion in poblacion:
 				if solucion.rank == 1:
 					archive_aux.append(solucion)
-		
+			if len(archive_aux) == 0:
+				#print "YO SOLO DEBO SUCEDER UNA VEZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+				for solucion in poblacion:
+					archive_aux.append(solucion)
+		#print len(archive_aux)
+		#issd= input(".. . .")
 		#Calculo su crowding de cada individuo y sort por dicho valor		
 		archive_aux = self.crowdingDistanceAssignment(archive_aux)
 		archive_aux = self.sortCrowding(archive_aux)
