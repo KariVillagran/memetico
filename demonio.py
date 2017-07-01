@@ -33,7 +33,7 @@ directorio = "results/" + str(exe)
 
 for instance in instancias:
 	print "Running instance:", instance
-	for i in range(30):
+	for i in range(1):
 		print "+++++++++++++++"
 		print "Running Process: " + str(i)
 		lineaCom = "python main.py " + "instances/" + str(instance) + " Configuraciones/" + str(exe) + " " + str(seeds[i]) + " " + str(directorio)

@@ -96,7 +96,7 @@ class NSGA2:
 			self.runGeneticQPLS(algorithm, poblacion, tamPob, indCX, k, limitSearch, start, nEvalua, maxEvalGen,  pobStr, searchStr, instancia, direct)
 
 		else:
-			print "Can't execute algorithm,", algorithm ,"check the 'parameters.dat' file"
+			print "Can't execute algorithm,", algorithm ,"check the '.dat' file"
 			print "The Algorithms are: NSGA2, QPLS, GQPLS or MEMETIC"
 		return 1
 
