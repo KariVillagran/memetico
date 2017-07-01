@@ -33,14 +33,14 @@ directorio = "results/" + str(exe)
 
 for instance in instancias:
 	print "Running instance:", instance
-	for i in range(1):
+	for i in range(30):
 		print "+++++++++++++++"
 		print "Running Process: " + str(i)
 		lineaCom = "python main.py " + "instances/" + str(instance) + " Configuraciones/" + str(exe) + " " + str(seeds[i]) + " " + str(directorio)
 		print lineaCom
 		p = subprocess.Popen(lineaCom, shell = True)
 		p.communicate()
-		time.sleep(1)
+		time.sleep(10)
 
 print lineaCom
 print "Memetic Algorithm Finished" 
