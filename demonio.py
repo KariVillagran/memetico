@@ -40,7 +40,7 @@ for instance in instancias:
 		print lineaCom
 		p = subprocess.Popen(lineaCom, shell = True)
 		p.communicate()
-		time.sleep(10)
+		time.sleep(1)
 
 print lineaCom
 print "Memetic Algorithm Finished" 

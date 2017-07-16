@@ -199,10 +199,10 @@ class NSGA2:
 				print "Local Search is running. . . ."
 				nextnextPobla = self.memoryBasedPLS(geneticSearchPobla, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 				print "Local Search has ended."
-				pobCombinada.extend(poblacion)
+				#pobCombinada.extend(poblacion)
 				pobCombinada.extend(nextPobla)
 				pobCombinada.extend(nextnextPobla)
-				pobCombinada.extend(geneticSearchPobla)
+				#pobCombinada.extend(geneticSearchPobla)
 				print "Fast Non-Dominated Sorting of Combined Population. . . " 
 				fronteras = self.fastNonDominatedSort(pobCombinada)
 				poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
@@ -215,7 +215,7 @@ class NSGA2:
 				geneticPobla = self.makeNewPob(nextPobla, indCX, tamPob)
 				print "Genetic Search has ended."
 				self.numberOfEvaluations += tamPob
-				pobCombinada.extend(poblacion)
+				#pobCombinada.extend(poblacion)
 				pobCombinada.extend(geneticPobla)
 				pobCombinada.extend(nextPobla)
 				print "Fast Non-Dominated Sorting of Combined Population. . . " 
@@ -352,7 +352,7 @@ class NSGA2:
 
 			print "Extending Populations into Combined Population. . ."
 			pobCombinada.extend(poblacion)
-			pobCombinada.extend(nextPobla)
+			#pobCombinada.extend(nextPobla)
 			pobCombinada.extend(pobla)
 
 			
@@ -555,7 +555,7 @@ class NSGA2:
 						else:
 							filtro = self.obtenerAlphaRandom(candidatesNonDom, numEntrantes)
 							archive = self.filtrarRepetidos(archive, filtro)
-						
+					solSeleccionada.visitado = 1	
 													
 
 				#Si es False, continuo la busqueda.
@@ -764,6 +764,7 @@ class NSGA2:
 		vecino = Solucion(numFac)
 		vecino = self.generate_One_Neighbor(solucion, posiciones)
 		self.numberOfEvaluations +=1
+		self.numberOfEvalPerGen +=1
 		iterator = 1
 		tamVecindario = (numFac*(numFac-1))/2
 		searchLimit = int(round(tamVecindario*sL))
@@ -773,7 +774,7 @@ class NSGA2:
 			posiciones.append(vecino.movimientos)
 			vecino = self.generate_One_Neighbor(solucion, posiciones)
 			self.numberOfEvaluations +=1
-			#self.numberOfEvalPerGen +=1
+			self.numberOfEvalPerGen +=1
 			iterator += 1
 			if maxEvalGen != -1:
 				if iterator >= searchLimit or self.numberOfEvalPerGen >= maxEvalGen:

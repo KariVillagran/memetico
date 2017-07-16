@@ -33,7 +33,7 @@ def main():
 	nsga2 = NSGA2(2, params.mutRate, params.cxRate)
 
 	P = []
-	funciones.crearPoblacion(P, params.tamPob, numFac)
+	P = funciones.crearPoblacion(P, params.tamPob, numFac)
 
 	#print "Trabajo escrito de tesis"
 	

@@ -435,3 +435,42 @@ def addAndUpdate(self, solucion, archive):
 		del restPop[:]
 
 		return new_pob
+
+
+
+
+
+
+	#pobRef = []
+	#for elem in pobReferencia:
+	#	pobRef.append(elem.costoFlujo)
+	#refAux = []
+	#refAux = pobRef[:]	
+	#for elem in pobEvaluada:
+	#	if elem in refAux:
+	#		refAux.remove(elem)
+	#for elem in pobEvaluada:
+	#	sol = Solucion(numFac)
+	#	sol.costoFlujo = elem[:]
+	#	pobEv.append(sol)
+	#for elem in refAux:
+	#	sol = Solucion(numFac)
+	#	sol.costoFlujo = elem[:]
+	#	pobRef2.append(sol)
+	#counter = 0
+	#for solP in pobEv:
+	#	for solQ in pobRef2:
+	#		if funciones.weaklyDominance(solQ,solP):
+	#			#print solQ.costoFlujo, solP.costoFlujo
+	#			counter += 1.0
+	#			break
+	#		else:
+	#			#print solP.costoFlujo, solQ.costoFlujo
+	#			continue
+	#largo = float(len(pobEv))
+	#if largo == 0:
+	#	result = 1.0
+	#else:
+	#	result = counter/largo
+	#print "Cobertura: ",result
+	#return result

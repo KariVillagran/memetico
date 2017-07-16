@@ -6,11 +6,14 @@ import os
 from hv import HyperVolume
 import datetime
 import matplotlib as mpl
+import shutil
 
-mpl.use('agg')
+#mpl.use('agg')
  
 import matplotlib.pyplot as plt
 
+#plt.switch_backend('Qt5Agg')  
+plt.style.use('ggplot')
 #Creo matriz con 15 elementos, distribuidos en dimensiones (3,5), es decir, 3 arreglos de tamaño 5 cada uno
 a = np.arange(15).reshape(3,5)
 #Creo array
@@ -99,12 +102,13 @@ def resultsNSGA2(carpeta):
 					# allValuesF2.append(val2)
 			counter += 1
 			allLines.append(listLine)
+		theResults.append(allLines)
 		#for lines in listLine:
 		# print lines       
 		#o = input(". . . .")
 		#print listLine
 	print len(allLines)
-	theResults.append(allLines)
+	#theResults.append(allLines)
 	print len(theResults)
 	#h = input(" . . .")
 	#allValuesF1.sort()
@@ -189,22 +193,22 @@ def computeHyperVolumeIns(maxMinValues, fronteras, instance):
 	#Se guarda en esta lista debido a que los resultados iran dentro del objeto... en normalizedValues...
 	listaHyperVol = []
 	normalizados = []
-	#print len(fronteras)
-	#h = input("")
+	print len(fronteras)
+	h = input("")
 	listOfIndexes = []
 	for i in range(len(fronteras)):
-	#print i
+		print i
 		if i == instance:
-			print len(fronteras[i])
-		#Cada 10 generaciones calculo HV, al final deberia tener 1300 valores de HV
-		
+			print "largo", len(fronteras[i])
+			#Cada 10 generaciones calculo HV, al final deberia tener 1300 valores de HV
+			
 			for j in range(1,len(fronteras[i])):
 				normValues = []
 				listOfIndexes.append(j)
 				#print j
 				#h = input("DEBERIA SER 13.000 SI ES ASÍ ESTOY BIEN")
 				for elemento in fronteras[i][j]:
-			#h = input(". . . .")
+					#h = input(". . . .")
 					values = []
 					cost1 = elemento[0]
 					cost2 = elemento[1]
@@ -218,14 +222,16 @@ def computeHyperVolumeIns(maxMinValues, fronteras, instance):
 						valueObj2 = (cost2 - minObj2)/difObj2
 						values.append(valueObj1), values.append(valueObj2)
 						normValues.append(values)
+				normalizados.append(normValues)
+
 		#print "valores normalizados"
 		#for value in normValues:
 		#   print value
-				normalizados.append(normValues)
+				#normalizados.append(normValues)
 		#self.normalizedValues.append(normValues)
 	#h = input("")
 	#en normValues tengo toda la caca
-	print len(normalizados)
+	print "len norm:" ,len(normalizados)
 	#for i in range(len(normalizados)):
 	##  print normalizados[i]
 	# h = input(". . . .")
@@ -234,14 +240,15 @@ def computeHyperVolumeIns(maxMinValues, fronteras, instance):
 		print "Calculando HV . . . .", i 
 		hv = HyperVolume(referencePoint)
 		volume = hv.compute(normalizados[i])
-
+		listaHyperVol.append(volume)
 	#print volume
 	#io = input(". . . .")
-		listaHyperVol.append(volume)
+		
 	results = []
 	results.append(listOfIndexes)
 	results.append(listaHyperVol)
 	#print "Valores de HV para cada run: ", listaHyperVol    
+	print len(listOfIndexes)
 	print len(listaHyperVol)
 	return results
 
@@ -251,13 +258,14 @@ def getPareto(values, instance):
 		if i == instance:
 			print len(values[i])
 			for j in range(len(values[i])):
-				if j == 1:
-					lista.append(values[i][j])
-				elif j == 5:
-					print "largo gen 500: " , len(values[i][j])
-					lista.append(values[i][j])
-				elif j == 12999:
-					lista.append(values[i][j])
+				lista.append(values[i][j])
+				#if j == 1:
+				#	lista.append(values[i][j])
+				#elif j == 5:
+				#	print "largo gen 500: " , len(values[i][j])
+				#	lista.append(values[i][j])
+				#elif j == 12999:
+				#	lista.append(values[i][j])
 	lista1 = lista[0]
 	lista2 = lista[1]
 	lista3 = lista[2]
@@ -271,34 +279,37 @@ def getPareto(values, instance):
 	for ls in lista3:
 		e.append(ls[0])
 		f.append(ls[1])
-
-	aa = plt.plot(a, b, 'b+', label = "Gen 1" )
-	bb = plt.plot(c,d, 'g+', label = "Gen 5000")
-	cc = plt.plot(e, f, 'r', label = "Gen 13000")
+	return lista
+	#aa = plt.plot(a, b, 'b+', label = "Gen 1" )
+	#bb = plt.plot(c,d, 'g+', label = "Gen 5000")
+	#cc = plt.plot(e, f, 'r', label = "Gen 13000")
 	#dd = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre) 
-	plt.setp(aa, "linestyle", "none", "marker", "o")
-	plt.setp(bb, "linestyle", "none", "marker", "o")
-	plt.setp(cc, "linestyle", "none", "marker", "*")
-	plt.ylabel('Costo Flujo 2')
-	plt.xlabel('Costo Flujo 1')
-	plt.legend(loc = 'upper right')
-	plt.show()
+	#plt.setp(aa, "linestyle", "none", "marker", "o")
+	#plt.setp(bb, "linestyle", "none", "marker", "o")
+	#plt.setp(cc, "linestyle", "none", "marker", "*")
+	#plt.ylabel('Costo Flujo 2')
+	#plt.xlabel('Costo Flujo 1')
+	#plt.legend(loc = 'upper right')
+	#plt.show()
 		#print values[i][j]
 	
 		#o = input(". . .. ")
 
 
-def plot(results1, results2):
-	xAxis_1 = results1[0]
-	yAxis_1 = results1[1]
-	xAxis_2 = results2[0]
-	yAxis_2 = results2[1]
-	pl = plt.plot(xAxis_1, yAxis_1, '-bo', label = "Gen2")
-	pl2 = plt.plot(xAxis_2, yAxis_2, '-go', label ="Gen3")
+def plots(results):
+	#print "entre"
+	xAxis_1 = results[0][0:200]
+	yAxis_1 = results[1][0:200]
+	#xAxis_2 = results2[0]
+	#yAxis_2 = results2[1]
+	plt.plot(xAxis_1, yAxis_1, '-bo', label = "NSGA-II")
+	#pl2 = plt.plot(xAxis_2, yAxis_2, '-go', label ="Gen3")
+	#plt.setp(pl, "linestyle", "none", "marker", "*")
 	plt.xlabel('Generaciones')
-	plt.ylabel('HyperVolumen')
-	plt.title('Variacion del HyperVolumen por cada generacion')
+	plt.ylabel('HiperVolumen')
+	plt.title(' Medicion Hipervolumen por generaciones ')
 	plt.legend(loc = 'upper right')
+	#plt.savefig('nsga2.png')
 	plt.show()
 
 
@@ -325,8 +336,11 @@ def getMainNSGA2():
 	aux2.append(minObj2_g2), aux2.append(maxObj2_g2)
 	maxMins.append(aux1), maxMins.append(aux2)
 	
-	results1 = computeHyperVolumeIns(maxMins, values, 10)
-
+	for i in range(20):
+		results1 = computeHyperVolumeIns(maxMins, values, i)
+		plots(results1)
+	
+	#sa = input("... ")
 	gen3 = "/NSGA2/resultsGen3"
 
 	directory = cwd + gen3
@@ -344,12 +358,14 @@ def getMainNSGA2():
 	ayud2.append(minObj2_g3), ayud2.append(maxObj2_g3)
 	maxiMins.append(ayud1), maxiMins.append(ayud2)
 
-	results2 = computeHyperVolumeIns(maxiMins, valuesGen3, 11)
+	for i in range(20):
+		results2 = computeHyperVolumeIns(maxiMins, valuesGen3, i)
+		plots(results2)
 
 	finish = datetime.datetime.now()
 	total = finish - start
 	print "execution time: ", total
-	plot(results1, results2)
+	#plot(results1, results2)
 	return 1
 
 
@@ -593,21 +609,108 @@ def gerResultCasos():
 	results = obtainResults(dirs, path)
 	data = getData(results)
 
+def selectCarpetas(dirs, cwd, carpetas):
+	#carpetas = ['MB-MOMA-1', 'MB-MOMA-2','MB-MOMA-3','MB-MOMA-5','MB-MOMA-6','MB-MOMA-7', 'MB-MOMA-8', 'MB-MOMA-9', 'MB-MOMA-11', 'MB-MOMA-12' ]
+	#print dirs
+	resultsMem = 'resultsMem'
+	for carp in dirs:
+		#print carp
+		if carp in carpetas:
+			path = str(cwd) + "/" + str(carp)
+			elements = os.listdir(path)
+			for elem in elements:
+				if elem == 'KC':
+					new_path = str(path) + "/" + str(elem) + "/"
+					result = os.listdir(new_path)
+					result.sort()
+					npList = np.arange(0,480,30)
+					lista = list(npList)
+					counter = 0
+					print counter
+					memCounter = 0
+					for elem in result:
+						counter +=1	
+						papath = str(new_path) + str(elem)
+						print papath
+						destiny = str(path)+ "/"  + resultsMem + str(memCounter) + "/" + str(elem)
+						print destiny
+						shutil.move(papath, destiny)
+						if counter in lista:
+							print counter
+							memCounter +=1
+							#a = input("....")
+					
+				if elem == 'GAR':
+					new_path = str(path) + "/" + str(elem) + "/"
+					result = os.listdir(new_path)
+					result.sort()
+					npList = np.arange(0,300,30)
+					lista = list(npList)
+					counter = 0
+					print counter
+					memCounter = 16
+					for elem in result:
+						counter +=1	
+						papath = str(new_path) + str(elem)
+						print papath
+						destiny = str(path) + "/" + resultsMem + str(memCounter) + "/" + str(elem)
+						shutil.move(papath, destiny)
+						print destiny
+						if counter in lista:
+							print counter
+							memCounter +=1
+							#a = input("....")
+
+						
+
+						
+
+
+					#print "GAR"
+				
+			#print path
+			#for i in range(1,26):
+def convertMBMOMA(ins):
+	print ins
+	cwd = '/home/rsandova/Desktop/Tesis/Resultados/Julio2017/ResultadosConfiguraciones'
+	dirs = os.listdir(cwd)
+	print dirs
+	numCarp = input("Numero de carpetas:")
+	#2
+	carpetas = []
+	for i in range(numCarp):
+		carpeta = raw_input("Ingrese Carpeta: ")
+		carpetas.append(carpeta)
+	#print carpetas
+	selectCarpetas(dirs, cwd, carpetas)
+
+
+
 if __name__ == "__main__":
 	
 	#Funcion para obtener resultados de NSGA2.
-	#getMainNSGA2()
+	getMainNSGA2()
+
+
 
 	#Funcion para traer casos de los resultados.
 	#getResultCasos()
 	
 	#print dirs
-	cwd = os.getcwd()
-	carpeta = "/biological/arabidopsis"
-	path = cwd + carpeta
-	dirs = os.listdir(path)
+	
+	#cwd = os.getcwd()
+	#carpeta = "/biological/arabidopsis"
+	#path = cwd + carpeta
+	#dirs = os.listdir(path)
 	#print dirs
-	preProcessData(path,dirs)
+	#preProcessData(path,dirs)
+
+	#cwd = os.getcwd()
+	
+	#Funcion de conversion MB-MOMA.
+	#ls = convertMBMOMA("Empezando a ordenar...")
+	
+	
 
 	#valores = computeHyperVolume(maxMins, values, 25999)
 	#for i, val in enumerate(valores):

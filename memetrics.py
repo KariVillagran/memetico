@@ -341,7 +341,7 @@ class Metrics:
 
 
 
-	def computeParticipationLevel(self, referencia):
+	def computeParticipationLevela(self, referencia):
 		listaContador = []
 		contador= 0
 		for i in range(len(self.nonRepParetoFrontiers)):
@@ -432,6 +432,7 @@ class Metrics:
 			costoF2.append(elemento[1])
 		costoF1.sort()
 		costoF2.sort()
+		#print len(costoF1), len(costoF2)
 		#print costoF1[0], costoF1[len(costoF1)-1]
 		#print costoF2[0], costoF1[len(costoF2)-1]
 		aux1.append(costoF1[0]), aux1.append(costoF1[len(costoF1)-1])
@@ -454,7 +455,7 @@ def obtainResults(carpetas):
 		allMerged = []
 		metodo = direct + "/" + carpetas[i]
 		instanceList[i].nombre = carpetas[i]
-		#print instanceList[i].nombre
+		print instanceList[i].nombre
 		subcarp = os.listdir(metodo)
 		#Aqui abro cada uno de los resultsMem de cada carpetas
 		for j in range(len(subcarp)):
@@ -565,11 +566,11 @@ def computeHyperVolume(maxMinValues, fronteras):
 			cost1 = elemento[0]
 			cost2 = elemento[1]
 			if difObj1 == 0:
-				valueObj1 = 0
+				valueObj1 = 0.0
 			else:
 				valueObj1 = (cost1 - minObj1)/difObj1
 			if difObj2 == 0:
-				valueObj2 = 0
+				valueObj2 = 0.0
 			else: 
 				valueObj2 = (cost2 - minObj2)/difObj2
 			values.append(valueObj1), values.append(valueObj2)
@@ -651,27 +652,38 @@ def grafiqueFrontera(listPoblacion, po, instance, instanceList):
 		#plt.plot(<X AXIS VALUES HERE>, <Y AXIS VALUES HERE>, 'line type', label='label here')
 		#plt.title('title')
 
-def computeParticipationLevel(referencia):
+def computeParticipationLevelPO(ejecuciones, paretoOpt):
+	
 	listaContador = []
-	contador= 0
-	for i in range(len(self.nonRepParetoFrontiers)):
+	participacion = []
+	cov = []
+	for i in range(len(ejecuciones)):
 		contador = 0
-		#print i
-		for elemento in self.nonRepParetoFrontiers[i]:
-			#print elemento
-			if elemento in referencia:
+		for valor in ejecuciones[i]:
+			if valor in paretoOpt:
 				contador += 1
-			#print elemento
-		listaContador.append(contador)  
+		listaContador.append(contador)
+	
 	for cantidad in listaContador:
-		cantAux = float(cantidad)/float(len(referencia))
-		self.participation.append(cantAux)
-	maxVal = max(self.participation)
-	print "el mejor es: ", maxVal
-	indice = self.participation.index(maxVal)
-	print "y su indice es: ", indice
-	print "porcentajes de participacion: ", self.participation
+		cantAux = float(cantidad)/float(len(paretoOpt))
+		if len(ejecuciones) != 0:
+			cantAux2 = float(cantidad)/float(len(ejecuciones))	
+		else:
+			cantAux2 = 1.0
+		cov.append(cantAux2)
+		participacion.append(cantAux)
+	
+	maxVal = max(participacion)
+	print "Porcentaje de Participacion: ", maxVal
+	indice = participacion.index(maxVal)
+	cobertura = cov[indice]
+	#print "y su indice es: ", indice
+	print "Cobertura es:", 1.0-cobertura
+
+	
+	#print "porcentajes de participacion: ", participacion
 	return indice
+
 
 def computeParticipation(poblations, representative):
 	listaContador = []
@@ -710,8 +722,43 @@ def getMeanSTD(listofHV):
 	arr = numpy.array(listofHV)
 	prom = numpy.mean(arr, axis = 0)
 	std = numpy.std(arr, axis = 0)
-	print str(prom) + " +- " +  str(std)
+	median = numpy.median(arr, axis = 0)
+	print "Valor del HV: ", str(prom) + " +- " +  str(std)
+	#print "La mediana es: ", median
+	
 					#print listofHV
+def computeCov(pobEvaluada, pobReferencia, numFac):
+	nsga2 = NSGA2(2, 0.1, 1.0)
+	pobEv, pobRef, pobRef2 = [], [], []
+	
+	#nuew
+	paretoOpt, paretoNoOpt = [], []
+	for elemento in pobReferencia:
+		if elemento.rank == 1:
+			paretoOpt.append(elemento.costoFlujo)
+		else:
+			paretoNoOpt.append(elemento.costoFlujo)
+	counter = 0
+	prueba = 0		
+	for costo in pobEvaluada:
+		if costo in paretoNoOpt:
+			counter += 1
+		else:
+			prueba += 1
+	if len(pobEvaluada) != 0:
+		totalDominadas = float(counter)/float(len(pobEvaluada))
+		totalNDominadas = float(prueba)/float(len(pobEvaluada))		
+	else:
+		totalDominadas = 1.0
+		totalNDominadas = 0.0
+	print "La cantidad de soluciones de B dominadas por A es: COB", totalDominadas
+	#print "La cantidad de soluciones de B NO-DOMINADAS por A es:", totalNDominadas
+
+	#deleteifitswrong
+
+def computeParetoCov(pobEvaluada, pobOpt, numFac):
+	raise "asdasd"
+
 
 def computeCoverage(pobEvaluada, pobMetodos, indice, instanceList):
 	cov = []
@@ -780,9 +827,66 @@ def compareMaxMins(maxMin1, maxMin2):
 	#print newMaxMin
 	return newMaxMin
 
+def getMedian(listOFHV):
+	#listOFHV.append(4.0)
+	#listOFHV.sort()
+	arr = numpy.array(listOFHV)
+	newList = arr.argsort()
+	print len(newList), len(listOFHV)
+	med = newList[14]
+	print "La mediana es: ", med
+	return med		
+	#print len(newList)
 
+def computeParticipationLevel(ejecuciones, paretoOpt ):
+	#contador = 0
+	listaContador, part, listaCov, cover = [], [], [], []
+	for i in range(len(ejecuciones)):
+		contPart, contCov = 0,0
+		for valor in ejecuciones[i]:
+			if valor in paretoOpt:
+				contPart += 1
+			else:
+				#print "NUNCA ENTRO ACA?"
+				contCov += 1
+		#print "contador Cov: ", contCov
+		listaContador.append(contPart)	
+		listaCov.append(contCov)
+	
+	for cantidad in listaContador:
+		cantAux = float(cantidad)/float(len(paretoOpt))
+		part.append(cantAux)
+	for cantidad in listaCov:
+		cantAux = float(cantidad)/float(len(ejecuciones))
+		cover.append(cantAux)
+	suma = 0.0
+	for elem in part:
+		suma += elem
+	print "deberia ser 100..................", suma			
+	for k,elemento in enumerate(part):
+		print elemento, k
+	#print "porcentajes de participacion: ", part
+	#print "coverage, ", cover
+	return part
 
-
+def getParetoRep(pobMetodos, numFac):
+	nsga2 = NSGA2(2, 0.1, 1.0)
+	pob, poblacion = [], []
+	for i in range(len(pobMetodos)):
+		for elem in pobMetodos[i]:
+			sol = Solucion(numFac)
+			sol.costoFlujo = elem[:]
+			pob.append(sol)
+		#print sol.costoFlujo
+	fronteras = nsga2.fastNonDominatedSort(pob)
+	pob = nsga2.ordenPostBusqueda(pob, fronteras, len(pob))
+	#for elem in pob:
+		#if elem.rank == 1:
+		#poblacion.append(elem)
+	return pob
+	#for elem in poblacion:
+	#	print elem.solution, elem.costoFlujo
+	#asd = input("...")
 
 if __name__ == "__main__":
 
@@ -804,7 +908,6 @@ if __name__ == "__main__":
 		#print(myMetr.maxMinInstance[i])
 	#print "paretoOptimas, ", myMetr.paretoOptimas
 	#myMetr.computeHVforPO()
-
 	graspMetr = Metrics()
 	graspMetr.openResults()
 	print "Opening mGRASP/H results..."
@@ -823,7 +926,7 @@ if __name__ == "__main__":
 	cwd = os.getcwd()
 	#print cwd
 
-	results = "/ResultadosConfiguracion"
+	results = "/ResultadosConfiguraciones"
 	#res = raw_input("Carpeta que contiene los resultados: . . . ")
 	#results = "/"+res
 	#result = "/Resultados"
@@ -835,7 +938,7 @@ if __name__ == "__main__":
 	direct = cwd + results
 	carpetas = os.listdir(direct)
 	print carpetas
-
+	carpetas.sort()
 	
 	#Lista de listas que contiene los mejores de cada ejecucion (indice)
 	mejoresDeMejores = []
@@ -845,9 +948,7 @@ if __name__ == "__main__":
 	#Aqui obtengo los maxmin de todAs las instancias.
 	#Este metodo devuelve una lista de largo 'x' (cantidad de instancias) en donde cada posicion corresponde a un arreglo de dos arreglos.
 	#Del tipo [[minObj1, MaxObj1], [MinObj2, MaxObj2]]
-	for i in range(len(instanceList)):
-		print instanceList[i].nombre
-	h = input(" . . .")	
+	#h = input(" . . .")	
 	allMaxMin = getMaxMinMetodos(instanceList)
 	#print len(allMaxMin)
 	#pobMetodos = []
@@ -872,79 +973,92 @@ if __name__ == "__main__":
 	out = "metrics.csv"
 	fileOut = open(out, 'w')
 	for i in range(len(allMaxMin)):
-		pobMetodos = []
+		pobMetodos20, pobMetodos60 = [], []
 		combined = []
 		print "Resultados para Mem" + str(i)
-		c = 0
 		for j in range(len(instanceList)):
 			if i < 8:
 				print instanceList[j].nombre
-				#if i == 3:
-					#pass
-					#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
-					#for k,HV in enumerate(listofHV):
-					#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
-					#getMeanSTD(listofHV)
-				#	pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
-				#	pobMetodos.append(pob)
-					
-				#listofHV = computeHyperVolume(myMetr.maxMinInstance[i], instanceList[j].listOFrontiers[i])
+				listofHV = computeHyperVolume(myMetr.maxMinInstance[i], instanceList[j].listOFrontiers[i])
+				
+				#print len(instanceList[j].listOFrontiers[i]) --> la cantidad de ejecuciones, es decir, 30.
+				#med = getMedian(listofHV)
+				
 				#getMeanSTD(listofHV)
-				#for k,HV in enumerate(listofHV):
-				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
+				exe = computeParticipationLevelPO(instanceList[j].listOFrontiers[i], myMetr.paretoOptimas[i])	
+				#cov = computeCov(instanceList[j].listOFrontiers[i][exe], myMetr.paretoOptimas[i], 10)
+				listofHV.sort()
+				
+				#for ls in listofHV:
+				#	print ls
+				
+				
+				for k,HV in enumerate(listofHV):
+					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
+				
 				#print listofHV
-				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
-				pobMetodos.append(pob)	
+				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
+				#pobMetodos.append(pob)
+				
 			elif i >= 8 and i < 16:
 				print instanceList[j].nombre
-				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
-				#getMeanSTD(listofHV)
-				#for k,HV in enumerate(listofHV):
-				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + ","+ str(HV) + "\n")
-				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
-				pobMetodos.append(pob)
+				#Calculo HV
+				listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+				#Obtengo Promedio y SD
+				getMeanSTD(listofHV)
+				#Calculo la exe correspondiente a la mediana segun el orden de los HV
+				med = getMedian(listofHV)
+				#Escribo resultados
+				for k,HV in enumerate(listofHV):
+					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + ","+ str(HV) + "\n")
+				#Aca deberia agregar a pobMetodos solo la ejecucion seleccionada
+				pobMetodos20.append(instanceList[j].listOFrontiers[i][med])
+
+				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
+				#pobMetodos.append(pob)
+				
 			elif i >= 16 and i < 26:
 				print instanceList[j].nombre
 				#print count
 				#newMaxMin = compareMaxMins(pasMOQAP.maxMinInstance[count], allMaxMin[i])
 				#hop = input("...")
 				#listofHVpasMOQAP = computeHyperVolume(allMaxMin[i], pasMOQAP.paretoFrontiers[count])
-				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
-				#getMeanSTD(listofHV)
-				#for k,HV in enumerate(listofHV):
-				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," + str(HV) + "\n")
+				listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
+				getMeanSTD(listofHV)
+				med = getMedian(listofHV)
+				for k,HV in enumerate(listofHV):
+					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," + str(HV) + "\n")
 				#getMeanSTD(listofHVpasMOQAP)
-				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 60)
-				pobMetodos.append(pob)
-				#h = input("")
-				#c+=1
-				#if c == 5:
-				#	count += 1
-				#listofHV = computeHyperVolume()
-			elif i == 26:
-				print instanceList[j].nombre
+				pobMetodos60.append(instanceList[j].listOFrontiers[i][med])
+
+				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 60)
+				#pobMetodos.append(pob)
+				
+			#elif i == 26:
+				#print instanceList[j].nombre
 				#listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
 				#getMeanSTD(listofHV)
 				#for k,HV in enumerate(listofHV):
 				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
-				pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
-				pobMetodos.append(pob)
-		print "pobMetodos: ", len(pobMetodos)		
+				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
+				#pobMetodos.append(pob)
+		h = input("waiting...")
+		#print "pobMetodos: ", len(pobMetodos)		
 		#listOfPobMetodos.append(pobMetodos)
-		
+		print "Calculando metricas . . . ."
 		if i < 8:
 			listOFcovMetodo = []
-			computeParticipation(pobMetodos, myMetr.paretoOptimas[i])
-			fileOut.write(inst[i][1:])
-			fileOut.write("\n")
-			for k in range(len(pobMetodos)):
-				covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
-				for elem in covMetodo:
-					fileOut.write(str(elem) + ",")
+			#computeParticipation(pobMetodos, myMetr.paretoOptimas[i])
+			#fileOut.write(inst[i][1:])
+			#fileOut.write("\n")
+			#for k in range(len(pobMetodos)):
+			#	covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
+			#	for elem in covMetodo:
+			#		fileOut.write(str(elem) + ",")
 				
-				fileOut.write("\n")	#
-			fileOut.write("\n")
-			fileOut.write("\n")
+				#fileOut.write("\n")	#
+			#fileOut.write("\n")
+			#fileOut.write("\n")
 				#listOFcovMetodo.append(covMetodo)
 			
 			#funciones.imprimeMatriz(listOFcovMetodo)
@@ -953,21 +1067,43 @@ if __name__ == "__main__":
 				
 			#a=input("...")
 			#grafiqueFrontera(pobMetodos, myMetr.paretoOptimas[i], inst[i], instanceList )
+		elif i >= 8 and i < 16:
+			paretoRep = getParetoRep(pobMetodos20, 20)
+			reference = []
+			for elem in paretoRep:
+				reference.append(elem.costoFlujo)
+			computeParticipationLevel(pobMetodos20, reference)
+			for pob in pobMetodos20:
+				computeCov(pob,paretoRep,20)
+			asdasd = input("...")
 		else:
 			#pass
-			paretoRep = getParetoRepresentative(pobMetodos)
-			aporteFrontera = computeParticipation(pobMetodos, paretoRep)
-			listOFcovMetodo = []
-			fileOut.write(inst[i][1:])
-			fileOut.write("\n")
-			for k in range(len(pobMetodos)):
-				covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
-				for elem in covMetodo:
-					fileOut.write(str(elem) + ",")
+			
+			paretoRep = getParetoRep(pobMetodos60, 60)
+			reference = []
+			for elem in paretoRep:
+				reference.append(elem.costoFlujo)
+			computeParticipationLevel(pobMetodos60, reference)
+			for pob in pobMetodos60:
+				computeCov(pob,paretoRep,60)
+			asdasd = input("....")
+
+
+
+			#paretoRep = getParetoRepresentative(pobMetodos)
+			#aporteFrontera = computeParticipation(pobMetodos, paretoRep)
+			#listOFcovMetodo = []
+			#fileOut.write(inst[i][1:])
+			#fileOut.write("\n")
+			#for k in range(len(pobMetodos)):
+			#	covMetodo = computeCoverage(pobMetodos[k], pobMetodos, k, instanceList)
+			#	for elem in covMetodo:
+			#		fileOut.write(str(elem) + ",")
 					#fileOut.write("\n")
-				fileOut.write("\n")			
-			fileOut.write("\n")
-			fileOut.write("\n")
+			#	fileOut.write("\n")			
+			#fileOut.write("\n")
+			#fileOut.write("\n")
+			
 			#ahora debo imprimir la matriz que me resulta listofcovmetodos.
 			#funciones.imprimeMatriz(listOFcovMetodo)
 			#for matriz in listOFcovMetodo:
@@ -979,38 +1115,3 @@ if __name__ == "__main__":
 	fileOut.close()
 	resultadosMet.close()		
 		#h = input("")
-
-
-
-	#for i in range(1,9):
-	#   print i
-	#   direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/ResultadosCY/resultsMem' + str(i)
-	#   metrics = Metrics(direct)
-	#   metrics.numFacilities = input("Numfac: ")
-	#   metrics.openArchivos()
-	#   metrics.computeHyperVolume(myMetr.maxMinInstance[i-1])
-	#   best = metrics.computeParticipationLevel(myMetr.paretoOptimas[i-1])
-	#   metrics.grafiqueFrontera(myMetr.paretoOptimas,best, i-1, instances[i-1])
-	#
-
-	#for i in range(9,11):
-	#   print i
-	#   direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/ResultadosCY/resultsMem' + str(i)
-	#   metrics = Metrics(direct)
-	#   metrics.numFacilities = input("NumFac: ")
-	#   metrics.openArchivos()
-	#   metrics.grafiqueFrontera(graspMetr.graspFrontier, 3, k, "")
-	#   k+=1
-
-
-	#for i in range(1,len(carpetas)+1):
-	#   print i 
-	#   direct = '/home/rsandova/Desktop/Tesis/Memetico/AM/ResultadosCY/resultsMem' + str(i)
-	#   metrics = Metrics(direct)
-	#   metrics.numFacilities = input ("numFac: ")
-	#   metrics.openArchivos()
-	#   maxMin = metrics.obtenerMaxMin()
-	#   metrics.computeHyperVolume(maxMin)
-	#   metrics.calculeFinalFrontier()
-	#   #metrics.grafiqueFrontera()
-	#   metrics.computeParticipationLevel()
