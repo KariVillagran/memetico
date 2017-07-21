@@ -275,22 +275,25 @@ class NSGA2:
 				nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 				print "Local Search has ended."
 			
-			print "Extending Populations into Combined Population. . ."
-			pobCombinada.extend(poblacion)
-			pobCombinada.extend(nextPobla)
+			else:
+				nextPobla = self.memoryBasedPLS(nextPobla, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
 
-			print "Fast Non-Dominated Sorting of Combined Population. . . " 
-			fronteras = self.fastNonDominatedSort(pobCombinada)
-			poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
+			#print "Extending Populations into Combined Population. . ."
+			#pobCombinada.extend(poblacion)
+			#pobCombinada.extend(nextPobla)
+
+			#print "Fast Non-Dominated Sorting of Combined Population. . . " 
+			#fronteras = self.fastNonDominatedSort(pobCombinada)
+			#poblacion = self.ordenPostBusqueda(pobCombinada, fronteras, tamPob)
 		
 			nArchivo.write("Generacion: " + str(counter) + "\n")
-			for j in range(len(poblacion)):
-				if poblacion[j].rank == 1:
-					nArchivo.write(""+ str(poblacion[j].solution) + ", " + str(poblacion[j].costoFlujo[0]) + ", " + str(poblacion[j].costoFlujo[1]) + ", " + str(poblacion[j].crowdedDistance) + ", " + str(poblacion[j].rank) + "\n")
+			for j in range(len(nextPobla)):
+				if nextPobla[j].rank == 1:
+					nArchivo.write(""+ str(nextPobla[j].solution) + ", " + str(nextPobla[j].costoFlujo[0]) + ", " + str(nextPobla[j].costoFlujo[1]) + ", " + str(nextPobla[j].crowdedDistance) + ", " + str(nextPobla[j].rank) + "\n")
 			
-			print "Local Search is beggining. . . "	
-			nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
-			print "Local Search has ended."
+			#print "Local Search is beggining. . . "	
+			#nextPobla = self.memoryBasedPLS(poblacion, tamPob, k, limitSearch, maxEvalGen, pobStr, searchStr)
+			#print "Local Search has ended."
 
 
 			if self.numberOfEvaluations >= nEvalua:
@@ -299,7 +302,7 @@ class NSGA2:
 				print "++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 				print "Resumen: P = ", tamPob, "nEval = ", nEvalua
 				fPareto = open(filePareto, 'w')
-				for elemento in poblacion:
+				for elemento in nextPobla:
 					if elemento.rank == 1:
 						fPareto.write(""+ str(elemento.costoFlujo[0]) + ", " + str(elemento.costoFlujo[1]) + ", " + str(elemento.crowdedDistance) + ", " + str(elemento.rank) + "\n")
 				fPareto.close()
