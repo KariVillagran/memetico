@@ -672,7 +672,7 @@ def selectCarpetas(dirs, cwd, carpetas):
 			#for i in range(1,26):
 def convertMBMOMA(ins):
 	print ins
-	cwd = '/home/rsandova/Desktop/Tesis/Resultados/Julio2017/ResultadosConfiguraciones'
+	cwd = '/home/rsandova/Desktop/Tesis/Memetico/AM/ResultadosConfiguraciones'
 	dirs = os.listdir(cwd)
 	print dirs
 	numCarp = input("Numero de carpetas:")
@@ -689,7 +689,7 @@ def convertMBMOMA(ins):
 if __name__ == "__main__":
 	
 	#Funcion para obtener resultados de NSGA2.
-	getMainNSGA2()
+	#getMainNSGA2()
 
 
 
@@ -708,7 +708,7 @@ if __name__ == "__main__":
 	#cwd = os.getcwd()
 	
 	#Funcion de conversion MB-MOMA.
-	#ls = convertMBMOMA("Empezando a ordenar...")
+	ls = convertMBMOMA("Empezando a ordenar...")
 	
 	
 

@@ -604,49 +604,85 @@ def ordenarMergedFronts(mergedFronts, numFac):
 			poblacion.append(elem)
 	return poblacion
 
-def grafiqueFrontera(listPoblacion, po, instance, instanceList):
+
+
+def grafiqueFrontera(listPoblacion, indice, po, instance, instanceList, tam):
 	#listaSolC1, listaSolC2 = [], []
 	#listaObtC1, listaObtC2 = [], []
 	instance1 = instance[1:]
 
+
 	listaOfCosts = []
-	listaObtC1, listaObtC2 = [], []
 	for i in range(len(listPoblacion)):
 		listaCost1, listaCost2 = [], []
-		#print i
-		for solucion in listPoblacion[i]:
-			#print solucion.costoFlujo
-			listaCost1.append(solucion.costoFlujo[0])
-			listaCost2.append(solucion.costoFlujo[1])
-		listaOfCosts.append(listaCost1)
-		listaOfCosts.append(listaCost2)
-	#print len(listaOfCosts)
-	a = plt.plot(listaOfCosts[0], listaOfCosts[1], 'b+', label = instanceList[0].nombre )
-	b = plt.plot(listaOfCosts[2], listaOfCosts[3], 'g+', label = instanceList[1].nombre)
-	c = plt.plot(listaOfCosts[4], listaOfCosts[5], 'c', label = instanceList[2].nombre)
-	d = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[3].nombre)
-	f = plt.plot(listaOfCosts[8], listaOfCosts[9], 'k', label = instanceList[4].nombre)
-	if len(po) == 0:
-		pass	
-	else:
-		for elem in po:
-			#print "elemento: ", elem
-			listaObtC1.append(elem[0])
-			listaObtC2.append(elem[1])
-		e = plt.plot(listaObtC1, listaObtC2, 'r', label = 'Pareto Optima')
-		plt.setp(e, "linestyle", "none", "marker", "*")
-	
-	plt.title('Comparacion con instancia: ' + instance1)
-	plt.setp(a, "linestyle", "none", "marker", "o")
-	plt.setp(b, "linestyle", "none", "marker", ".")
-	plt.setp(c, "linestyle", "none", "marker", "8")
-	plt.setp(d, "linestyle", "none", "marker", "o")
-	plt.setp(f, "linestyle", "none", "marker", ">")
-		
-	plt.ylabel('Costo Flujo 2')
-	plt.xlabel('Costo Flujo 1')
-	plt.legend(loc = 'upper right')
-	plt.show()
+		if i in indice:
+			for valores in listPoblacion[i]:
+				listaCost1.append(valores[0])
+				listaCost2.append(valores[1])
+			listaOfCosts.append(listaCost1)
+			listaOfCosts.append(listaCost2)	
+
+	listaPO1, listaPO2 = [], []
+	for elem in po:
+		listaPO1.append(elem[0])
+		listaPO2.append(elem[1])
+
+	if tam == 10:
+		a = plt.plot(listaOfCosts[0], listaOfCosts[1], 'b+', label = instanceList[indice[0]].nombre)
+		b = plt.plot(listaOfCosts[2], listaOfCosts[3], 'g+', label = instanceList[indice[1]].nombre)
+		c = plt.plot(listaOfCosts[4], listaOfCosts[5], 'c', label = instanceList[indice[2]].nombre)
+		d = plt.plot(listaPO1, listaPO2, 'r', mfc = 'none',label = 'PO')
+		#plt.title('Comparacion con instancia: ' + instance1)
+		plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+		plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+		plt.setp(a, "linestyle", "none", "marker", "v")
+		plt.setp(b, "linestyle", "none", "marker", "^")
+		plt.setp(c, "linestyle", "none", "marker", ">")
+		plt.setp(d, "linestyle", "none", "marker", "o")
+		plt.ylabel('Costo Flujo 2')
+		plt.xlabel('Costo Flujo 1')
+		plt.legend(loc = 'upper right')
+		plt.show()
+
+	if tam == 20:
+		a = plt.plot(listaOfCosts[0], listaOfCosts[1], 'b+', label = instanceList[indice[0]].nombre)
+		b = plt.plot(listaOfCosts[2], listaOfCosts[3], 'g+', label = instanceList[indice[1]].nombre)
+		c = plt.plot(listaOfCosts[4], listaOfCosts[5], 'c', label = instanceList[indice[2]].nombre)
+		#e = plt.plot(listaOfCosts[6], listaOfCosts[7], 'y', label = instanceList[indice[3]].nombre)
+		d = plt.plot(listaPO1, listaPO2, 'r', mfc = 'none',label = 'PO')
+		#plt.title('Comparacion con instancia: ' + instance1)
+		plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+		plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+		plt.setp(a, "linestyle", "none", "marker", "v")
+		plt.setp(b, "linestyle", "none", "markr", "^")
+		plt.setp(c, "linestyle", "none", "marker", ">")
+		plt.setp(d, "linestyle", "none", "marker", "o")
+		#plt.setp(e, "linestyle", "none", "marker", "<")
+		plt.ylabel('Costo Flujo 2')
+		plt.xlabel('Costo Flujo 1')
+		plt.legend(loc = 'upper right')
+		plt.show()
+	if tam == 60:
+		a = plt.plot(listaOfCosts[0], listaOfCosts[1], 'b+', label = instanceList[indice[0]].nombre)
+		b = plt.plot(listaOfCosts[2], listaOfCosts[3], 'g+', label = instanceList[indice[1]].nombre)
+		c = plt.plot(listaOfCosts[4], listaOfCosts[5], 'c', label = instanceList[indice[2]].nombre)
+		#e = plt.plot(listaOfCosts[4], listaOfCosts[5], 'y', label = instanceList[indice[3]].nombre)
+		d = plt.plot(listaPO1, listaPO2, 'r', mfc = 'none',label = 'PO')
+		#plt.title('Comparacion con instancia: ' + instance1)
+		plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+		plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+		plt.setp(a, "linestyle", "none", "marker", "v")
+		plt.setp(b, "linestyle", "none", "marker", "^")
+		plt.setp(c, "linestyle", "none", "marker", ">")
+		#plt.setp(e, "linestyle", "none", "marker", "<")
+		plt.setp(d, "linestyle", "none", "marker", "o")
+		plt.ylabel('Costo Flujo 2')
+		plt.xlabel('Costo Flujo 1')
+		plt.legend(loc = 'upper right')
+		plt.show()	
+
+
+
 
 		#plt.plot(<X AXIS VALUES HERE>, <Y AXIS VALUES HERE>, 'line type', label='label here')
 		#plt.plot(<X AXIS VALUES HERE>, <Y AXIS VALUES HERE>, 'line type', label='label here')
@@ -664,21 +700,22 @@ def computeParticipationLevelPO(ejecuciones, paretoOpt):
 				contador += 1
 		listaContador.append(contador)
 	
-	for cantidad in listaContador:
+	for k,cantidad in enumerate(listaContador):
 		cantAux = float(cantidad)/float(len(paretoOpt))
-		if len(ejecuciones) != 0:
-			cantAux2 = float(cantidad)/float(len(ejecuciones))	
+		if len(ejecuciones[k]) != 0:
+			#print len(ejecuciones[k]), cantidad
+			cantAux2 = float(len(ejecuciones[k]) - cantidad)/float(len(ejecuciones[k]))	
 		else:
 			cantAux2 = 1.0
 		cov.append(cantAux2)
 		participacion.append(cantAux)
 	
 	maxVal = max(participacion)
-	print "Porcentaje de Participacion: ", maxVal
 	indice = participacion.index(maxVal)
+	print "Porcentaje de Participacion: ", maxVal, indice
 	cobertura = cov[indice]
 	#print "y su indice es: ", indice
-	print "Cobertura es:", 1.0-cobertura
+	print "Cobertura es:", cobertura
 
 	
 	#print "porcentajes de participacion: ", participacion
@@ -751,7 +788,7 @@ def computeCov(pobEvaluada, pobReferencia, numFac):
 	else:
 		totalDominadas = 1.0
 		totalNDominadas = 0.0
-	print "La cantidad de soluciones de B dominadas por A es: COB", totalDominadas
+	print "La cantidad de soluciones de  dominadas por A es: COB", totalDominadas
 	#print "La cantidad de soluciones de B NO-DOMINADAS por A es:", totalNDominadas
 
 	#deleteifitswrong
@@ -832,7 +869,7 @@ def getMedian(listOFHV):
 	#listOFHV.sort()
 	arr = numpy.array(listOFHV)
 	newList = arr.argsort()
-	print len(newList), len(listOFHV)
+	#print len(newList), len(listOFHV)
 	med = newList[14]
 	print "La mediana es: ", med
 	return med		
@@ -841,30 +878,35 @@ def getMedian(listOFHV):
 def computeParticipationLevel(ejecuciones, paretoOpt ):
 	#contador = 0
 	listaContador, part, listaCov, cover = [], [], [], []
+
 	for i in range(len(ejecuciones)):
 		contPart, contCov = 0,0
 		for valor in ejecuciones[i]:
 			if valor in paretoOpt:
 				contPart += 1
-			else:
-				#print "NUNCA ENTRO ACA?"
-				contCov += 1
 		#print "contador Cov: ", contCov
 		listaContador.append(contPart)	
-		listaCov.append(contCov)
+		#listaCov.append(contCov)
 	
 	for cantidad in listaContador:
 		cantAux = float(cantidad)/float(len(paretoOpt))
 		part.append(cantAux)
-	for cantidad in listaCov:
-		cantAux = float(cantidad)/float(len(ejecuciones))
-		cover.append(cantAux)
+	for k,cantidad in enumerate(listaContador):
+		if len(ejecuciones[k]) == 0:
+			cover.append(1.0)
+		else:
+			cantAux = float(len(ejecuciones[k])-cantidad)/float(len(ejecuciones[k]))
+			cover.append(cantAux)
 	suma = 0.0
 	for elem in part:
 		suma += elem
 	print "deberia ser 100..................", suma			
+	print "Porcentaje participaicion"
 	for k,elemento in enumerate(part):
 		print elemento, k
+	print "cobertura"	
+	for k,elem in enumerate(cover):
+		print elem, k
 	#print "porcentajes de participacion: ", part
 	#print "coverage, ", cover
 	return part
@@ -874,12 +916,16 @@ def getParetoRep(pobMetodos, numFac):
 	pob, poblacion = [], []
 	for i in range(len(pobMetodos)):
 		for elem in pobMetodos[i]:
-			sol = Solucion(numFac)
-			sol.costoFlujo = elem[:]
-			pob.append(sol)
+			
+			if elem in pob:
+				continue
+			else:
+				sol = Solucion(numFac)
+				sol.costoFlujo = elem[:]
+				pob.append(sol)
 		#print sol.costoFlujo
 	fronteras = nsga2.fastNonDominatedSort(pob)
-	pob = nsga2.ordenPostBusqueda(pob, fronteras, len(pob))
+	#pob = nsga2.ordenPostBusqueda(pob, fronteras, 3400)
 	#for elem in pob:
 		#if elem.rank == 1:
 		#poblacion.append(elem)
@@ -904,6 +950,10 @@ if __name__ == "__main__":
 	myMetr.openParetOptimas()
 	myMetr.poMaxMin(myMetr.paretoOptimas)
 	print "Opening Pareto Optimas for KC10-instances"
+	
+	for i in range(len(myMetr.paretoOptimas)):
+		print len(myMetr.paretoOptimas[i])
+	asdasd = input("...")
 	#for i in range(len(myMetr.maxMinInstance)):
 		#print(myMetr.maxMinInstance[i])
 	#print "paretoOptimas, ", myMetr.paretoOptimas
@@ -973,7 +1023,7 @@ if __name__ == "__main__":
 	out = "metrics.csv"
 	fileOut = open(out, 'w')
 	for i in range(len(allMaxMin)):
-		pobMetodos20, pobMetodos60 = [], []
+		pobMetodos10, pobMetodos20, pobMetodos60 = [], [], []
 		combined = []
 		print "Resultados para Mem" + str(i)
 		for j in range(len(instanceList)):
@@ -995,7 +1045,7 @@ if __name__ == "__main__":
 				
 				for k,HV in enumerate(listofHV):
 					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
-				
+				pobMetodos10.append(instanceList[j].listOFrontiers[i][exe])
 				#print listofHV
 				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 10)
 				#pobMetodos.append(pob)
@@ -1008,6 +1058,7 @@ if __name__ == "__main__":
 				getMeanSTD(listofHV)
 				#Calculo la exe correspondiente a la mediana segun el orden de los HV
 				med = getMedian(listofHV)
+				#print med
 				#Escribo resultados
 				for k,HV in enumerate(listofHV):
 					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + ","+ str(HV) + "\n")
@@ -1025,6 +1076,7 @@ if __name__ == "__main__":
 				#listofHVpasMOQAP = computeHyperVolume(allMaxMin[i], pasMOQAP.paretoFrontiers[count])
 				listofHV = computeHyperVolume(allMaxMin[i], instanceList[j].listOFrontiers[i])
 				getMeanSTD(listofHV)
+				print med
 				med = getMedian(listofHV)
 				for k,HV in enumerate(listofHV):
 					resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," + str(HV) + "\n")
@@ -1042,10 +1094,11 @@ if __name__ == "__main__":
 				#	resultadosMet.write(inst[i][1:] + "," + str(j) +  "," + str(k) + "," +str(HV) + "\n")
 				#pob = ordenarMergedFronts(instanceList[j].mergedNonRepFrontiers[i], 20)
 				#pobMetodos.append(pob)
-		h = input("waiting...")
+		#h = input("waiting...")
 		#print "pobMetodos: ", len(pobMetodos)		
 		#listOfPobMetodos.append(pobMetodos)
-		print "Calculando metricas . . . ."
+		#po = input("results Ready... proceed to metrics")
+		print "Metrics. . . . ."
 		if i < 8:
 			listOFcovMetodo = []
 			#computeParticipation(pobMetodos, myMetr.paretoOptimas[i])
@@ -1066,27 +1119,34 @@ if __name__ == "__main__":
 			#	print listOFcovMetodo[e]
 				
 			#a=input("...")
-			#grafiqueFrontera(pobMetodos, myMetr.paretoOptimas[i], inst[i], instanceList )
+			grafique = [9,13,15]
+			#grafiqueFrontera(pobMetodos10, grafique, myMetr.paretoOptimas[i], inst[i], instanceList, 10)
 		elif i >= 8 and i < 16:
 			paretoRep = getParetoRep(pobMetodos20, 20)
 			reference = []
 			for elem in paretoRep:
-				reference.append(elem.costoFlujo)
+				if elem.rank == 1:
+					reference.append(elem.costoFlujo)
 			computeParticipationLevel(pobMetodos20, reference)
-			for pob in pobMetodos20:
-				computeCov(pob,paretoRep,20)
-			asdasd = input("...")
+			#for pob in pobMetodos20:
+			#	computeCov(pob,paretoRep,20)
+			#asdasd = input("...")
+			grafique = [2,7,10, 9]
+			#grafiqueFrontera(pobMetodos20, grafique, reference, inst[i], instanceList, 20)
 		else:
 			#pass
 			
 			paretoRep = getParetoRep(pobMetodos60, 60)
 			reference = []
 			for elem in paretoRep:
-				reference.append(elem.costoFlujo)
+				if elem.rank == 1:
+					reference.append(elem.costoFlujo)
 			computeParticipationLevel(pobMetodos60, reference)
-			for pob in pobMetodos60:
-				computeCov(pob,paretoRep,60)
-			asdasd = input("....")
+			#for pob in pobMetodos60:
+			#	computeCov(pob,paretoRep,60)
+			grafique = [2,8,7]
+			grafiqueFrontera(pobMetodos60, grafique, reference, inst[i], instanceList, 60)
+			#asdasd = input("....")
 
 
 
